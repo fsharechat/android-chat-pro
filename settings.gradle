@@ -1,0 +1,6 @@
+include ':client',
+        ':push',
+        ':chat',
+        ':emojilibrary',
+        ':imagepicker',
+        ':p2penginekit'
