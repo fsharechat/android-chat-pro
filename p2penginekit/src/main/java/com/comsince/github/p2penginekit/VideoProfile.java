@@ -31,7 +31,7 @@ public class VideoProfile {
     public int fps;
     public int bitrate;
 
-    public VideoProfile(int width, int height, int bitrate, int fps, boolean var5) {
+    public VideoProfile(int width, int height, int fps, int bitrate, boolean var5) {
         if (var5) {
             this.height = width;
             this.height = width;
@@ -44,8 +44,8 @@ public class VideoProfile {
         this.fps = fps;
     }
 
-    public static VideoProfile getVideoProfile(int var0, boolean var1) {
-        switch (var0) {
+    public static VideoProfile getVideoProfile(int fps, boolean var1) {
+        switch (fps) {
             case 0:
                 return new VideoProfile(160, 120, 15, 120, var1);
             case 2:
