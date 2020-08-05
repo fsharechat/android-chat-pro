@@ -749,9 +749,8 @@ public class PeerConnectionClient {
         String regex = "^a=rtpmap:(\\d+) " + codec + "(/\\d+)+[\r]?$";
         Pattern codecPattern = Pattern.compile(regex);
 
-        Matcher codecMatcher;
         for(int i = 0; i < lines.length; ++i) {
-            codecMatcher = codecPattern.matcher(lines[i]);
+            Matcher codecMatcher = codecPattern.matcher(lines[i]);
             if (codecMatcher.matches()) {
                 codecRtpMap = codecMatcher.group(1);
                 rtpmapLineIndex = i;
@@ -768,7 +767,7 @@ public class PeerConnectionClient {
             codecPattern = Pattern.compile(regex);
 
             for(int i = 0; i < lines.length; ++i) {
-                codecMatcher = codecPattern.matcher(lines[i]);
+                Matcher codecMatcher = codecPattern.matcher(lines[i]);
                 if (codecMatcher.matches()) {
                     Log.d("PCRTCClient", "Found " + codec + " " + lines[i]);
                     if (isVideoCodec) {
@@ -861,11 +860,8 @@ public class PeerConnectionClient {
         } else {
             List<String> codecPayloadTypes = new ArrayList();
             Pattern codecPattern = Pattern.compile("^a=rtpmap:(\\d+) " + codec + "(/\\d+)+[\r]?$");
-            String[] var7 = lines;
-            int var8 = lines.length;
 
-            for(int var9 = 0; var9 < var8; ++var9) {
-                String line = var7[var9];
+            for (String line : lines) {
                 Matcher codecMatcher = codecPattern.matcher(line);
                 if (codecMatcher.matches()) {
                     codecPayloadTypes.add(codecMatcher.group(1));
@@ -889,16 +885,12 @@ public class PeerConnectionClient {
     }
 
     private void drainCandidates() {
-        if (this.queuedRemoteCandidates != null) {
-            Log.d("PCRTCClient", "Add " + this.queuedRemoteCandidates.size() + " remote candidates");
-            Iterator var1 = this.queuedRemoteCandidates.iterator();
-
-            while(var1.hasNext()) {
-                IceCandidate candidate = (IceCandidate)var1.next();
-                this.peerConnection.addIceCandidate(candidate);
+        if (queuedRemoteCandidates != null) {
+            Log.d(TAG, "Add " + queuedRemoteCandidates.size() + " remote candidates");
+            for (IceCandidate candidate : queuedRemoteCandidates) {
+                peerConnection.addIceCandidate(candidate);
             }
-
-            this.queuedRemoteCandidates = null;
+            queuedRemoteCandidates = null;
         }
 
     }
