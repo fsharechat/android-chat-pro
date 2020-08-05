@@ -245,7 +245,6 @@ public class PeerConnectionClient {
         this.preferredVideoCodec = "VP8";
         if (this.videoCallEnabled && this.peerConnectionParameters.videoCodec != null) {
             String videoCodec = this.peerConnectionParameters.videoCodec;
-            byte var4 = -1;
             switch(videoCodec) {
                 case VIDEO_CODEC_H264_HIGH:
                     fieldTrials = fieldTrials + "WebRTC-H264HighProfile/Enabled/";
@@ -684,9 +683,9 @@ public class PeerConnectionClient {
                     if (parameters.encodings.size() == 0) {
                         Log.w("PCRTCClient", "RtpParameters are not ready.");
                     } else {
-                        Encoding encoding;
-                        for(Iterator var3 = parameters.encodings.iterator(); var3.hasNext(); encoding.maxBitrateBps = maxBitrateKbps == null ? null : maxBitrateKbps * 1000) {
-                            encoding = (Encoding)var3.next();
+                        for (RtpParameters.Encoding encoding : parameters.encodings) {
+                            // Null value means no limit.
+                            encoding.maxBitrateBps = maxBitrateKbps == null ? null : maxBitrateKbps * BPS_IN_KBPS;
                         }
 
                         if (!this.localVideoSender.setParameters(parameters)) {
@@ -720,32 +719,26 @@ public class PeerConnectionClient {
 
     public VideoTrack createVideoTrack(VideoCapturer capturer) {
         this.videoCapturer = capturer;
-        if (this.localVideoTrack != null) {
-            return this.localVideoTrack;
-        } else {
+        if (this.localVideoTrack == null) {
             this.videoSource = this.factory.createVideoSource(capturer);
             capturer.startCapture(this.videoWidth, this.videoHeight, this.videoFps);
             this.localVideoTrack = this.factory.createVideoTrack("ARDAMSv0", this.videoSource);
             this.localVideoTrack.setEnabled(this.renderVideo);
             this.events.onCreateLocalVideoTrack(this.localVideoTrack);
-            return this.localVideoTrack;
         }
+        return this.localVideoTrack;
     }
 
     private void findVideoSender() {
-        Iterator var1 = this.peerConnection.getSenders().iterator();
-
-        while(var1.hasNext()) {
-            RtpSender sender = (RtpSender)var1.next();
+        for (RtpSender sender : peerConnection.getSenders()) {
             if (sender.track() != null) {
                 String trackType = sender.track().kind();
-                if (trackType.equals("video")) {
-                    Log.d("PCRTCClient", "Found video sender.");
-                    this.localVideoSender = sender;
+                if (trackType.equals(VIDEO_TRACK_TYPE)) {
+                    Log.d(TAG, "Found video sender.");
+                    localVideoSender = sender;
                 }
             }
         }
-
     }
 
     private static String setStartBitrate(String codec, boolean isVideoCodec, String sdpDescription, int bitrateKbps) {
@@ -948,8 +941,6 @@ public class PeerConnectionClient {
     }
 
     private class SDPObserver implements SdpObserver {
-        private SDPObserver() {
-        }
 
         public void onCreateSuccess(SessionDescription origSdp) {
             if (PeerConnectionClient.this.localSdp != null) {
@@ -1013,8 +1004,6 @@ public class PeerConnectionClient {
     }
 
     private class PCObserver implements Observer {
-        private PCObserver() {
-        }
 
         public void onIceCandidate(IceCandidate candidate) {
             PeerConnectionClient.executor.execute(() -> {

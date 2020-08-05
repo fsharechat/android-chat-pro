@@ -348,8 +348,8 @@ public class AVEngineKit implements OnReceiveMessageListener {
 
         try {
             deltaTime = ChatManager.Instance().getServerDeltaTime();
-        } catch (NotInitializedExecption var5) {
-            var5.printStackTrace();
+        } catch (NotInitializedExecption notInitializedExecption) {
+            notInitializedExecption.printStackTrace();
         }
 
         if (!(message.content instanceof SignalMessage) && !(message.content instanceof CallStartMessageContent) && !(message.content instanceof AnswerMessage) && !(message.content instanceof ByeMessage) && !(message.content instanceof ModifyMessage)) {
@@ -600,7 +600,7 @@ public class AVEngineKit implements OnReceiveMessageListener {
 
     private VideoCapturer createVideoCapturer() {
         String videoFileAsCamera = null;
-        Object videoCapturer;
+        VideoCapturer videoCapturer;
         if (videoFileAsCamera != null) {
             try {
                 videoCapturer = new FileVideoCapturer((String)videoFileAsCamera);
@@ -622,7 +622,7 @@ public class AVEngineKit implements OnReceiveMessageListener {
             });
             return null;
         } else {
-            return (VideoCapturer)videoCapturer;
+            return videoCapturer;
         }
     }
 
@@ -633,32 +633,21 @@ public class AVEngineKit implements OnReceiveMessageListener {
     private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
         String[] deviceNames = enumerator.getDeviceNames();
         Logging.d("CallRTCClient", "Looking for front facing cameras.");
-        String[] var3 = deviceNames;
-        int var4 = deviceNames.length;
-
-        int var5;
-        String deviceName;
-        CameraVideoCapturer videoCapturer;
-        for(var5 = 0; var5 < var4; ++var5) {
-            deviceName = var3[var5];
+        for(String deviceName : deviceNames) {
             if (enumerator.isFrontFacing(deviceName)) {
                 Logging.d("CallRTCClient", "Creating front facing camera capturer.");
-                videoCapturer = enumerator.createCapturer(deviceName, (CameraEventsHandler)null);
+                CameraVideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
             }
         }
-
         Logging.d("CallRTCClient", "Looking for other cameras.");
-        var3 = deviceNames;
-        var4 = deviceNames.length;
 
-        for(var5 = 0; var5 < var4; ++var5) {
-            deviceName = var3[var5];
+        for(String deviceName : deviceNames) {
             if (!enumerator.isFrontFacing(deviceName)) {
                 Logging.d("CallRTCClient", "Creating other camera capturer.");
-                videoCapturer = enumerator.createCapturer(deviceName, (CameraEventsHandler)null);
+                CameraVideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
                 if (videoCapturer != null) {
                     return videoCapturer;
                 }
