@@ -67,7 +67,7 @@ public class AVProximitySensor implements SensorEventListener {
         this.threadChecker.checkIsOnValidThread();
         AVUtils.assertIsTrue(event.sensor.getType() == 8);
         float distanceInCentimeters = event.values[0];
-        if (distanceInCentimeters < this.proximitySensor.getMaximumRange()) {
+        if (distanceInCentimeters < Math.floor(this.proximitySensor.getMaximumRange())) {
             Log.d("AVProximitySensor", "Proximity sensor => NEAR state");
             this.lastStateReportIsNear = true;
         } else {
@@ -79,7 +79,8 @@ public class AVProximitySensor implements SensorEventListener {
             this.onSensorStateListener.run();
         }
 
-        Log.d("AVProximitySensor", "onSensorChanged" + AVUtils.getThreadInfo() + ": accuracy=" + event.accuracy + ", timestamp=" + event.timestamp + ", distance=" + event.values[0]);
+        Log.d("AVProximitySensor", "onSensorChanged" + AVUtils.getThreadInfo() + ": accuracy=" + event.accuracy + ", timestamp=" + event.timestamp + ", distance=" + event.values[0]
+                +" maximumRange "+this.proximitySensor.getMaximumRange());
     }
 
     private boolean initDefaultSensor() {
