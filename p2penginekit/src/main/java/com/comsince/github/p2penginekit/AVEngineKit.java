@@ -352,6 +352,11 @@ public class AVEngineKit implements OnReceiveMessageListener {
             notInitializedExecption.printStackTrace();
         }
 
+        //这里只接收单聊信令
+        if(message.conversation.type != ConversationType.Single){
+            return false;
+        }
+
         if (!(message.content instanceof SignalMessage) && !(message.content instanceof CallStartMessageContent) && !(message.content instanceof AnswerMessage) && !(message.content instanceof ByeMessage) && !(message.content instanceof ModifyMessage)) {
             return false;
         } else {
