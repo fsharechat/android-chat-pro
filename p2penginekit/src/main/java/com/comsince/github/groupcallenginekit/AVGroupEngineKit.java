@@ -215,7 +215,8 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
             return false;
         }
 
-        if (!(message.content instanceof SignalMessage) && !(message.content instanceof CallStartMessageContent) && !(message.content instanceof AnswerMessage) && !(message.content instanceof ByeMessage) && !(message.content instanceof ModifyMessage)) {
+        if (!(message.content instanceof SignalMessage) && !(message.content instanceof CallStartMessageContent) && !(message.content instanceof AnswerMessage)
+                && !(message.content instanceof ByeMessage) && !(message.content instanceof ModifyMessage)) {
             return false;
         } else {
             if (System.currentTimeMillis() - (message.serverTime - deltaTime) < 90000L && (message.direction == MessageDirection.Receive || message.content instanceof AnswerMessage)) {
@@ -333,7 +334,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
         private AVGroupEngineKit.CallState state;
         protected String clientId;
         private boolean audioOnly;
-        private AVGroupEngineKit.CallSessionCallback callback;
+        protected AVGroupEngineKit.CallSessionCallback callback;
         private long startMsgId;
         private long startTime;
         private long endTime;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.comsince.github.message.SignalMessage;
+import com.comsince.github.p2penginekit.AVEngineKit;
 import com.comsince.github.p2penginekit.VideoProfile;
 
 import org.json.JSONException;
@@ -31,6 +32,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     private AVGroupEngineKit avGroupEngineKit;
     private boolean audioOnly;
     private VideoCapturer videoCapturer;
+    private VideoTrack localVideoTrack;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public Participant(Context context,String target, String sender, AVGroupEngineKit avGroupEngineKit,boolean audioOnly){
@@ -228,7 +230,10 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
 
     @Override
     public void onCreateLocalVideoTrack(VideoTrack videoTrack) {
-
+        executor.submit(() -> {
+            localVideoTrack = videoTrack;
+            avGroupEngineKit.getCurrentSession().callback.didCreateLocalVideoTrack();
+        });
     }
 
     @Override
