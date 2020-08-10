@@ -28,7 +28,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     private String target;
     private String sender;
     private Context mContent;
-    private GroupPeerConnectionClient groupPeerConnectionClient;
+    protected GroupPeerConnectionClient groupPeerConnectionClient;
     private AVGroupEngineKit avGroupEngineKit;
     private boolean audioOnly;
     private VideoCapturer videoCapturer;
@@ -210,17 +210,32 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
 
     @Override
     public void onIceConnected() {
-
+        executor.submit(() -> {
+            if (avGroupEngineKit != null && avGroupEngineKit.getCurrentSession() != null && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
+                avGroupEngineKit.getCurrentSession().connectedTime = System.currentTimeMillis();
+                groupPeerConnectionClient.enableStatsEvents(true, 1000);
+                avGroupEngineKit.getCurrentSession().setState(AVGroupEngineKit.CallState.Connected);
+            } else {
+                Log.w("CallRTCClient", "Call is connected in closed or error state");
+            }
+        });
     }
 
     @Override
     public void onIceDisconnected() {
+        executor.submit(() -> {
+            if (avGroupEngineKit.getCurrentSession() != null && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
+                avGroupEngineKit.getCurrentSession().endCall(AVGroupEngineKit.CallEndReason.MediaError);
+            }
 
+        });
     }
 
     @Override
     public void onAddRemoteVideoTrack(VideoTrack videoTrack) {
-
+        executor.submit(() -> {
+            avGroupEngineKit.getCurrentSession().callback.didReceiveRemoteVideoTrack(this.sender,videoTrack);
+        });
     }
 
     @Override
@@ -232,13 +247,15 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     public void onCreateLocalVideoTrack(VideoTrack videoTrack) {
         executor.submit(() -> {
             localVideoTrack = videoTrack;
-            avGroupEngineKit.getCurrentSession().callback.didCreateLocalVideoTrack();
+            avGroupEngineKit.getCurrentSession().callback.didCreateLocalVideoTrack(this.sender,videoTrack);
         });
     }
 
     @Override
     public void onRemoveLocalVideoTrack() {
-
+        executor.submit(() -> {
+            avGroupEngineKit.getCurrentSession().callback.didRemoveVideoTrack(this.sender);
+        });
     }
 
     @Override

@@ -6,6 +6,8 @@ import com.comsince.github.message.AnswerMessage;
 import com.comsince.github.message.ByeMessage;
 import com.comsince.github.message.ModifyMessage;
 import com.comsince.github.message.SignalMessage;
+import com.comsince.github.p2penginekit.AVEngineKit;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,10 +15,13 @@ import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
+import org.webrtc.VideoTrack;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -337,6 +342,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
         protected AVGroupEngineKit.CallSessionCallback callback;
         private long startMsgId;
         private long startTime;
+        protected long connectedTime;
         private long endTime;
 
         private CallSession() {
@@ -345,6 +351,10 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
         public boolean isAudioOnly() {
             return this.audioOnly;
+        }
+
+        public void setCallback(AVGroupEngineKit.CallSessionCallback callback) {
+            this.callback = callback;
         }
 
         public CallSessionCallback getCallback(){
@@ -392,6 +402,40 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                 }
             });
         }
+
+        public void switchCamera() {
+            executor.submit(() -> {
+                Participant participant = participants.get(AVGroupEngineKit.this.currentUserId);
+                if (participant.groupPeerConnectionClient != null) {
+                    participant.groupPeerConnectionClient.switchCamera();
+                }
+
+            });
+        }
+
+        public boolean muteAudio(final boolean muted) {
+            Future future = executor.submit(new Callable<Boolean>() {
+                public Boolean call() throws Exception {
+                    Participant participant = participants.get(AVGroupEngineKit.this.currentUserId);
+                    if (participant.groupPeerConnectionClient != null) {
+                        participant.groupPeerConnectionClient.setAudioEnabled(!muted);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+
+            try {
+                return (Boolean)future.get();
+            } catch (InterruptedException var4) {
+                var4.printStackTrace();
+            } catch (ExecutionException var5) {
+                var5.printStackTrace();
+            }
+
+            return false;
+        }
     }
 
     public interface AVEngineCallback {
@@ -409,9 +453,11 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
         void didChangeMode(boolean changeMode);
 
-        void didCreateLocalVideoTrack();
+        void didCreateLocalVideoTrack(String userId, VideoTrack videoTrack);
 
-        void didReceiveRemoteVideoTrack();
+        void didReceiveRemoteVideoTrack(String userId,VideoTrack remoteVideoTrack);
+
+        void didRemoveVideoTrack(String userId);
 
         void didError(String error);
 

@@ -25,5 +25,6 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(':client')
+    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
     implementation 'org.webrtc:google-webrtc:1.0.21929'
 }
