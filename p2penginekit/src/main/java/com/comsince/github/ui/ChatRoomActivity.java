@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -26,6 +27,7 @@ import org.webrtc.StatsReport;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoTrack;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +39,7 @@ import cn.wildfirechat.client.NotInitializedExecption;
  * 支持 9 路同時通信
  */
 public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngineKit.CallSessionCallback {
-
+    private String TAG = "ChatRoomActivity";
     private FrameLayout wr_video_view;
     private AVGroupEngineKit avGroupEngineKit;
     private String[] tos;
@@ -58,11 +60,6 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
     public static final String EXTRA_AUDIO_ONLY = "audioOnly";
     public static final String EXTRA_TOS = "tos";
     public static final String EXTRA_TARGET = "TARGET";
-
-    public static void openActivity(Activity activity) {
-        Intent intent = new Intent(activity, ChatRoomActivity.class);
-        activity.startActivity(intent);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +83,14 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
         }
         final Intent intent = getIntent();
         targetId = intent.getStringExtra(EXTRA_TARGET);
-        tos = intent.getStringArrayExtra(EXTRA_TOS);
+        ArrayList<String> tosList = intent.getStringArrayListExtra(EXTRA_TOS);
+        if(tosList != null){
+            tos = new String[tosList.size()];
+            tosList.toArray(tos);
+        }
         isOutgoing = intent.getBooleanExtra(EXTRA_MO, false);
         isAudioOnly = intent.getBooleanExtra(EXTRA_AUDIO_ONLY, false);
-        startCall(targetId,tos,isOutgoing,isAudioOnly);
+        init(targetId,tos,isOutgoing,isAudioOnly);
     }
 
 
@@ -108,7 +109,7 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
 
     }
 
-    private void startCall(String targetId,String[] tos, boolean outgoing, boolean audioOnly) {
+    private void init(String targetId,String[] tos, boolean outgoing, boolean audioOnly) {
         AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
         if (outgoing) {
             avGroupEngineKit.startCall(targetId, audioOnly, tos,ChatRoomActivity.this);
@@ -121,6 +122,9 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
         }
     }
 
+    public boolean isOutgoing() {
+        return isOutgoing;
+    }
 
     private void addView(String id, VideoTrack videoTrack) {
         SurfaceViewRenderer renderer = new SurfaceViewRenderer(ChatRoomActivity.this);
@@ -281,6 +285,15 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
 
     }
 
+    public void accept() {
+        AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
+        if (session != null && session.getState() == AVGroupEngineKit.CallState.Incoming) {
+            session.answerCall(false);
+        } else {
+            finish();
+        }
+    }
+
     // 切换摄像头
     public void switchCamera() {
         AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
@@ -360,6 +373,7 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
     @Override
     public void didReceiveRemoteVideoTrack(String userId, VideoTrack remoteVideoTrack) {
         runOnUiThread(() -> {
+            Log.i(TAG,"didReceiveRemoteVideoTrack userId "+userId);
             addView(userId, remoteVideoTrack);
         });
     }

@@ -34,6 +34,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -676,6 +677,9 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 " content type "+messageResponse.getContent().getType()+" tos "+messageResponse.getTos()+"direct "+messageResponse.getDirection()
                 + "status "+messageResponse.getStatus()+" messageUid "+messageResponse.getMessageUid() +" messageId "+messageResponse.getMessageId());
         builder.setFromUser(messageResponse.getFrom());
+        if(messageResponse.getTos() != null){
+            builder.addAllTo(Arrays.asList(messageResponse.getTos()));
+        }
         WFCMessage.Conversation conversation = WFCMessage.Conversation.newBuilder()
                 .setType(messageResponse.getConversationType())
                 .setLine(messageResponse.getLine())

@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.comsince.github.R;
+import com.comsince.github.p2penginekit.AVEngineKit;
 import com.comsince.github.util.Utils;
 
 /**
@@ -28,16 +29,19 @@ public class ChatRoomFragment extends Fragment {
     private TextView wr_switch_camera;
     private TextView wr_hand_free;
     private TextView wr_open_camera;
+    private TextView wr_switch_accept;
     private ChatRoomActivity activity;
 
     private boolean enableMic = true;
     private boolean enableSpeaker = true;
     private boolean enableCamera = true;
+    private boolean isOutgoing;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (ChatRoomActivity) getActivity();
+        isOutgoing = activity.isOutgoing();
     }
 
     @Override
@@ -61,6 +65,14 @@ public class ChatRoomFragment extends Fragment {
         wr_switch_camera = rootView.findViewById(R.id.wr_switch_camera);
         wr_hand_free = rootView.findViewById(R.id.wr_hand_free);
         wr_open_camera = rootView.findViewById(R.id.wr_open_camera);
+        wr_switch_accept = rootView.findViewById(R.id.wr_switch_accept);
+        if(isOutgoing){
+            wr_switch_hang_up.setVisibility(View.VISIBLE);
+            wr_switch_accept.setVisibility(View.GONE);
+        } else {
+            wr_switch_hang_up.setVisibility(View.GONE);
+            wr_switch_accept.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initListener() {
@@ -71,6 +83,7 @@ public class ChatRoomFragment extends Fragment {
 
         });
         wr_switch_hang_up.setOnClickListener(v -> activity.hangUp());
+        wr_switch_accept.setOnClickListener(v -> activity.accept());
         wr_switch_camera.setOnClickListener(v -> activity.switchCamera());
         wr_hand_free.setOnClickListener(v -> {
             enableSpeaker = !enableSpeaker;

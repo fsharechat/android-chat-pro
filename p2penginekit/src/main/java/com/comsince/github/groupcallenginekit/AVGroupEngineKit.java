@@ -85,6 +85,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
      *      * @param isAudioOnly 是否仅仅是音频聊天
      * */
     public AVGroupEngineKit.CallSession startCall(String targetId, boolean audioOnly, String[] tos,AVGroupEngineKit.CallSessionCallback callback){
+        Log.i(TAG,"start call targetId "+targetId+" tos "+tos);
         this.isInitiator = true;
         CountDownLatch latch = new CountDownLatch(1);
         Future future = this.executor.submit(() -> {
@@ -240,7 +241,8 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                         if (this.currentSession != null && this.currentSession.state != AVGroupEngineKit.CallState.Idle) {
                             this.rejectOtherCall(invite.getCallId(), message.sender);
                         } else {
-                            AVGroupEngineKit.CallSession newSession = this.newSession(message.sender, invite.isAudioOnly(), invite.getCallId());
+                            //注意这里的clientId是值当前群组会话的targetId
+                            AVGroupEngineKit.CallSession newSession = this.newSession(message.conversation.target, invite.isAudioOnly(), invite.getCallId());
                             newSession.setState(AVGroupEngineKit.CallState.Incoming);
                             newSession.startMsgId = message.messageId;
                             this.currentSession = newSession;
@@ -301,6 +303,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
         this.participants.put(this.currentUserId,participant);
         for(int i = 0 ;i < participantArray.length(); i++){
             String userId = participantArray.getString(i);
+            Log.i(TAG,"onExistingParticipants "+userId);
             onProcessReceiveParticipant(userId);
         }
     }
@@ -357,6 +360,10 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
             this.callback = callback;
         }
 
+        public String getClientId(){
+            return clientId;
+        }
+
         public CallSessionCallback getCallback(){
             return callback;
         }
@@ -376,7 +383,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                     this.setState(AVGroupEngineKit.CallState.Connecting);
                     boolean ao = this.isAudioOnly() ? true : audioOnly;
                     AnswerMessage answerx = new AnswerMessage(this.callId, ao);
-                    AVGroupEngineKit.this.onOfferMessage(answerx, this.clientId, new String[0],true);
+                    AVGroupEngineKit.this.onOfferMessage(answerx, this.clientId,true);
                 }
             });
         }
@@ -399,6 +406,13 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                     this.setState(AVGroupEngineKit.CallState.Idle);
                     this.callback.didCallEndWithReason(reason);
                     AVGroupEngineKit.this.currentSession = null;
+
+                    for(String userId : participants.keySet()){
+                        Participant participant = participants.get(userId);
+                        if(participant != null){
+                            participant.dispose();
+                        }
+                    }
                 }
             });
         }
@@ -413,7 +427,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
             });
         }
 
-        public boolean muteAudio(final boolean muted) {
+        public boolean muteAudio(boolean muted) {
             Future future = executor.submit(new Callable<Boolean>() {
                 public Boolean call() throws Exception {
                     Participant participant = participants.get(AVGroupEngineKit.this.currentUserId);
@@ -443,7 +457,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
         void shouldStartRing(boolean shouldStartRing);
 
-        void shouldStopRing();
+        void shouldSopRing();
     }
 
     public interface CallSessionCallback {

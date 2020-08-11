@@ -23,6 +23,8 @@ import androidx.lifecycle.ViewModelStore;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
+import com.comsince.github.ui.ChatRoomActivity;
 import com.lqr.emoji.LQREmotionKit;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ import cn.wildfirechat.remote.OnRecallMessageListener;
 import cn.wildfirechat.remote.OnReceiveMessageListener;
 
 
-public class WfcUIKit implements AVEngineKit.AVEngineCallback, OnReceiveMessageListener, OnRecallMessageListener {
+public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.AVEngineCallback, OnReceiveMessageListener, OnRecallMessageListener {
 
     private boolean isBackground = true;
     private static Application application;
@@ -94,6 +96,11 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, OnReceiveMessageL
             SharedPreferences sp = application.getSharedPreferences("config", Context.MODE_PRIVATE);
             String id = sp.getString("id", null);
             String token = sp.getString("token", null);
+
+            AVGroupEngineKit.init(application,id,this);
+            ChatManagerHolder.avGroupEngineKit = AVGroupEngineKit.Instance();
+            ChatManagerHolder.avGroupEngineKit.addIceServer(Config.ICE_ADDRESS, Config.ICE_USERNAME, Config.ICE_PASSWORD);
+
             if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(token)) {
                 ChatManagerHolder.gChatManager.connect(id, token);
             }
@@ -120,6 +127,11 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, OnReceiveMessageL
     private AsyncPlayer ringPlayer;
 
     @Override
+    public void onReceiveCall(AVGroupEngineKit.CallSession callSession) {
+        onCall(application,callSession.getClientId(),new ArrayList<>(),false,callSession.isAudioOnly());
+    }
+
+    @Override
     public void shouldStartRing(boolean isIncomming) {
         if (isIncomming) {
             Uri uri = Uri.parse("android.resource://" + application.getPackageName() + "/" + R.raw.incoming_call_ring);
@@ -133,6 +145,28 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, OnReceiveMessageL
     @Override
     public void shouldSopRing() {
         ringPlayer.stop();
+    }
+
+    public static void onCall(Context context,String targetId,ArrayList<String> memberIds, boolean isMo, boolean isAudioOnly){
+        Intent voip = new Intent(WfcIntent.ACTION_VOIP_GROUP);
+        voip.putExtra(SingleVoipCallActivity.EXTRA_MO, isMo);
+        voip.putStringArrayListExtra(ChatRoomActivity.EXTRA_TOS,memberIds);
+        voip.putExtra(SingleVoipCallActivity.EXTRA_TARGET, targetId);
+        voip.putExtra(SingleVoipCallActivity.EXTRA_AUDIO_ONLY, isAudioOnly);
+
+        if (context instanceof Activity) {
+            context.startActivity(voip);
+        } else {
+            Intent main = new Intent(WfcIntent.ACTION_MAIN);
+            voip.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivities(context, 100, new Intent[]{main, voip}, PendingIntent.FLAG_ONE_SHOT);
+            try {
+                pendingIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
     // pls refer to https://stackoverflow.com/questions/11124119/android-starting-new-activity-from-application-class

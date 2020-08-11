@@ -1,5 +1,6 @@
 package cn.wildfire.chat.kit;
 
+import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
 import com.comsince.github.p2penginekit.AVEngineKit;
 import cn.wildfirechat.remote.ChatManager;
 
@@ -10,4 +11,5 @@ import cn.wildfirechat.remote.ChatManager;
 public class ChatManagerHolder {
     public static ChatManager gChatManager;
     public static AVEngineKit gAVEngine;
+    public static AVGroupEngineKit avGroupEngineKit;
 }

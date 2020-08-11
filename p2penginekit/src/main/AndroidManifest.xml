@@ -28,6 +28,11 @@
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
-            android:theme="@style/Webrtc.AppTheme.NoActionBar" />
+            android:theme="@style/Webrtc.AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="cn.wildfirechat.kit.chat.voip.group" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

@@ -194,6 +194,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
         SignalMessage signalMessage = new SignalMessage(avGroupEngineKit.getCurrentSession().callId);
         JSONObject json = new JSONObject();
         jsonPut(json, "type", "onIceCandidate");
+        jsonPut(json,"name",this.sender);
         JSONObject candidate = new JSONObject();
         jsonPut(candidate,"sdpMid",iceCandidate.sdpMid);
         jsonPut(candidate,"sdpMLineIndex",iceCandidate.sdpMLineIndex);

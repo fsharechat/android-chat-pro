@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import androidx.lifecycle.ViewModelProviders;
 import cn.wildfire.chat.kit.WfcUIKit;
@@ -63,7 +64,7 @@ public class VoipExt extends ConversationExt {
         GroupViewModel groupViewModel = ViewModelProviders.of(context).get(GroupViewModel.class);
         GroupInfo groupInfo = groupViewModel.getGroupInfo(conversation.target, false);
         intent.putExtra("groupInfo", groupInfo);
-        intent.putExtra("maxCount", 1);
+        intent.putExtra("maxCount", 9);
         startActivityForResult(intent, REQUEST_CODE_GROUP_VIDEO_CHAT);
     }
 
@@ -73,6 +74,10 @@ public class VoipExt extends ConversationExt {
 
     private void videoChat(String targetId) {
         WfcUIKit.onCall(context, targetId, true, false);
+    }
+
+    private void videoChat(ArrayList<String> memberIds){
+        WfcUIKit.onCall(context,this.conversation.target,memberIds,true,false);
     }
 
     @Override
@@ -100,9 +105,10 @@ public class VoipExt extends ConversationExt {
                 break;
             case REQUEST_CODE_GROUP_VIDEO_CHAT:
                 memberIds = data.getStringArrayListExtra(PickGroupMemberActivity.EXTRA_RESULT);
-                if (memberIds != null && memberIds.size() > 0) {
-                    videoChat(memberIds.get(0));
-                }
+//                if (memberIds != null && memberIds.size() > 0) {
+//                    videoChat(memberIds.get(0));
+//                }
+                videoChat(memberIds);
                 break;
             default:
                 break;

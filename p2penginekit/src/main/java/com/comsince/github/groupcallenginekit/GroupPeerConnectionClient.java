@@ -540,7 +540,7 @@ public class GroupPeerConnectionClient {
             try {
                 this.statsTimer.schedule(new TimerTask() {
                     public void run() {
-                        GroupPeerConnectionClient.executor.execute(new Runnable() {
+                        executor.execute(new Runnable() {
                             public void run() {
                                 GroupPeerConnectionClient.this.getStats();
                             }
@@ -1046,6 +1046,7 @@ public class GroupPeerConnectionClient {
         }
 
         public void onAddStream(MediaStream stream) {
+            Log.i("PCRTCClient","onAddStream "+mediaStream.videoTracks.size());
             GroupPeerConnectionClient.executor.execute(() -> {
                 if (GroupPeerConnectionClient.this.peerConnection != null && !GroupPeerConnectionClient.this.isError) {
                     if (stream.audioTracks.size() <= 1 && stream.videoTracks.size() <= 1) {
