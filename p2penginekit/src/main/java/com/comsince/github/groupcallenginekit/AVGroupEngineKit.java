@@ -6,17 +6,15 @@ import com.comsince.github.message.AnswerMessage;
 import com.comsince.github.message.ByeMessage;
 import com.comsince.github.message.ModifyMessage;
 import com.comsince.github.message.SignalMessage;
-import com.comsince.github.p2penginekit.AVEngineKit;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
 import org.webrtc.VideoTrack;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -131,6 +129,10 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
     public AVGroupEngineKit.CallSession getCurrentSession() {
         return this.currentSession;
+    }
+
+    public EglBase.Context getEglBaseContextByUserId(String userId){
+        return participants.get(userId).getEglBaseContext();
     }
 
     protected void onOfferMessage(final MessageContent message, final String clientId,final boolean isKeyMsg){
@@ -273,6 +275,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
     private void onReceiveData(byte[] data) throws JSONException {
         String jsonStr = new String(data);
+        Log.i(TAG,"onReceiveData "+jsonStr);
         JSONObject json = new JSONObject(jsonStr);
         String type = json.optString("type");
         switch (type){
@@ -320,6 +323,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
     private void onProcessReceiveParticipant(String userId){
         Participant participant = new Participant(this.mContent,this.currentSession.clientId,userId,this,this.currentSession.audioOnly);
         participant.newWebRtcReceiveOnlyClient();
+        this.participants.put(userId,participant);
     }
 
     private void onReceiverAnswer(String userId,String sdpAnswer){
@@ -413,6 +417,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                             participant.dispose();
                         }
                     }
+                    participants.clear();
                 }
             });
         }

@@ -2,16 +2,14 @@ package com.comsince.github.groupcallenginekit;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.comsince.github.message.SignalMessage;
-import com.comsince.github.p2penginekit.AVEngineKit;
 import com.comsince.github.p2penginekit.VideoProfile;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.CameraEnumerator;
 import org.webrtc.CameraVideoCapturer;
+import org.webrtc.EglBase;
 import org.webrtc.FileVideoCapturer;
 import org.webrtc.IceCandidate;
 import org.webrtc.Logging;
@@ -19,12 +17,12 @@ import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoTrack;
-
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Participant implements GroupPeerConnectionClient.PeerConnectionEvents {
+    private static final String TAG = "Participant";
     private String target;
     private String sender;
     private Context mContent;
@@ -77,6 +75,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
             if (this.groupPeerConnectionClient == null) {
                 Log.e("CallRTCClient", "Received remote SDP for non-initilized peer connection.");
             } else {
+                Log.d(TAG,this.sender+ " processAnswer "+sessionDescription);
                 this.groupPeerConnectionClient.setRemoteDescription(sessionDescription);
             }
         });
@@ -87,9 +86,17 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
             if (this.groupPeerConnectionClient == null) {
                 Log.e("CallRTCClient", "Received ICE candidate for a non-initialized peer connection.");
             } else {
+                Log.d(TAG,this.sender+" addIceCandidate "+iceCandidate);
                 this.groupPeerConnectionClient.addRemoteIceCandidate(iceCandidate);
             }
         });
+    }
+
+    public EglBase.Context getEglBaseContext(){
+        if(groupPeerConnectionClient != null){
+            return groupPeerConnectionClient.getRenderContext();
+        }
+        return null;
     }
 
     public void dispose(){
@@ -186,6 +193,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
         jsonPut(json, "type", "receiveVideoFrom");
         jsonPut(json,"sender",this.sender);
         signalMessage.setPayload(json.toString().getBytes());
+        Log.d(TAG,this.sender+ " send local description "+json.toString());
         avGroupEngineKit.onOfferMessage(signalMessage, target, new String[0],true);
     }
 
@@ -213,6 +221,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     public void onIceConnected() {
         executor.submit(() -> {
             if (avGroupEngineKit != null && avGroupEngineKit.getCurrentSession() != null && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
+                Log.d(TAG,this.sender + " onIceConnected ");
                 avGroupEngineKit.getCurrentSession().connectedTime = System.currentTimeMillis();
                 groupPeerConnectionClient.enableStatsEvents(true, 1000);
                 avGroupEngineKit.getCurrentSession().setState(AVGroupEngineKit.CallState.Connected);

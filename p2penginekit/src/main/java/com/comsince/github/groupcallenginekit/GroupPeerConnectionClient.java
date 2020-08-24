@@ -1046,7 +1046,6 @@ public class GroupPeerConnectionClient {
         }
 
         public void onAddStream(MediaStream stream) {
-            Log.i("PCRTCClient","onAddStream "+mediaStream.videoTracks.size());
             GroupPeerConnectionClient.executor.execute(() -> {
                 if (GroupPeerConnectionClient.this.peerConnection != null && !GroupPeerConnectionClient.this.isError) {
                     if (stream.audioTracks.size() <= 1 && stream.videoTracks.size() <= 1) {

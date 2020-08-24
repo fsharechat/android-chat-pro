@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import com.comsince.github.R;
 import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
@@ -38,7 +39,7 @@ import cn.wildfirechat.client.NotInitializedExecption;
  * 群聊界面
  * 支持 9 路同時通信
  */
-public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngineKit.CallSessionCallback {
+public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineKit.CallSessionCallback {
     private String TAG = "ChatRoomActivity";
     private FrameLayout wr_video_view;
     private AVGroupEngineKit avGroupEngineKit;
@@ -53,8 +54,6 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
     private VideoTrack _localVideoTrack;
 
     private int mScreenWidth;
-
-    private EglBase rootEglBase;
 
     public static final String EXTRA_MO = "ISMO";
     public static final String EXTRA_AUDIO_ONLY = "audioOnly";
@@ -72,8 +71,7 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
         setContentView(R.layout.wr_activity_chat_room);
         initView();
         initVar();
-        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
-        replaceFragment(chatRoomFragment);
+
 
         try {
             avGroupEngineKit = AVGroupEngineKit.Instance();
@@ -105,11 +103,12 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
             mScreenWidth = manager.getDefaultDisplay().getWidth();
         }
         wr_video_view.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mScreenWidth));
-        rootEglBase = EglBase.create();
-
     }
 
     private void init(String targetId,String[] tos, boolean outgoing, boolean audioOnly) {
+        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
+        replaceFragment(chatRoomFragment);
+
         AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
         if (outgoing) {
             avGroupEngineKit.startCall(targetId, audioOnly, tos,ChatRoomActivity.this);
@@ -128,7 +127,7 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
 
     private void addView(String id, VideoTrack videoTrack) {
         SurfaceViewRenderer renderer = new SurfaceViewRenderer(ChatRoomActivity.this);
-        renderer.init(rootEglBase.getEglBaseContext(), null);
+        renderer.init(avGroupEngineKit.getEglBaseContextByUserId(id), null);
         renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
         renderer.setMirror(true);
         // set render
@@ -354,7 +353,7 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
 
     @Override
     public void didChangeState(AVGroupEngineKit.CallState callState) {
-
+        Log.i(TAG,"didChangeState "+callState);
     }
 
     @Override
@@ -364,6 +363,7 @@ public class ChatRoomActivity extends AppCompatActivity implements AVGroupEngine
 
     @Override
     public void didCreateLocalVideoTrack(String userId, VideoTrack videoTrack) {
+        Log.i(TAG,"didCreateLocalVideoTrack "+userId);
         _localVideoTrack = videoTrack;
         runOnUiThread(() -> {
             addView(userId, videoTrack);
