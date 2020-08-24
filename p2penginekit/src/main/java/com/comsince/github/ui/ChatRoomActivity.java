@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
@@ -54,6 +55,8 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
     private VideoTrack _localVideoTrack;
 
     private int mScreenWidth;
+    private AVGroupEngineKit.CallSessionCallback currentCallback;
+    private Handler handler = new Handler();
 
     public static final String EXTRA_MO = "ISMO";
     public static final String EXTRA_AUDIO_ONLY = "audioOnly";
@@ -108,6 +111,8 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
     private void init(String targetId,String[] tos, boolean outgoing, boolean audioOnly) {
         ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
         replaceFragment(chatRoomFragment);
+
+        currentCallback = (AVGroupEngineKit.CallSessionCallback) chatRoomFragment;
 
         AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
         if (outgoing) {
@@ -348,12 +353,13 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
 
     @Override
     public void didCallEndWithReason(AVGroupEngineKit.CallEndReason callEndReason) {
-
+        finish();
     }
 
     @Override
     public void didChangeState(AVGroupEngineKit.CallState callState) {
         Log.i(TAG,"didChangeState "+callState);
+        postAction(() -> currentCallback.didChangeState(callState));
     }
 
     @Override
@@ -393,5 +399,9 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
     @Override
     public void didGetStats(StatsReport[] statsReports) {
 
+    }
+
+    private void postAction(Runnable action) {
+        handler.post(action);
     }
 }

@@ -18,6 +18,7 @@ import org.webrtc.StatsReport;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoTrack;
 import java.io.IOException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,7 +32,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     private boolean audioOnly;
     private VideoCapturer videoCapturer;
     private VideoTrack localVideoTrack;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor;
 
     public Participant(Context context,String target, String sender, AVGroupEngineKit avGroupEngineKit,boolean audioOnly){
         this.mContent = context;
@@ -39,6 +40,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
         this.sender = sender;
         this.avGroupEngineKit = avGroupEngineKit;
         this.audioOnly = audioOnly;
+        this.executor = avGroupEngineKit.executor;
     }
 
     public void newWebRtcSendOnlyClient(){
@@ -48,7 +50,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
             this.groupPeerConnectionClient.createPeerConnectionFactory(this.mContent, this, !audioOnly,
                     videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate, StreamMode.SEND_ONLY);
         }
-        startMedia();
+        startMedia(StreamMode.SEND_ONLY);
     }
 
     public void newWebRtcReceiveOnlyClient(){
@@ -58,7 +60,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
             this.groupPeerConnectionClient.createPeerConnectionFactory(this.mContent, this, !audioOnly,
                     videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate, StreamMode.RECV_ONLY);
         }
-        startMedia();
+        startMedia(StreamMode.RECV_ONLY);
     }
 
     public void newWebRtcSendRecClient(){
@@ -117,9 +119,9 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
         }
     }
 
-    private void startMedia(){
+    private void startMedia(StreamMode streamMode){
         //avGroupEngineKit.getCurrentSession().setState(AVGroupEngineKit.CallState.Connecting);
-        if (this.videoCapturer == null && !this.avGroupEngineKit.getCurrentSession().isAudioOnly()) {
+        if (this.videoCapturer == null && !this.avGroupEngineKit.getCurrentSession().isAudioOnly() && streamMode != StreamMode.RECV_ONLY) {
             this.videoCapturer = this.createVideoCapture();
         }
         this.groupPeerConnectionClient.createPeerConnection(this.videoCapturer, this.avGroupEngineKit.getIceServers());

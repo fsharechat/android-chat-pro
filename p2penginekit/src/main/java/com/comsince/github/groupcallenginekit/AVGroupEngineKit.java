@@ -45,7 +45,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
     private Map<String,Participant> participants;
     private AVGroupEngineKit.CallSession currentSession;
     private AVGroupEngineKit.AVEngineCallback engineCallback;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    protected ExecutorService executor = Executors.newSingleThreadExecutor();
     private List<PeerConnection.IceServer> iceServers = new ArrayList();
 
     public static AVGroupEngineKit Instance() throws NotInitializedExecption {
@@ -374,6 +374,9 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
         public void setState(AVGroupEngineKit.CallState state){
             this.state = state;
+            if (this.callback != null) {
+                this.callback.didChangeState(state);
+            }
         }
         public AVGroupEngineKit.CallState getState() {
             return this.state;
@@ -405,12 +408,6 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                         AVGroupEngineKit.this.onOfferMessage(bye, this.clientId, false);
                     }
 
-                    this.clientId = null;
-                    this.callId = null;
-                    this.setState(AVGroupEngineKit.CallState.Idle);
-                    this.callback.didCallEndWithReason(reason);
-                    AVGroupEngineKit.this.currentSession = null;
-
                     for(String userId : participants.keySet()){
                         Participant participant = participants.get(userId);
                         if(participant != null){
@@ -418,6 +415,14 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                         }
                     }
                     participants.clear();
+
+                    this.clientId = null;
+                    this.callId = null;
+                    this.setState(AVGroupEngineKit.CallState.Idle);
+                    this.callback.didCallEndWithReason(reason);
+                    AVGroupEngineKit.this.currentSession = null;
+
+
                 }
             });
         }

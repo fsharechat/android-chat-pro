@@ -396,7 +396,7 @@ public class GroupPeerConnectionClient {
 
         this.sdpMediaConstraints = new MediaConstraints();
         this.sdpMediaConstraints.mandatory.add(new KeyValuePair("OfferToReceiveAudio", peerConnectionParameters.streamMode == StreamMode.SEND_ONLY ? "false" : "true"));
-        if (this.videoCallEnabled) {
+        if (this.videoCallEnabled || peerConnectionParameters.streamMode == StreamMode.RECV_ONLY) {
             this.sdpMediaConstraints.mandatory.add(new KeyValuePair("OfferToReceiveVideo", peerConnectionParameters.streamMode == StreamMode.SEND_ONLY ? "false" : "true"));
         } else {
             this.sdpMediaConstraints.mandatory.add(new KeyValuePair("OfferToReceiveVideo", "false"));

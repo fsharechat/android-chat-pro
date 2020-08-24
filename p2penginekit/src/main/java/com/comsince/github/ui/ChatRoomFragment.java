@@ -13,14 +13,19 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.comsince.github.R;
+import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
+import com.comsince.github.p2penginekit.AVEngineKit;
 import com.comsince.github.util.Utils;
+
+import org.webrtc.StatsReport;
+import org.webrtc.VideoTrack;
 
 /**
  * 视频会议控制界面
  * Created by dds on 2019/1/2.
  * android_shuai@163.com
  */
-public class ChatRoomFragment extends Fragment {
+public class ChatRoomFragment extends Fragment implements AVGroupEngineKit.CallSessionCallback {
 
     public View rootView;
     private TextView wr_switch_mute;
@@ -161,4 +166,48 @@ public class ChatRoomFragment extends Fragment {
     }
 
 
+    @Override
+    public void didCallEndWithReason(AVGroupEngineKit.CallEndReason callEndReason) {
+
+    }
+
+    @Override
+    public void didChangeState(AVGroupEngineKit.CallState callState) {
+        if (callState == AVGroupEngineKit.CallState.Connected) {
+            wr_switch_hang_up.setVisibility(View.VISIBLE);
+            wr_switch_accept.setVisibility(View.GONE);
+        } else {
+            // do nothing now
+        }
+    }
+
+    @Override
+    public void didChangeMode(boolean changeMode) {
+
+    }
+
+    @Override
+    public void didCreateLocalVideoTrack(String userId, VideoTrack videoTrack) {
+
+    }
+
+    @Override
+    public void didReceiveRemoteVideoTrack(String userId, VideoTrack remoteVideoTrack) {
+
+    }
+
+    @Override
+    public void didRemoveVideoTrack(String userId) {
+
+    }
+
+    @Override
+    public void didError(String error) {
+
+    }
+
+    @Override
+    public void didGetStats(StatsReport[] statsReports) {
+
+    }
 }
