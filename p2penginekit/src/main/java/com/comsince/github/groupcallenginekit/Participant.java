@@ -3,7 +3,6 @@ package com.comsince.github.groupcallenginekit;
 import android.content.Context;
 import android.util.Log;
 import com.comsince.github.message.SignalMessage;
-import com.comsince.github.p2penginekit.VideoProfile;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.Camera1Enumerator;
@@ -18,9 +17,7 @@ import org.webrtc.StatsReport;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoTrack;
 import java.io.IOException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Participant implements GroupPeerConnectionClient.PeerConnectionEvents {
     private static final String TAG = "Participant";
@@ -43,33 +40,37 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
         this.executor = avGroupEngineKit.executor;
     }
 
-    public void newWebRtcSendOnlyClient(){
+    public void newWebRtcSendOnlyClient(DefaultPeerConnectionFactory defaultPeerConnectionFactory){
         if(this.groupPeerConnectionClient == null){
            this.groupPeerConnectionClient = new GroupPeerConnectionClient();
-           VideoProfile videoProfile = VideoProfile.getVideoProfile(30, false);
-            this.groupPeerConnectionClient.createPeerConnectionFactory(this.mContent, this, !audioOnly,
-                    videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate, StreamMode.SEND_ONLY);
+           this.groupPeerConnectionClient.init(defaultPeerConnectionFactory,this,this.audioOnly,StreamMode.SEND_ONLY);
         }
         startMedia(StreamMode.SEND_ONLY);
     }
 
-    public void newWebRtcReceiveOnlyClient(){
+    public void newWebRtcReceiveOnlyClient(DefaultPeerConnectionFactory defaultPeerConnectionFactory){
         if(this.groupPeerConnectionClient == null){
             this.groupPeerConnectionClient = new GroupPeerConnectionClient();
-            VideoProfile videoProfile = VideoProfile.getVideoProfile(30, false);
-            this.groupPeerConnectionClient.createPeerConnectionFactory(this.mContent, this, !audioOnly,
-                    videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate, StreamMode.RECV_ONLY);
+            this.groupPeerConnectionClient.init(defaultPeerConnectionFactory,this,this.audioOnly,StreamMode.RECV_ONLY);
         }
         startMedia(StreamMode.RECV_ONLY);
     }
 
-    public void newWebRtcSendRecClient(){
+    public void newWebRtcSendRecClient(DefaultPeerConnectionFactory defaultPeerConnectionFactory){
         if(this.groupPeerConnectionClient == null){
             this.groupPeerConnectionClient = new GroupPeerConnectionClient();
-            VideoProfile videoProfile = VideoProfile.getVideoProfile(30, false);
-            this.groupPeerConnectionClient.createPeerConnectionFactory(this.mContent, this, !audioOnly,
-                    videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate, StreamMode.SENDRECV);
+            this.groupPeerConnectionClient.init(defaultPeerConnectionFactory,this,this.audioOnly,StreamMode.SENDRECV);
         }
+        startMedia(StreamMode.SENDRECV);
+    }
+
+    private void startMedia(StreamMode streamMode){
+        if (this.videoCapturer == null && !this.avGroupEngineKit.getCurrentSession().isAudioOnly() && streamMode != StreamMode.RECV_ONLY) {
+            this.videoCapturer = this.createVideoCapture();
+        }
+        Log.i(TAG,"startMedia "+streamMode);
+        this.groupPeerConnectionClient.createPeerConnection(this.videoCapturer, this.avGroupEngineKit.getIceServers());
+        this.groupPeerConnectionClient.createOffer();
     }
 
     public void processAnswer(SessionDescription sessionDescription){
@@ -119,14 +120,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
         }
     }
 
-    private void startMedia(StreamMode streamMode){
-        //avGroupEngineKit.getCurrentSession().setState(AVGroupEngineKit.CallState.Connecting);
-        if (this.videoCapturer == null && !this.avGroupEngineKit.getCurrentSession().isAudioOnly() && streamMode != StreamMode.RECV_ONLY) {
-            this.videoCapturer = this.createVideoCapture();
-        }
-        this.groupPeerConnectionClient.createPeerConnection(this.videoCapturer, this.avGroupEngineKit.getIceServers());
-        this.groupPeerConnectionClient.createOffer();
-    }
+
 
     private VideoCapturer createVideoCapture() {
         String videoFileAsCamera = null;
@@ -138,7 +132,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
                 return null;
             }
         } else {
-            Logging.d("CallRTCClient", "Creating capturer using camera1 API.");
+            Logging.d(TAG, "Creating capturer using camera1 API.");
             videoCapturer = this.createCameraCapture(new Camera1Enumerator(this.captureToTexture()));
         }
 

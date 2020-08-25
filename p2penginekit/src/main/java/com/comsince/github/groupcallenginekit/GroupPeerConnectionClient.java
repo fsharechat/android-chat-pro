@@ -1,6 +1,5 @@
 package com.comsince.github.groupcallenginekit;
 
-import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -12,8 +11,6 @@ import org.webrtc.CameraVideoCapturer.CameraSwitchHandler;
 import org.webrtc.DataChannel;
 import org.webrtc.DataChannel.Buffer;
 import org.webrtc.DataChannel.Init;
-import org.webrtc.DefaultVideoDecoderFactory;
-import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.Logging;
@@ -35,7 +32,6 @@ import org.webrtc.PeerConnection.RtcpMuxPolicy;
 import org.webrtc.PeerConnection.SignalingState;
 import org.webrtc.PeerConnection.TcpCandidatePolicy;
 import org.webrtc.PeerConnectionFactory;
-import org.webrtc.PeerConnectionFactory.InitializationOptions;
 import org.webrtc.PeerConnectionFactory.Options;
 import org.webrtc.RtpParameters;
 import org.webrtc.RtpParameters.Encoding;
@@ -43,24 +39,11 @@ import org.webrtc.RtpReceiver;
 import org.webrtc.RtpSender;
 import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;
-import org.webrtc.SoftwareVideoDecoderFactory;
-import org.webrtc.SoftwareVideoEncoderFactory;
 import org.webrtc.StatsObserver;
 import org.webrtc.StatsReport;
 import org.webrtc.VideoCapturer;
-import org.webrtc.VideoDecoderFactory;
-import org.webrtc.VideoEncoderFactory;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
-import org.webrtc.voiceengine.WebRtcAudioManager;
-import org.webrtc.voiceengine.WebRtcAudioRecord;
-import org.webrtc.voiceengine.WebRtcAudioRecord.AudioRecordStartErrorCode;
-import org.webrtc.voiceengine.WebRtcAudioRecord.WebRtcAudioRecordErrorCallback;
-import org.webrtc.voiceengine.WebRtcAudioTrack;
-import org.webrtc.voiceengine.WebRtcAudioTrack.AudioTrackStartErrorCode;
-import org.webrtc.voiceengine.WebRtcAudioTrack.ErrorCallback;
-import org.webrtc.voiceengine.WebRtcAudioUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -77,37 +60,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GroupPeerConnectionClient {
-    public static final String VIDEO_TRACK_ID = "ARDAMSv0";
-    public static final String AUDIO_TRACK_ID = "ARDAMSa0";
     public static final String VIDEO_TRACK_TYPE = "video";
-    private static final String TAG = "PCRTCClient";
-    private static final String VIDEO_CODEC_VP8 = "VP8";
-    private static final String VIDEO_CODEC_VP9 = "VP9";
-    private static final String VIDEO_CODEC_H264 = "H264";
-    private static final String VIDEO_CODEC_H264_BASELINE = "H264 Baseline";
-    private static final String VIDEO_CODEC_H264_HIGH = "H264 High";
-    private static final String AUDIO_CODEC_OPUS = "opus";
-    private static final String AUDIO_CODEC_ISAC = "ISAC";
-    private static final String VIDEO_CODEC_PARAM_START_BITRATE = "x-google-start-bitrate";
-    private static final String VIDEO_FLEXFEC_FIELDTRIAL = "WebRTC-FlexFEC-03-Advertised/Enabled/WebRTC-FlexFEC-03/Enabled/";
-    private static final String VIDEO_VP8_INTEL_HW_ENCODER_FIELDTRIAL = "WebRTC-IntelVP8/Enabled/";
-    private static final String VIDEO_H264_HIGH_PROFILE_FIELDTRIAL = "WebRTC-H264HighProfile/Enabled/";
-    private static final String DISABLE_WEBRTC_AGC_FIELDTRIAL = "WebRTC-Audio-MinimizeResamplingOnMobile/Enabled/";
-    private static final String VIDEO_FRAME_EMIT_FIELDTRIAL = "VideoFrameEmit/Enabled/";
-    private static final String AUDIO_CODEC_PARAM_BITRATE = "maxaveragebitrate";
-    private static final String AUDIO_ECHO_CANCELLATION_CONSTRAINT = "googEchoCancellation";
-    private static final String AUDIO_AUTO_GAIN_CONTROL_CONSTRAINT = "googAutoGainControl";
-    private static final String AUDIO_HIGH_PASS_FILTER_CONSTRAINT = "googHighpassFilter";
-    private static final String AUDIO_NOISE_SUPPRESSION_CONSTRAINT = "googNoiseSuppression";
-    private static final String AUDIO_LEVEL_CONTROL_CONSTRAINT = "levelControl";
-    private static final String DTLS_SRTP_KEY_AGREEMENT_CONSTRAINT = "DtlsSrtpKeyAgreement";
-    private static final int HD_VIDEO_WIDTH = 1280;
-    private static final int HD_VIDEO_HEIGHT = 720;
+    private static final String TAG = "GroupWebRtcPClient";
     private static final int BPS_IN_KBPS = 1000;
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final GroupPeerConnectionClient.PCObserver pcObserver = new GroupPeerConnectionClient.PCObserver();
-    private final GroupPeerConnectionClient.SDPObserver sdpObserver = new GroupPeerConnectionClient.SDPObserver();
-    private final EglBase rootEglBase = EglBase.create();
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private GroupPeerConnectionClient.PCObserver pcObserver = new GroupPeerConnectionClient.PCObserver();
+    private GroupPeerConnectionClient.SDPObserver sdpObserver = new GroupPeerConnectionClient.SDPObserver();
+    private EglBase rootEglBase;
     private PeerConnectionFactory factory;
     private PeerConnection peerConnection;
     Options options = null;
@@ -125,7 +84,7 @@ public class GroupPeerConnectionClient {
     private int videoFps;
     private MediaConstraints audioConstraints;
     private MediaConstraints sdpMediaConstraints;
-    private GroupPeerConnectionClient.PeerConnectionParameters peerConnectionParameters;
+    private DefaultPeerConnectionFactory.PeerConnectionParameters peerConnectionParameters;
     private List<IceCandidate> queuedRemoteCandidates;
     private GroupPeerConnectionClient.PeerConnectionEvents events;
     private boolean isInitiator;
@@ -145,29 +104,30 @@ public class GroupPeerConnectionClient {
         this.options = options;
     }
 
-    public void createPeerConnectionFactory(Context context, GroupPeerConnectionClient.PeerConnectionEvents events, boolean enableVideo, int videoWidth, int videoHeight,
-                                            int videoFps, int maxBitrate,StreamMode streamMode) {
-        this.peerConnectionParameters = new GroupPeerConnectionClient.PeerConnectionParameters(enableVideo, false, videoWidth, videoHeight, videoFps, maxBitrate,
-                "H264 Baseline", true, true, 0, "OPUS", false, false,
-                false, true, true, true, false, false, streamMode,null);
+    public void init(DefaultPeerConnectionFactory defaultPeerConnectionFactory,GroupPeerConnectionClient.PeerConnectionEvents events,boolean audioOnly,StreamMode streamMode){
+        this.peerConnectionParameters = new DefaultPeerConnectionFactory.PeerConnectionParameters(defaultPeerConnectionFactory.peerConnectionParameters.videoCallEnabled,
+                defaultPeerConnectionFactory.peerConnectionParameters.tracing,defaultPeerConnectionFactory.peerConnectionParameters.videoWidth,
+                defaultPeerConnectionFactory.peerConnectionParameters.videoHeight,defaultPeerConnectionFactory.peerConnectionParameters.videoFps,
+                defaultPeerConnectionFactory.peerConnectionParameters.videoMaxBitrate,defaultPeerConnectionFactory.peerConnectionParameters.videoCodec,
+                defaultPeerConnectionFactory.peerConnectionParameters.videoCodecHwAcceleration,defaultPeerConnectionFactory.peerConnectionParameters.videoFlexfecEnabled,
+                defaultPeerConnectionFactory.peerConnectionParameters.audioStartBitrate,defaultPeerConnectionFactory.peerConnectionParameters.audioCodec,
+                defaultPeerConnectionFactory.peerConnectionParameters.noAudioProcessing,defaultPeerConnectionFactory.peerConnectionParameters.aecDump,
+                defaultPeerConnectionFactory.peerConnectionParameters.useOpenSLES,defaultPeerConnectionFactory.peerConnectionParameters.disableBuiltInAEC,
+                defaultPeerConnectionFactory.peerConnectionParameters.disableBuiltInAGC,defaultPeerConnectionFactory.peerConnectionParameters.disableBuiltInNS,
+                defaultPeerConnectionFactory.peerConnectionParameters.enableLevelControl,defaultPeerConnectionFactory.peerConnectionParameters.disableWebRtcAGCAndHPF,
+                defaultPeerConnectionFactory.peerConnectionParameters.streamMode);
+        this.peerConnectionParameters.streamMode = streamMode;
+        this.peerConnectionParameters.videoCallEnabled = !audioOnly;
+        this.rootEglBase = defaultPeerConnectionFactory.rootEglBase;
+        this.factory = defaultPeerConnectionFactory.defaultPeerConnectionFactory;
+        this.preferredVideoCodec = defaultPeerConnectionFactory.preferredVideoCodec;
+        this.preferIsac = this.peerConnectionParameters.audioCodec != null && this.peerConnectionParameters.audioCodec.equals("ISAC");
         this.events = events;
         this.videoCallEnabled = this.peerConnectionParameters.videoCallEnabled;
         this.dataChannelEnabled = this.peerConnectionParameters.dataChannelParameters != null;
-        this.factory = null;
-        this.peerConnection = null;
-        this.preferIsac = false;
-        this.videoCapturerStopped = false;
-        this.isError = false;
-        this.queuedRemoteCandidates = null;
-        this.localSdp = null;
-        this.mediaStream = null;
-        this.videoCapturer = null;
         this.renderVideo = true;
-        this.localVideoTrack = null;
-        this.remoteVideoTrack = null;
-        this.localVideoSender = null;
         this.enableAudio = true;
-        this.localAudioTrack = null;
+        this.isError = false;
         this.statsTimer = new Timer();
         if (this.peerConnectionParameters.videoCallEnabled) {
             this.videoWidth = this.peerConnectionParameters.videoWidth;
@@ -184,8 +144,6 @@ public class GroupPeerConnectionClient {
 
             Logging.d("PCRTCClient", "Capturing format: " + videoWidth + "x" + videoHeight + "@" + videoFps);
         }
-
-        this.createPeerConnectionFactoryInternal(context);
     }
 
     public void removeVideoTrack() {
@@ -208,6 +166,7 @@ public class GroupPeerConnectionClient {
             executor.execute(new Runnable() {
                 public void run() {
                     try {
+                        Log.i(TAG,"createPeerConnection");
                         GroupPeerConnectionClient.this.createMediaConstraintsInternal();
                         GroupPeerConnectionClient.this.createPeerConnectionInternal();
                     } catch (Exception var2) {
@@ -227,135 +186,6 @@ public class GroupPeerConnectionClient {
 
     public boolean isVideoCallEnabled() {
         return this.videoCallEnabled;
-    }
-
-    private void createPeerConnectionFactoryInternal(Context context) {
-        this.isError = false;
-        String fieldTrials = "";
-        if (this.peerConnectionParameters.videoFlexfecEnabled) {
-            fieldTrials = fieldTrials + "WebRTC-FlexFEC-03-Advertised/Enabled/WebRTC-FlexFEC-03/Enabled/";
-            Log.d("PCRTCClient", "Enable FlexFEC field trial.");
-        }
-
-        fieldTrials = fieldTrials + "WebRTC-IntelVP8/Enabled/";
-        if (this.peerConnectionParameters.disableWebRtcAGCAndHPF) {
-            fieldTrials = fieldTrials + "WebRTC-Audio-MinimizeResamplingOnMobile/Enabled/";
-            Log.d("PCRTCClient", "Disable WebRTC AGC field trial.");
-        }
-
-        fieldTrials = fieldTrials + "VideoFrameEmit/Enabled/";
-        this.preferredVideoCodec = "VP8";
-        if (this.videoCallEnabled && this.peerConnectionParameters.videoCodec != null) {
-            String videoCodec = this.peerConnectionParameters.videoCodec;
-            switch(videoCodec) {
-                case VIDEO_CODEC_H264_HIGH:
-                    fieldTrials = fieldTrials + "WebRTC-H264HighProfile/Enabled/";
-                    this.preferredVideoCodec = "H264";
-                    break;
-                case VIDEO_CODEC_H264_BASELINE:
-                    this.preferredVideoCodec = "H264";
-                    break;
-                case VIDEO_CODEC_VP8:
-                    this.preferredVideoCodec = "VP8";
-                    break;
-                case VIDEO_CODEC_VP9:
-                    this.preferredVideoCodec = "VP9";
-                    break;
-                default:
-                    this.preferredVideoCodec = "VP8";
-                    break;
-            }
-        }
-
-        Log.d("PCRTCClient", "Preferred video codec: " + this.preferredVideoCodec);
-        Log.d("PCRTCClient", "Initialize WebRTC. Field trials: " + fieldTrials + " Enable video HW acceleration: " + this.peerConnectionParameters.videoCodecHwAcceleration);
-        PeerConnectionFactory.initialize(InitializationOptions.builder(context).setFieldTrials(fieldTrials).setEnableVideoHwAcceleration(this.peerConnectionParameters.videoCodecHwAcceleration).setEnableInternalTracer(true).createInitializationOptions());
-        if (this.peerConnectionParameters.tracing) {
-            PeerConnectionFactory.startInternalTracingCapture(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "webrtc-trace.txt");
-        }
-
-        this.preferIsac = this.peerConnectionParameters.audioCodec != null && this.peerConnectionParameters.audioCodec.equals("ISAC");
-        if (!this.peerConnectionParameters.useOpenSLES) {
-            Log.d("PCRTCClient", "Disable OpenSL ES audio even if device supports it");
-            WebRtcAudioManager.setBlacklistDeviceForOpenSLESUsage(true);
-        } else {
-            Log.d("PCRTCClient", "Allow OpenSL ES audio if device supports it");
-            WebRtcAudioManager.setBlacklistDeviceForOpenSLESUsage(false);
-        }
-
-        if (this.peerConnectionParameters.disableBuiltInAEC) {
-            Log.d("PCRTCClient", "Disable built-in AEC even if device supports it");
-            WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true);
-        } else {
-            Log.d("PCRTCClient", "Enable built-in AEC if device supports it");
-            WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(false);
-        }
-
-        if (this.peerConnectionParameters.disableBuiltInAGC) {
-            Log.d("PCRTCClient", "Disable built-in AGC even if device supports it");
-            WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true);
-        } else {
-            Log.d("PCRTCClient", "Enable built-in AGC if device supports it");
-            WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(false);
-        }
-
-        if (this.peerConnectionParameters.disableBuiltInNS) {
-            Log.d("PCRTCClient", "Disable built-in NS even if device supports it");
-            WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true);
-        } else {
-            Log.d("PCRTCClient", "Enable built-in NS if device supports it");
-            WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(false);
-        }
-
-        WebRtcAudioRecord.setErrorCallback(new WebRtcAudioRecordErrorCallback() {
-            public void onWebRtcAudioRecordInitError(String errorMessage) {
-                Log.e("PCRTCClient", "onWebRtcAudioRecordInitError: " + errorMessage);
-                GroupPeerConnectionClient.this.reportError(errorMessage);
-            }
-
-            public void onWebRtcAudioRecordStartError(AudioRecordStartErrorCode errorCode, String errorMessage) {
-                Log.e("PCRTCClient", "onWebRtcAudioRecordStartError: " + errorCode + ". " + errorMessage);
-                GroupPeerConnectionClient.this.reportError(errorMessage);
-            }
-
-            public void onWebRtcAudioRecordError(String errorMessage) {
-                Log.e("PCRTCClient", "onWebRtcAudioRecordError: " + errorMessage);
-                GroupPeerConnectionClient.this.reportError(errorMessage);
-            }
-        });
-        WebRtcAudioTrack.setErrorCallback(new ErrorCallback() {
-            public void onWebRtcAudioTrackInitError(String errorMessage) {
-                Log.e("PCRTCClient", "onWebRtcAudioTrackInitError: " + errorMessage);
-                GroupPeerConnectionClient.this.reportError(errorMessage);
-            }
-
-            public void onWebRtcAudioTrackStartError(AudioTrackStartErrorCode errorCode, String errorMessage) {
-                Log.e("PCRTCClient", "onWebRtcAudioTrackStartError: " + errorCode + ". " + errorMessage);
-                GroupPeerConnectionClient.this.reportError(errorMessage);
-            }
-
-            public void onWebRtcAudioTrackError(String errorMessage) {
-                Log.e("PCRTCClient", "onWebRtcAudioTrackError: " + errorMessage);
-                GroupPeerConnectionClient.this.reportError(errorMessage);
-            }
-        });
-        if (this.options != null) {
-            Log.d("PCRTCClient", "Factory networkIgnoreMask option: " + this.options.networkIgnoreMask);
-        }
-
-        boolean enableH264HighProfile = "H264 High".equals(this.peerConnectionParameters.videoCodec);
-        Object decoderFactory;
-        Object encoderFactory;
-        if (this.peerConnectionParameters.videoCodecHwAcceleration) {
-            encoderFactory = new DefaultVideoEncoderFactory(this.rootEglBase.getEglBaseContext(), true, enableH264HighProfile);
-            decoderFactory = new DefaultVideoDecoderFactory(this.rootEglBase.getEglBaseContext());
-        } else {
-            encoderFactory = new SoftwareVideoEncoderFactory();
-            decoderFactory = new SoftwareVideoDecoderFactory();
-        }
-
-        this.factory = new PeerConnectionFactory(this.options, (VideoEncoderFactory)encoderFactory, (VideoDecoderFactory)decoderFactory);
-        Log.d("PCRTCClient", "Peer connection factory created.");
     }
 
     private void createMediaConstraintsInternal() {
@@ -464,10 +294,6 @@ public class GroupPeerConnectionClient {
     }
 
     private void closeInternal() {
-        if (this.factory != null && this.peerConnectionParameters.aecDump) {
-            this.factory.stopAecDump();
-        }
-
         Log.d("PCRTCClient", "Closing peer connection.");
         this.statsTimer.cancel();
         if (this.dataChannel != null) {
@@ -498,18 +324,10 @@ public class GroupPeerConnectionClient {
             this.videoSource = null;
         }
 
-        Log.d("PCRTCClient", "Closing peer connection factory.");
-        if (this.factory != null) {
-            this.factory.dispose();
-            this.factory = null;
-        }
-
         this.options = null;
-        this.rootEglBase.release();
+        this.rootEglBase = null;
         Log.d("PCRTCClient", "Closing peer connection done.");
         this.events.onPeerConnectionClosed();
-        PeerConnectionFactory.stopInternalTracingCapture();
-        PeerConnectionFactory.shutdownInternalTracer();
         this.events = null;
     }
 
@@ -955,7 +773,7 @@ public class GroupPeerConnectionClient {
 
                 final SessionDescription sdp = new SessionDescription(origSdp.type, sdpDescription);
                 GroupPeerConnectionClient.this.localSdp = sdp;
-                GroupPeerConnectionClient.executor.execute(new Runnable() {
+                executor.execute(new Runnable() {
                     public void run() {
                         if (GroupPeerConnectionClient.this.peerConnection != null && !GroupPeerConnectionClient.this.isError) {
                             Log.d("PCRTCClient", "Set local SDP from " + sdp.type);
@@ -968,7 +786,7 @@ public class GroupPeerConnectionClient {
         }
 
         public void onSetSuccess() {
-            GroupPeerConnectionClient.executor.execute(new Runnable() {
+            executor.execute(new Runnable() {
                 public void run() {
                     if (GroupPeerConnectionClient.this.peerConnection != null && !GroupPeerConnectionClient.this.isError) {
                         if (GroupPeerConnectionClient.this.isInitiator) {
@@ -1004,13 +822,13 @@ public class GroupPeerConnectionClient {
     private class PCObserver implements Observer {
 
         public void onIceCandidate(IceCandidate candidate) {
-            GroupPeerConnectionClient.executor.execute(() -> {
+            executor.execute(() -> {
                 GroupPeerConnectionClient.this.events.onIceCandidate(candidate);
             });
         }
 
         public void onIceCandidatesRemoved(IceCandidate[] candidates) {
-            GroupPeerConnectionClient.executor.execute(() -> {
+            executor.execute(() -> {
                 GroupPeerConnectionClient.this.events.onIceCandidatesRemoved(candidates);
             });
         }
@@ -1020,7 +838,7 @@ public class GroupPeerConnectionClient {
         }
 
         public void onIceConnectionChange(IceConnectionState newState) {
-            GroupPeerConnectionClient.executor.execute(() -> {
+            executor.execute(() -> {
                 Log.d("PCRTCClient", "IceConnectionState: " + newState);
                 if (newState == IceConnectionState.CONNECTED) {
                     if (GroupPeerConnectionClient.this.events != null) {
@@ -1046,7 +864,7 @@ public class GroupPeerConnectionClient {
         }
 
         public void onAddStream(MediaStream stream) {
-            GroupPeerConnectionClient.executor.execute(() -> {
+            executor.execute(() -> {
                 if (GroupPeerConnectionClient.this.peerConnection != null && !GroupPeerConnectionClient.this.isError) {
                     if (stream.audioTracks.size() <= 1 && stream.videoTracks.size() <= 1) {
                         if (stream.videoTracks.size() == 1) {
@@ -1063,7 +881,7 @@ public class GroupPeerConnectionClient {
         }
 
         public void onRemoveStream(MediaStream stream) {
-            GroupPeerConnectionClient.executor.execute(() -> {
+            executor.execute(() -> {
                 if (GroupPeerConnectionClient.this.events != null) {
                     GroupPeerConnectionClient.this.events.onRemoveRemoteVideoTrack(GroupPeerConnectionClient.this.remoteVideoTrack);
                 }
@@ -1132,80 +950,5 @@ public class GroupPeerConnectionClient {
         void onPeerConnectionError(String var1);
     }
 
-    private static class PeerConnectionParameters {
-        public final boolean videoCallEnabled;
-        public final boolean tracing;
-        public final int videoWidth;
-        public final int videoHeight;
-        public final int videoFps;
-        public final int videoMaxBitrate;
-        public final String videoCodec;
-        public final boolean videoCodecHwAcceleration;
-        public final boolean videoFlexfecEnabled;
-        public final int audioStartBitrate;
-        public final String audioCodec;
-        public final boolean noAudioProcessing;
-        public final boolean aecDump;
-        public final boolean useOpenSLES;
-        public final boolean disableBuiltInAEC;
-        public final boolean disableBuiltInAGC;
-        public final boolean disableBuiltInNS;
-        public final boolean enableLevelControl;
-        public final boolean disableWebRtcAGCAndHPF;
-        public final StreamMode streamMode;
-        private final GroupPeerConnectionClient.DataChannelParameters dataChannelParameters;
 
-        public PeerConnectionParameters(boolean videoCallEnabled, boolean tracing, int videoWidth, int videoHeight, int videoFps, int videoMaxBitrate, String videoCodec,
-                                        boolean videoCodecHwAcceleration, boolean videoFlexfecEnabled, int audioStartBitrate, String audioCodec, boolean noAudioProcessing,
-                                        boolean aecDump, boolean useOpenSLES, boolean disableBuiltInAEC, boolean disableBuiltInAGC, boolean disableBuiltInNS, boolean enableLevelControl,
-                                        boolean disableWebRtcAGCAndHPF,StreamMode streamMode) {
-            this(videoCallEnabled, tracing, videoWidth, videoHeight, videoFps, videoMaxBitrate, videoCodec, videoCodecHwAcceleration, videoFlexfecEnabled, audioStartBitrate, audioCodec,
-                    noAudioProcessing, aecDump, useOpenSLES, disableBuiltInAEC, disableBuiltInAGC, disableBuiltInNS, enableLevelControl, disableWebRtcAGCAndHPF, streamMode,null);
-        }
-
-        public PeerConnectionParameters(boolean videoCallEnabled, boolean tracing, int videoWidth, int videoHeight, int videoFps, int videoMaxBitrate, String videoCodec,
-                                        boolean videoCodecHwAcceleration, boolean videoFlexfecEnabled, int audioStartBitrate, String audioCodec, boolean noAudioProcessing,
-                                        boolean aecDump, boolean useOpenSLES, boolean disableBuiltInAEC, boolean disableBuiltInAGC, boolean disableBuiltInNS, boolean enableLevelControl,
-                                        boolean disableWebRtcAGCAndHPF, StreamMode streamMode,GroupPeerConnectionClient.DataChannelParameters dataChannelParameters) {
-            this.videoCallEnabled = videoCallEnabled;
-            this.tracing = tracing;
-            this.videoWidth = videoWidth;
-            this.videoHeight = videoHeight;
-            this.videoFps = videoFps;
-            this.videoMaxBitrate = videoMaxBitrate;
-            this.videoCodec = videoCodec;
-            this.videoFlexfecEnabled = videoFlexfecEnabled;
-            this.videoCodecHwAcceleration = videoCodecHwAcceleration;
-            this.audioStartBitrate = audioStartBitrate;
-            this.audioCodec = audioCodec;
-            this.noAudioProcessing = noAudioProcessing;
-            this.aecDump = aecDump;
-            this.useOpenSLES = useOpenSLES;
-            this.disableBuiltInAEC = disableBuiltInAEC;
-            this.disableBuiltInAGC = disableBuiltInAGC;
-            this.disableBuiltInNS = disableBuiltInNS;
-            this.enableLevelControl = enableLevelControl;
-            this.disableWebRtcAGCAndHPF = disableWebRtcAGCAndHPF;
-            this.streamMode = streamMode;
-            this.dataChannelParameters = dataChannelParameters;
-        }
-    }
-
-    private static class DataChannelParameters {
-        public final boolean ordered;
-        public final int maxRetransmitTimeMs;
-        public final int maxRetransmits;
-        public final String protocol;
-        public final boolean negotiated;
-        public final int id;
-
-        public DataChannelParameters(boolean ordered, int maxRetransmitTimeMs, int maxRetransmits, String protocol, boolean negotiated, int id) {
-            this.ordered = ordered;
-            this.maxRetransmitTimeMs = maxRetransmitTimeMs;
-            this.maxRetransmits = maxRetransmits;
-            this.protocol = protocol;
-            this.negotiated = negotiated;
-            this.id = id;
-        }
-    }
 }

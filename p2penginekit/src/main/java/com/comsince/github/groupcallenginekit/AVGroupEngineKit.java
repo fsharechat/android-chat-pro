@@ -47,6 +47,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
     private AVGroupEngineKit.AVEngineCallback engineCallback;
     protected ExecutorService executor = Executors.newSingleThreadExecutor();
     private List<PeerConnection.IceServer> iceServers = new ArrayList();
+    private DefaultPeerConnectionFactory defaultPeerConnectionFactory;
 
     public static AVGroupEngineKit Instance() throws NotInitializedExecption {
         if (Instance == null) {
@@ -85,6 +86,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
     public AVGroupEngineKit.CallSession startCall(String targetId, boolean audioOnly, String[] tos,AVGroupEngineKit.CallSessionCallback callback){
         Log.i(TAG,"start call targetId "+targetId+" tos "+tos);
         this.isInitiator = true;
+        createDefaultPeerConnectionFactory();
         CountDownLatch latch = new CountDownLatch(1);
         Future future = this.executor.submit(() -> {
             AVGroupEngineKit.CallSession callSession;
@@ -302,7 +304,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
     private void onExistingParticipants(JSONArray participantArray) throws JSONException {
         Participant participant = new Participant(this.mContent,this.currentSession.clientId,this.currentUserId,this,this.currentSession.audioOnly);
-        participant.newWebRtcSendOnlyClient();
+        participant.newWebRtcSendOnlyClient(defaultPeerConnectionFactory);
         this.participants.put(this.currentUserId,participant);
         for(int i = 0 ;i < participantArray.length(); i++){
             String userId = participantArray.getString(i);
@@ -322,7 +324,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
     private void onProcessReceiveParticipant(String userId){
         Participant participant = new Participant(this.mContent,this.currentSession.clientId,userId,this,this.currentSession.audioOnly);
-        participant.newWebRtcReceiveOnlyClient();
+        participant.newWebRtcReceiveOnlyClient(defaultPeerConnectionFactory);
         this.participants.put(userId,participant);
     }
 
@@ -339,6 +341,12 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
 
     IceCandidate toJavaCandidate(JSONObject json) throws JSONException {
         return new IceCandidate(json.getString("sdpMid"), json.getInt("sdpMLineIndex"), json.getString("candidate"));
+    }
+
+    private void createDefaultPeerConnectionFactory(){
+        if(defaultPeerConnectionFactory == null){
+            defaultPeerConnectionFactory = new DefaultPeerConnectionFactory(this.mContent);
+        }
     }
 
     public class CallSession {
@@ -383,6 +391,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
         }
 
         public void answerCall(boolean audioOnly){
+            createDefaultPeerConnectionFactory();
             AVGroupEngineKit.this.executor.submit(() -> {
                 if (this.state != AVGroupEngineKit.CallState.Incoming) {
                     Log.d("CallRTCClient", "can not answer call in state " + this.state);
@@ -422,7 +431,11 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                     this.callback.didCallEndWithReason(reason);
                     AVGroupEngineKit.this.currentSession = null;
 
-
+                    if(defaultPeerConnectionFactory != null){
+                        Log.i(TAG,"dispose defaultPeerConnectionFactory");
+                        defaultPeerConnectionFactory.dispose();
+                        defaultPeerConnectionFactory = null;
+                    }
                 }
             });
         }
