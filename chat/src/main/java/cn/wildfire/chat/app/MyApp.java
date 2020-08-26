@@ -2,9 +2,6 @@ package cn.wildfire.chat.app;
 
 import android.app.ActivityManager;
 import android.content.Context;
-
-import com.tencent.bugly.crashreport.CrashReport;
-
 import java.io.File;
 
 import cn.wildfire.chat.app.third.location.viewholder.LocationMessageContentViewHolder;
@@ -20,8 +17,6 @@ public class MyApp extends BaseApp {
     public void onCreate() {
         super.onCreate();
 
-        // bugly，务必替换为你自己的!!!
-        CrashReport.initCrashReport(getApplicationContext(), "34490ba79f", false);
         // 只在主进程初始化
         if (getCurProcessName(this).equals("cn.comsince.fschat")) {
             wfcUIKit = new WfcUIKit();

@@ -41,6 +41,7 @@ import org.webrtc.SoftwareVideoDecoderFactory;
 import org.webrtc.SoftwareVideoEncoderFactory;
 import org.webrtc.StatsObserver;
 import org.webrtc.StatsReport;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoDecoderFactory;
 import org.webrtc.VideoEncoderFactory;
@@ -138,8 +139,11 @@ public class PeerConnectionClient {
     private AudioTrack localAudioTrack;
     private DataChannel dataChannel;
     private boolean dataChannelEnabled;
+    private SurfaceTextureHelper surfaceTextureHelper;
+    private Context context;
 
-    public PeerConnectionClient() {
+    public PeerConnectionClient(Context context) {
+        this.context = context;
     }
 
     public void setPeerConnectionFactoryOptions(Options options) {
@@ -267,7 +271,7 @@ public class PeerConnectionClient {
 
         Log.d("PCRTCClient", "Preferred video codec: " + this.preferredVideoCodec);
         Log.d("PCRTCClient", "Initialize WebRTC. Field trials: " + fieldTrials + " Enable video HW acceleration: " + this.peerConnectionParameters.videoCodecHwAcceleration);
-        PeerConnectionFactory.initialize(InitializationOptions.builder(context).setFieldTrials(fieldTrials).setEnableVideoHwAcceleration(this.peerConnectionParameters.videoCodecHwAcceleration).setEnableInternalTracer(true).createInitializationOptions());
+        PeerConnectionFactory.initialize(InitializationOptions.builder(context).setFieldTrials(fieldTrials).setEnableInternalTracer(true).createInitializationOptions());
         if (this.peerConnectionParameters.tracing) {
             PeerConnectionFactory.startInternalTracingCapture(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "webrtc-trace.txt");
         }
@@ -342,8 +346,8 @@ public class PeerConnectionClient {
         }
 
         boolean enableH264HighProfile = "H264 High".equals(this.peerConnectionParameters.videoCodec);
-        Object decoderFactory;
-        Object encoderFactory;
+        VideoDecoderFactory decoderFactory;
+        VideoEncoderFactory encoderFactory;
         if (this.peerConnectionParameters.videoCodecHwAcceleration) {
             encoderFactory = new DefaultVideoEncoderFactory(this.rootEglBase.getEglBaseContext(), true, enableH264HighProfile);
             decoderFactory = new DefaultVideoDecoderFactory(this.rootEglBase.getEglBaseContext());
@@ -352,7 +356,12 @@ public class PeerConnectionClient {
             decoderFactory = new SoftwareVideoDecoderFactory();
         }
 
-        this.factory = new PeerConnectionFactory(this.options, (VideoEncoderFactory)encoderFactory, (VideoDecoderFactory)decoderFactory);
+        this.factory = PeerConnectionFactory.builder()
+                .setOptions(options)
+                .setVideoDecoderFactory(decoderFactory)
+                .setVideoEncoderFactory(encoderFactory)
+                .createPeerConnectionFactory();
+
         Log.d("PCRTCClient", "Peer connection factory created.");
     }
 
@@ -407,7 +416,7 @@ public class PeerConnectionClient {
             Log.d("PCRTCClient", "Create peer connection.");
             this.queuedRemoteCandidates = new ArrayList();
             if (this.videoCallEnabled) {
-                this.factory.setVideoHwAccelerationOptions(this.rootEglBase.getEglBaseContext(), this.rootEglBase.getEglBaseContext());
+                //this.factory.setVideoHwAccelerationOptions(this.rootEglBase.getEglBaseContext(), this.rootEglBase.getEglBaseContext());
             }
 
             RTCConfiguration rtcConfig = new RTCConfiguration(this.iceServers);
@@ -492,11 +501,17 @@ public class PeerConnectionClient {
             this.videoSource = null;
         }
 
+        if (surfaceTextureHelper != null) {
+            surfaceTextureHelper.dispose();
+            surfaceTextureHelper = null;
+        }
+
         Log.d("PCRTCClient", "Closing peer connection factory.");
         if (this.factory != null) {
             this.factory.dispose();
             this.factory = null;
         }
+
 
         this.options = null;
         this.rootEglBase.release();
@@ -720,7 +735,9 @@ public class PeerConnectionClient {
     public VideoTrack createVideoTrack(VideoCapturer capturer) {
         this.videoCapturer = capturer;
         if (this.localVideoTrack == null) {
-            this.videoSource = this.factory.createVideoSource(capturer);
+            this.videoSource = this.factory.createVideoSource(capturer.isScreencast());
+            surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
+            videoCapturer.initialize(surfaceTextureHelper,context,videoSource.getCapturerObserver());
             capturer.startCapture(this.videoWidth, this.videoHeight, this.videoFps);
             this.localVideoTrack = this.factory.createVideoTrack("ARDAMSv0", this.videoSource);
             this.localVideoTrack.setEnabled(this.renderVideo);

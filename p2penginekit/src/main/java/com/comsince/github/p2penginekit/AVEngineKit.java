@@ -47,7 +47,8 @@ import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
-import org.webrtc.VideoRenderer;
+import org.webrtc.VideoFrame;
+import org.webrtc.VideoSink;
 import org.webrtc.VideoTrack;
 import org.webrtc.CameraVideoCapturer.CameraEventsHandler;
 import org.webrtc.PeerConnection.IceServer;
@@ -452,7 +453,7 @@ public class AVEngineKit implements OnReceiveMessageListener {
 
     private void createPeerConnectionClient() {
         if (this.peerConnectionClient == null) {
-            this.peerConnectionClient = new PeerConnectionClient();
+            this.peerConnectionClient = new PeerConnectionClient(mContent);
             VideoProfile videoProfile = VideoProfile.getVideoProfile(this.mVideoProfile, this.mSwapWidthHeight);
             this.peerConnectionClient.createPeerConnectionFactory(this.mContent, this.peerConnectionEventHandler, !this.currentSession.audioOnly, videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate);
         }
@@ -707,8 +708,8 @@ public class AVEngineKit implements OnReceiveMessageListener {
         private boolean audioOnly;
         private AVEngineKit.CallSessionCallback callback;
         private List<SurfaceViewRenderer> surfaceViewRenderers;
-        private VideoRenderer localRenderer;
-        private VideoRenderer remoteRenderer;
+        private VideoSink localRenderer;
+        private VideoSink remoteRenderer;
         private long startTime;
         private long connectedTime;
         private long endTime;
@@ -917,12 +918,17 @@ public class AVEngineKit implements OnReceiveMessageListener {
 
             AVEngineKit.this.executor.submit(() -> {
                 if (this.localRenderer != null) {
-                    AVEngineKit.this.localVideoTrack.removeRenderer(this.localRenderer);
+                    AVEngineKit.this.localVideoTrack.removeSink(this.localRenderer);
                 }
 
                 if (rendererView != null && AVEngineKit.this.localVideoTrack != null) {
-                    this.localRenderer = new VideoRenderer((SurfaceViewRenderer)rendererView);
-                    AVEngineKit.this.localVideoTrack.addRenderer(this.localRenderer);
+                    this.localRenderer = new VideoSink() {
+                        @Override
+                        public void onFrame(VideoFrame videoFrame) {
+                            ((SurfaceViewRenderer) rendererView).onFrame(videoFrame);
+                        }
+                    };
+                    AVEngineKit.this.localVideoTrack.addSink(this.localRenderer);
                 }
 
             });
@@ -935,12 +941,17 @@ public class AVEngineKit implements OnReceiveMessageListener {
 
             AVEngineKit.this.executor.submit(() -> {
                 if (this.remoteRenderer != null) {
-                    AVEngineKit.this.remoteVideoTrack.removeRenderer(this.remoteRenderer);
+                    AVEngineKit.this.remoteVideoTrack.removeSink(this.remoteRenderer);
                 }
 
                 if (rendererView != null && AVEngineKit.this.remoteVideoTrack != null) {
-                    this.remoteRenderer = new VideoRenderer((SurfaceViewRenderer)rendererView);
-                    AVEngineKit.this.remoteVideoTrack.addRenderer(this.remoteRenderer);
+                    this.remoteRenderer = new VideoSink() {
+                        @Override
+                        public void onFrame(VideoFrame videoFrame) {
+                            ((SurfaceViewRenderer) rendererView).onFrame(videoFrame);
+                        }
+                    };
+                    AVEngineKit.this.remoteVideoTrack.addSink(this.remoteRenderer);
                 }
 
             });

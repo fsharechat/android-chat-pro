@@ -353,6 +353,7 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
 
     @Override
     public void didCallEndWithReason(AVGroupEngineKit.CallEndReason callEndReason) {
+        exit();
         finish();
     }
 

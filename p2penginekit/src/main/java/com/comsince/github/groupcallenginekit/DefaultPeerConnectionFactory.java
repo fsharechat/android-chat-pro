@@ -38,7 +38,7 @@ public class DefaultPeerConnectionFactory {
     private static final String VIDEO_CODEC_H264_HIGH = "H264 High";
 
     public DefaultPeerConnectionFactory(Context mContent){
-        VideoProfile videoProfile = VideoProfile.getVideoProfile(30, false);
+        VideoProfile videoProfile = VideoProfile.getVideoProfile(20, false);
         createPeerConnectionFactory(mContent,  false,
                 videoProfile.width, videoProfile.height, videoProfile.fps, videoProfile.bitrate, StreamMode.SENDRECV);
     }
@@ -88,7 +88,7 @@ public class DefaultPeerConnectionFactory {
 
         Log.d(TAG, "Preferred video codec: " + this.preferredVideoCodec);
         Log.d(TAG, "Initialize WebRTC. Field trials: " + fieldTrials + " Enable video HW acceleration: " + this.peerConnectionParameters.videoCodecHwAcceleration);
-        PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).setFieldTrials(fieldTrials).setEnableVideoHwAcceleration(this.peerConnectionParameters.videoCodecHwAcceleration).setEnableInternalTracer(true).createInitializationOptions());
+        PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).setFieldTrials(fieldTrials).setEnableInternalTracer(true).createInitializationOptions());
         if (this.peerConnectionParameters.tracing) {
             PeerConnectionFactory.startInternalTracingCapture(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "webrtc-trace.txt");
         }
@@ -162,8 +162,8 @@ public class DefaultPeerConnectionFactory {
         }
 
         boolean enableH264HighProfile = "H264 High".equals(this.peerConnectionParameters.videoCodec);
-        Object decoderFactory;
-        Object encoderFactory;
+        VideoDecoderFactory decoderFactory;
+        VideoEncoderFactory encoderFactory;
         if (this.peerConnectionParameters.videoCodecHwAcceleration) {
             encoderFactory = new DefaultVideoEncoderFactory(this.rootEglBase.getEglBaseContext(), true, enableH264HighProfile);
             decoderFactory = new DefaultVideoDecoderFactory(this.rootEglBase.getEglBaseContext());
@@ -172,7 +172,11 @@ public class DefaultPeerConnectionFactory {
             decoderFactory = new SoftwareVideoDecoderFactory();
         }
 
-        this.defaultPeerConnectionFactory = new PeerConnectionFactory(this.options, (VideoEncoderFactory)encoderFactory, (VideoDecoderFactory)decoderFactory);
+        this.defaultPeerConnectionFactory = PeerConnectionFactory.builder()
+                .setOptions(options)
+                .setVideoEncoderFactory(encoderFactory)
+                .setVideoDecoderFactory(decoderFactory)
+                .createPeerConnectionFactory();
         Log.d(TAG, "Peer connection factory created.");
     }
 

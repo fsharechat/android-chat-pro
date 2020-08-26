@@ -42,7 +42,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
 
     public void newWebRtcSendOnlyClient(DefaultPeerConnectionFactory defaultPeerConnectionFactory){
         if(this.groupPeerConnectionClient == null){
-           this.groupPeerConnectionClient = new GroupPeerConnectionClient();
+           this.groupPeerConnectionClient = new GroupPeerConnectionClient(mContent);
            this.groupPeerConnectionClient.init(defaultPeerConnectionFactory,this,this.audioOnly,StreamMode.SEND_ONLY);
         }
         startMedia(StreamMode.SEND_ONLY);
@@ -50,7 +50,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
 
     public void newWebRtcReceiveOnlyClient(DefaultPeerConnectionFactory defaultPeerConnectionFactory){
         if(this.groupPeerConnectionClient == null){
-            this.groupPeerConnectionClient = new GroupPeerConnectionClient();
+            this.groupPeerConnectionClient = new GroupPeerConnectionClient(mContent);
             this.groupPeerConnectionClient.init(defaultPeerConnectionFactory,this,this.audioOnly,StreamMode.RECV_ONLY);
         }
         startMedia(StreamMode.RECV_ONLY);
@@ -58,7 +58,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
 
     public void newWebRtcSendRecClient(DefaultPeerConnectionFactory defaultPeerConnectionFactory){
         if(this.groupPeerConnectionClient == null){
-            this.groupPeerConnectionClient = new GroupPeerConnectionClient();
+            this.groupPeerConnectionClient = new GroupPeerConnectionClient(mContent);
             this.groupPeerConnectionClient.init(defaultPeerConnectionFactory,this,this.audioOnly,StreamMode.SENDRECV);
         }
         startMedia(StreamMode.SENDRECV);

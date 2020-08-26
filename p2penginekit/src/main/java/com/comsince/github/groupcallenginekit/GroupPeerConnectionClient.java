@@ -1,5 +1,6 @@
 package com.comsince.github.groupcallenginekit;
 
+import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -41,6 +42,7 @@ import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;
 import org.webrtc.StatsObserver;
 import org.webrtc.StatsReport;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
@@ -99,6 +101,12 @@ public class GroupPeerConnectionClient {
     private AudioTrack localAudioTrack;
     private DataChannel dataChannel;
     private boolean dataChannelEnabled;
+    private SurfaceTextureHelper surfaceTextureHelper;
+    private Context context;
+
+    public GroupPeerConnectionClient(Context context){
+        this.context = context;
+    }
 
     public void setPeerConnectionFactoryOptions(Options options) {
         this.options = options;
@@ -178,6 +186,7 @@ public class GroupPeerConnectionClient {
         }
     }
 
+
     public void close() {
         executor.execute(() -> {
             this.closeInternal();
@@ -239,7 +248,7 @@ public class GroupPeerConnectionClient {
             Log.d("PCRTCClient", "Create peer connection.");
             this.queuedRemoteCandidates = new ArrayList();
             if (this.videoCallEnabled) {
-                this.factory.setVideoHwAccelerationOptions(this.rootEglBase.getEglBaseContext(), this.rootEglBase.getEglBaseContext());
+               // this.factory.setVideoHwAccelerationOptions(this.rootEglBase.getEglBaseContext(), this.rootEglBase.getEglBaseContext());
             }
 
             RTCConfiguration rtcConfig = new RTCConfiguration(this.iceServers);
@@ -322,6 +331,11 @@ public class GroupPeerConnectionClient {
         if (this.videoSource != null) {
             this.videoSource.dispose();
             this.videoSource = null;
+        }
+
+        if (surfaceTextureHelper != null) {
+            surfaceTextureHelper.dispose();
+            surfaceTextureHelper = null;
         }
 
         this.options = null;
@@ -544,7 +558,9 @@ public class GroupPeerConnectionClient {
     public VideoTrack createVideoTrack(VideoCapturer capture) {
         this.videoCapturer = capture;
         if (this.localVideoTrack == null) {
-            this.videoSource = this.factory.createVideoSource(capture);
+            this.videoSource = this.factory.createVideoSource(capture.isScreencast());
+            surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
+            videoCapturer.initialize(surfaceTextureHelper,context,videoSource.getCapturerObserver());
             capture.startCapture(this.videoWidth, this.videoHeight, this.videoFps);
             this.localVideoTrack = this.factory.createVideoTrack("ARDAMSv0", this.videoSource);
             this.localVideoTrack.setEnabled(this.renderVideo);
