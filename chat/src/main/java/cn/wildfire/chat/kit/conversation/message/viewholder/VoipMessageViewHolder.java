@@ -16,6 +16,7 @@ import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.CallStartMessageContent;
+import cn.wildfirechat.model.Conversation;
 
 @MessageContentType(CallStartMessageContent.class)
 @ReceiveLayoutRes(resId = R.layout.conversation_item_voip_receive)
@@ -56,6 +57,10 @@ public class VoipMessageViewHolder extends NormalMessageContentViewHolder {
     @OnClick(R.id.contentTextView)
     public void call(View view) {
         if (((CallStartMessageContent) message.message.content).getStatus() == 1) {
+            return;
+        }
+        //如果是群组聊天,点击无效
+        if(message.message.conversation.type == Conversation.ConversationType.Group){
             return;
         }
         WfcUIKit.onCall(context, message.message.conversation.target, true, false);

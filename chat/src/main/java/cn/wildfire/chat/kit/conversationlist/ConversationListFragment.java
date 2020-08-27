@@ -49,7 +49,7 @@ public class ConversationListFragment extends Fragment {
             if (types.contains(conversationInfo.conversation.type) && lines.contains(conversationInfo.conversation.line)) {
                 adapter.submitConversationInfo(conversationInfo);
                 // scroll or not?
-                // recyclerView.scrollToPosition(0);
+                recyclerView.scrollToPosition(0);
             }
         }
     };
