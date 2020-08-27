@@ -131,18 +131,17 @@ public class ProtoService extends AbstractProtoService {
 
     public ProtoUserInfo[] getUserInfos(String[] userIds, String groupId){
         log.i("getUserInfos "+Arrays.toString(userIds)+" groupId "+groupId);
-        if(imMemoryStore.getUserInfos(userIds) == null){
-            WFCMessage.PullUserRequest.Builder userRequestBuilder = WFCMessage.PullUserRequest.newBuilder();
-            for(String user : userIds){
-                WFCMessage.UserRequest userRequest = WFCMessage.UserRequest.newBuilder().setUid(user).build();
-                userRequestBuilder.addRequest(userRequest);
-            }
-            SimpleFuture<ProtoUserInfo[]> simpleFuture = sendMessageSync(Signal.PUBLISH,SubSignal.UPUI,userRequestBuilder.build().toByteArray());
-            try {
-                simpleFuture.get(200,TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                log.e("getuserinfo error ",e);
-            }
+
+        WFCMessage.PullUserRequest.Builder userRequestBuilder = WFCMessage.PullUserRequest.newBuilder();
+        for(String user : userIds){
+            WFCMessage.UserRequest userRequest = WFCMessage.UserRequest.newBuilder().setUid(user).build();
+            userRequestBuilder.addRequest(userRequest);
+        }
+        SimpleFuture<ProtoUserInfo[]> simpleFuture = sendMessageSync(Signal.PUBLISH,SubSignal.UPUI,userRequestBuilder.build().toByteArray());
+        try {
+            return simpleFuture.get(200,TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.e("getuserinfo error ",e);
         }
 
         return imMemoryStore.getUserInfos(userIds);

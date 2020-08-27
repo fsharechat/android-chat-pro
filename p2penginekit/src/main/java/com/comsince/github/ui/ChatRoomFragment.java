@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 
 import com.comsince.github.R;
 import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
-import com.comsince.github.p2penginekit.AVEngineKit;
 import com.comsince.github.util.Utils;
 
 import org.webrtc.StatsReport;
@@ -74,7 +73,7 @@ public class ChatRoomFragment extends Fragment implements AVGroupEngineKit.CallS
             wr_switch_hang_up.setVisibility(View.VISIBLE);
             wr_switch_accept.setVisibility(View.GONE);
         } else {
-            wr_switch_hang_up.setVisibility(View.GONE);
+            wr_switch_hang_up.setVisibility(View.VISIBLE);
             wr_switch_accept.setVisibility(View.VISIBLE);
         }
     }

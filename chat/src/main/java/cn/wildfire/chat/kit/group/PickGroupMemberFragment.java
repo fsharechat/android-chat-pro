@@ -45,6 +45,9 @@ public class PickGroupMemberFragment extends PickContactFragment {
 
         GroupViewModel groupViewModel = ViewModelProviders.of(getActivity()).get(GroupViewModel.class);
         List<GroupMember> members = groupViewModel.getGroupMembers(groupInfo.target, false);
+        if(members == null || members.size() == 0){
+            members = groupViewModel.getGroupMembers(groupInfo.target,true);
+        }
         List<String> memberIds = new ArrayList<>(members.size());
         for (GroupMember member : members) {
             memberIds.add(member.memberId);
