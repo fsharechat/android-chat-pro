@@ -26,7 +26,6 @@
         <activity
             android:name=".ui.ChatRoomActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
-            android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
             android:theme="@style/Webrtc.AppTheme.NoActionBar" >
             <intent-filter>
