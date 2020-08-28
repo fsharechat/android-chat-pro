@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.wildfirechat.model.ProtoUserInfo;
+import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.proto.ProtoService;
 import cn.wildfirechat.proto.WFCMessage;
 
@@ -44,7 +45,9 @@ public class GetUserInfoMessageHanlder extends AbstractMessageHandler {
                 protoService.getImMemoryStore().addUserInfo(protoUserInfo);
                 protoUserInfoList.add(protoUserInfo);
             }
-            simpleFuture.setComplete(protoUserInfoList.toArray(protoUserInfos));
+            protoUserInfoList.toArray(protoUserInfos);
+            JavaProtoLogic.onUserInfoUpdated(protoUserInfos);
+            simpleFuture.setComplete(protoUserInfos);
         } catch (InvalidProtocolBufferException e) {
 
         }
