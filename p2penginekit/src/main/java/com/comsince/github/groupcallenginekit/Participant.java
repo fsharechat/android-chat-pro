@@ -65,6 +65,9 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     }
 
     private void startMedia(StreamMode streamMode){
+        if(this.sender.equals(avGroupEngineKit.currentUserId)){
+            avGroupEngineKit.getCurrentSession().setState(AVGroupEngineKit.CallState.Connecting);
+        }
         if (this.videoCapturer == null && !this.avGroupEngineKit.getCurrentSession().isAudioOnly() && streamMode != StreamMode.RECV_ONLY) {
             this.videoCapturer = this.createVideoCapture();
         }
@@ -216,7 +219,9 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     @Override
     public void onIceConnected() {
         executor.submit(() -> {
-            if (avGroupEngineKit != null && avGroupEngineKit.getCurrentSession() != null && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
+            if (avGroupEngineKit != null && avGroupEngineKit.getCurrentSession() != null
+                    && avGroupEngineKit.currentUserId.equals(sender)
+                    && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
                 Log.d(TAG,this.sender + " onIceConnected ");
                 avGroupEngineKit.getCurrentSession().connectedTime = System.currentTimeMillis();
                 groupPeerConnectionClient.enableStatsEvents(true, 1000);
@@ -230,7 +235,9 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
     @Override
     public void onIceDisconnected() {
         executor.submit(() -> {
-            if (avGroupEngineKit.getCurrentSession() != null && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
+            if (avGroupEngineKit.getCurrentSession() != null
+                    && avGroupEngineKit.currentUserId.equals(sender)
+                    && avGroupEngineKit.getCurrentSession().getState() != AVGroupEngineKit.CallState.Idle) {
                 avGroupEngineKit.getCurrentSession().endCall(AVGroupEngineKit.CallEndReason.MediaError);
             }
 

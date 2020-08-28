@@ -11,6 +11,36 @@
         android:layout_width="match_parent"
         android:layout_height="360dp" />
 
+    <RelativeLayout
+        android:id="@+id/group_call_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/wr_background"
+        android:gravity="center"
+        android:visibility="visible"
+        android:padding="12dp">
+        <ImageView
+            android:id="@+id/groupPortraitImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:adjustViewBounds="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/webrtc_btn_voice_answer" />
+        <TextView
+            android:id="@+id/group_call_intro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/groupPortraitImageView"
+            android:drawablePadding="5dp"
+            android:gravity="center_horizontal"
+            android:text="text"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/wr_control_text_size" />
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/wr_container"

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/wr_background"
     android:gravity="center"
-    android:padding="20dp">
+    android:padding="12dp">
     <!--静音-->
     <TextView
         android:id="@+id/wr_switch_mute"
@@ -13,6 +13,8 @@
         android:layout_alignParentStart="true"
         android:drawableTop="@drawable/webrtc_btn_voice_mute"
         android:drawablePadding="5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center_horizontal"
         android:text="@string/webrtc_chat_mute"
         android:textColor="@android:color/white"
@@ -39,6 +41,7 @@
         android:layout_marginBottom="10dp"
         android:drawableTop="@drawable/webrtc_btn_open_camera"
         android:drawablePadding="5dp"
+        android:layout_marginRight="20dp"
         android:text="@string/webrtc_open_camera"
         android:textColor="@android:color/white"
         android:textSize="@dimen/wr_control_text_size" />
@@ -52,6 +55,10 @@
         android:layout_alignParentLeft="true"
         android:drawableTop="@drawable/webrtc_switch_camera"
         android:drawablePadding="5dp"
+        android:layout_marginLeft="20dp"
+        android:text="转换"
+        android:textSize="@dimen/wr_control_text_size"
+        android:textColor="@android:color/white"
         android:gravity="center_horizontal" />
     <!--挂断-->
     <TextView
@@ -62,6 +69,9 @@
         android:layout_centerHorizontal="true"
         android:drawableTop="@drawable/webrtc_cancel"
         android:drawablePadding="5dp"
+        android:text="挂断"
+        android:textSize="@dimen/wr_control_text_size"
+        android:textColor="@android:color/white"
         android:gravity="center_horizontal"
 
         />
@@ -74,7 +84,10 @@
         android:layout_alignParentEnd="true"
         android:drawableTop="@drawable/webrtc_btn_voice_answer"
         android:drawablePadding="5dp"
+        android:layout_marginRight="20dp"
         android:gravity="center_horizontal"
-
+        android:text="接听"
+        android:textSize="@dimen/wr_control_text_size"
+        android:textColor="@android:color/white"
         />
 </RelativeLayout>

@@ -6,6 +6,8 @@ import com.comsince.github.message.AnswerMessage;
 import com.comsince.github.message.ByeMessage;
 import com.comsince.github.message.ModifyMessage;
 import com.comsince.github.message.SignalMessage;
+import com.comsince.github.p2penginekit.AVEngineKit;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -39,7 +43,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
     private static String TAG = "AVGroupEngineKit";
     private static AVGroupEngineKit Instance;
     private Context mContent;
-    private String currentUserId;
+    protected String currentUserId;
     //是否为群组聊天发起者
     private boolean isInitiator = false;
     private Map<String,Participant> participants;
@@ -372,6 +376,14 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
             this.callback = callback;
         }
 
+        public long getStartTime() {
+            return this.startTime;
+        }
+
+        public long getConnectedTime(){
+            return connectedTime;
+        }
+
         public String getClientId(){
             return clientId;
         }
@@ -380,11 +392,55 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
             return callback;
         }
 
+        /**
+         * 由于群组视频存在多个链接,因此状态只以当前用户链接到KMS为准,以防止出现混乱的状态
+         * */
         public void setState(AVGroupEngineKit.CallState state){
-            this.state = state;
-            if (this.callback != null) {
-                this.callback.didChangeState(state);
+            if(this.state != state){
+                AVGroupEngineKit.CallState previousState = this.state;
+                this.state = state;
+                switch (state){
+                    case Incoming:
+                    case Outgoing:
+                        engineCallback.shouldStartRing(state == AVGroupEngineKit.CallState.Incoming);
+                        break;
+                    case Connecting:
+                        engineCallback.shouldSopRing();
+                        break;
+                    case Idle:
+                    case Connected:
+                        if (state == AVGroupEngineKit.CallState.Idle && (previousState == AVGroupEngineKit.CallState.Incoming || previousState == AVGroupEngineKit.CallState.Outgoing)) {
+                            engineCallback.shouldSopRing();
+                        }
+
+                        if (this.startMsgId > 0L) {
+                            try {
+                                Message msg = ChatManager.Instance().getMessage(this.startMsgId);
+                                if (msg.content instanceof CallStartMessageContent) {
+                                    CallStartMessageContent startMessageContent = (CallStartMessageContent)msg.content;
+                                    if (state == AVGroupEngineKit.CallState.Connected) {
+                                        startMessageContent.setConnectTime(System.currentTimeMillis());
+                                        startMessageContent.setStatus(1);
+                                    } else {
+                                        startMessageContent.setEndTime(System.currentTimeMillis());
+                                        startMessageContent.setStatus(2);
+                                    }
+
+                                    ChatManager.Instance().updateMessage(this.startMsgId, startMessageContent);
+                                }
+                            } catch (NotInitializedExecption var5) {
+                                var5.printStackTrace();
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                if (this.callback != null) {
+                    this.callback.didChangeState(state);
+                }
             }
+
         }
         public AVGroupEngineKit.CallState getState() {
             return this.state;

@@ -4,19 +4,28 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.comsince.github.R;
 import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
 import com.comsince.github.groupcallenginekit.MemberBean;
@@ -35,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 import cn.wildfirechat.client.NotInitializedExecption;
+import cn.wildfirechat.model.GroupInfo;
+import cn.wildfirechat.remote.ChatManager;
 
 /**
  * 群聊界面
@@ -43,6 +54,7 @@ import cn.wildfirechat.client.NotInitializedExecption;
 public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineKit.CallSessionCallback {
     private String TAG = "ChatRoomActivity";
     private FrameLayout wr_video_view;
+    private RelativeLayout groupCallInfoView;
     private AVGroupEngineKit avGroupEngineKit;
     private String[] tos;
     private boolean isOutgoing;
@@ -53,6 +65,8 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
     private Map<String, ProxyVideoSink> _sinks = new HashMap<>();
     private List<MemberBean> _infos = new ArrayList<>();
     private VideoTrack _localVideoTrack;
+    private ImageView groupPortrait;
+    private TextView groupCallIntro;
 
     private int mScreenWidth;
     private AVGroupEngineKit.CallSessionCallback currentCallback;
@@ -94,9 +108,15 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
         init(targetId,tos,isOutgoing,isAudioOnly);
     }
 
+    public AVGroupEngineKit getEngineKit() {
+        return avGroupEngineKit;
+    }
 
     private void initView() {
         wr_video_view = findViewById(R.id.wr_video_view);
+        groupCallInfoView = findViewById(R.id.group_call_info);
+        groupPortrait = findViewById(R.id.groupPortraitImageView);
+        groupCallIntro = findViewById(R.id.group_call_intro);
     }
 
     private void initVar() {
@@ -111,6 +131,18 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
     private void init(String targetId,String[] tos, boolean outgoing, boolean audioOnly) {
         ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
         replaceFragment(chatRoomFragment);
+
+        if(!this.isOutgoing){
+            GroupInfo groupInfo = ChatManager.Instance().getGroupInfo(this.targetId,false);
+            String portrait = groupInfo.portrait;
+            //groupPortrait.setImageURI(Uri.parse(portrait));
+            Glide.with(this).load(portrait).apply(new RequestOptions().placeholder(R.drawable.webrtc_avatar_default).centerCrop()).into(groupPortrait);
+            groupCallInfoView.setVisibility(View.VISIBLE);
+            groupCallIntro.setText(groupInfo.name+"发起群组视频会话");
+        } else {
+            groupCallInfoView.setVisibility(View.GONE);
+        }
+
 
         currentCallback = (AVGroupEngineKit.CallSessionCallback) chatRoomFragment;
 
@@ -290,6 +322,7 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
     }
 
     public void accept() {
+        groupCallInfoView.setVisibility(View.GONE);
         AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
         if (session != null && session.getState() == AVGroupEngineKit.CallState.Incoming) {
             session.answerCall(false);

@@ -3,9 +3,12 @@ package com.comsince.github.ui;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -39,12 +42,14 @@ public class ChatRoomFragment extends Fragment implements AVGroupEngineKit.CallS
     private boolean enableSpeaker = true;
     private boolean enableCamera = true;
     private boolean isOutgoing;
+    private AVGroupEngineKit avGroupEngineKit;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         activity = (ChatRoomActivity) getActivity();
         isOutgoing = activity.isOutgoing();
+        avGroupEngineKit = activity.getEngineKit();
     }
 
     @Override
@@ -76,6 +81,7 @@ public class ChatRoomFragment extends Fragment implements AVGroupEngineKit.CallS
             wr_switch_hang_up.setVisibility(View.VISIBLE);
             wr_switch_accept.setVisibility(View.VISIBLE);
         }
+        updateCallDuration();
     }
 
     private void initListener() {
@@ -150,6 +156,25 @@ public class ChatRoomFragment extends Fragment implements AVGroupEngineKit.CallS
             wr_open_camera.setText(R.string.webrtc_open_camera);
             wr_switch_camera.setVisibility(View.GONE);
         }
+    }
+
+
+    private Handler handler = new Handler();
+
+    private void updateCallDuration() {
+        AVGroupEngineKit.CallSession session = avGroupEngineKit.getCurrentSession();
+        if (session != null && session.getState() == AVGroupEngineKit.CallState.Connected) {
+            long s = System.currentTimeMillis() - session.getConnectedTime();
+            s = s / 1000;
+            String text;
+            if (s > 3600) {
+                text = String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
+            } else {
+                text = String.format("%02d:%02d", s / 60, (s % 60));
+            }
+            wr_switch_hang_up.setText(text);
+        }
+        handler.postDelayed(this::updateCallDuration, 1000);
     }
 
 
