@@ -26,6 +26,7 @@ import cn.wildfirechat.proto.handler.AddFriendRequestHandler;
 import cn.wildfirechat.proto.handler.AddGroupMemberHandler;
 import cn.wildfirechat.proto.handler.ConnectAckMessageHandler;
 import cn.wildfirechat.proto.handler.CreateGroupHandler;
+import cn.wildfirechat.proto.handler.DeliveryReportHandler;
 import cn.wildfirechat.proto.handler.FriendPullHandler;
 import cn.wildfirechat.proto.handler.FriendRequestHandler;
 import cn.wildfirechat.proto.handler.GetMinioUploadUrlHandler;
@@ -42,6 +43,7 @@ import cn.wildfirechat.proto.handler.NotifyFriendRequestHandler;
 import cn.wildfirechat.proto.handler.NotifyMessageHandler;
 import cn.wildfirechat.proto.handler.QiniuTokenHandler;
 import cn.wildfirechat.proto.handler.QuitGroupHandler;
+import cn.wildfirechat.proto.handler.ReadReportHandler;
 import cn.wildfirechat.proto.handler.RecallMessageHandler;
 import cn.wildfirechat.proto.handler.RecallNotifyMessageHandler;
 import cn.wildfirechat.proto.handler.ReceiveMessageHandler;
@@ -92,6 +94,8 @@ public class ProtoService extends AbstractProtoService {
         messageHandlers.add(new RecallNotifyMessageHandler(this));
         messageHandlers.add(new RemoteMessageHandler(this));
         messageHandlers.add(new GetMinioUploadUrlHandler(this));
+        messageHandlers.add(new DeliveryReportHandler(this));
+        messageHandlers.add(new ReadReportHandler(this));
     }
 
     public void searchUser(String keyword, JavaProtoLogic.ISearchUserCallback callback){
@@ -436,5 +440,32 @@ public class ProtoService extends AbstractProtoService {
        sendMessage(Signal.PUBLISH,SubSignal.MR,int64Buf.toByteArray(),callback);
     }
 
+    /**
+     * 上报送达与已读回执
+     * 送达回执,只上报单聊会话
+     * @param target 会话target
+     * @param tos 如果会话为群组,则发送改中接收消息的来源用户uid
+     * */
+    public void uploadReport(int reportType,String target, int conversationType,List<String> tos,JavaProtoLogic.IGeneralCallback callback){
+        if(reportType == ProtoConstants.MessageReportType.ReportType_Delivery){
+            if(conversationType == ProtoConstants.ConversationType.ConversationType_Private){
+                WFCMessage.DeliveryReport deliveryReport = WFCMessage.DeliveryReport.newBuilder()
+                        .setDate(System.currentTimeMillis())
+                        .setTarget(target)
+                        .build();
+                sendMessage(Signal.PUBLISH, SubSignal.MDR,deliveryReport.toByteArray(),callback);
+            }
+        } else if(reportType == ProtoConstants.MessageReportType.ReportType_Read){
+            WFCMessage.ReadReport.Builder readReport = WFCMessage.ReadReport.newBuilder()
+                    .setTarget(target)
+                    .setDate(System.currentTimeMillis())
+                    .setType(conversationType);
+            if(conversationType == ProtoConstants.ConversationType.ConversationType_Group){
+                readReport.addAllTos(getImMemoryStore().getGroupReportUsers(target));
+            }
+            sendMessage(Signal.PUBLISH,SubSignal.MRR,readReport.build().toByteArray(),callback);
+        }
+
+    }
 
 }

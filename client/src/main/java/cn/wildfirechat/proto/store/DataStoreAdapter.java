@@ -298,4 +298,14 @@ public class DataStoreAdapter implements ImMemoryStore{
     public void stop() {
 
     }
+
+    @Override
+    public void setGroupReportUsers(String target,String user) {
+
+    }
+
+    @Override
+    public List<String> getGroupReportUsers(String target) {
+        return null;
+    }
 }

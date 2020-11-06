@@ -72,4 +72,6 @@ public interface ImMemoryStore {
     void saveRequestProtoMessageIds(Set<String> protoMessageIds);
     Set<String> getRequestProtoMessageIds();
     void stop();
+    void setGroupReportUsers(String target,String user);
+    List<String> getGroupReportUsers(String target);
 }

@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 
 import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.proto.JavaProtoLogic;
+import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.ProtoService;
 import cn.wildfirechat.proto.WFCMessage;
 
@@ -65,6 +66,8 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
                         if(isUserPull){
                             processUserPullMessages(pullMessageResult.getMessageList(),requestInfo);
                         } else {
+                            //上报送达回执报告,目前只上报notify下拉消息送达回执报告
+                            uploadReport(pullMessageResult.getMessageList());
                             processNotifyPullMessage(pullMessageResult.getMessageList());
                         }
                     }
@@ -117,7 +120,7 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
         for(WFCMessage.Message wfcMessage : wfcMessageList){
             ProtoMessage protoMessage = protoService.convertProtoMessage(wfcMessage);
             logger.i("target-> "+protoMessage.getTarget()+" messageType-> "+wfcMessage.getContent().getType());
-
+            computeGroupSender(protoMessage);
             //为什么要去重，因为语音通话消息信令发送频繁，容易出现消息重复，可能影响通话流程
             //这里的消息最好在一个线程里面进行，不然插入数据还没生效，可能出现幻读，否则会出现信令重复，可能出现意想不到的结果
             ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessage(protoMessage.getMessageId());
@@ -133,5 +136,35 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
         ProtoMessage[] protoMessagesArr = new ProtoMessage[resultProtoMessageList.size()];
         resultProtoMessageList.toArray(protoMessagesArr);
         JavaProtoLogic.onReceiveMessage(protoMessagesArr,false);
+    }
+
+    /**
+     * 这里仅仅上报已送达回执
+     * */
+    private void uploadReport(List<WFCMessage.Message> wfcMessageList){
+       for(WFCMessage.Message wfcMessage : wfcMessageList){
+           if(wfcMessage.getConversation().getType() == ProtoConstants.ConversationType.ConversationType_Private){
+               protoService.uploadReport(ProtoConstants.MessageReportType.ReportType_Delivery, wfcMessage.getFromUser(), wfcMessage.getConversation().getType(), null, new JavaProtoLogic.IGeneralCallback() {
+                   @Override
+                   public void onSuccess() {
+                       logger.i("upload delivery report success");
+                   }
+
+                   @Override
+                   public void onFailure(int errorCode) {
+                       logger.i("upload delivery report fail");
+                   }
+               });
+           }
+       }
+    }
+
+    /**
+     * 统计当前群组聊天中有哪些用户发送了消息
+     * */
+    private void computeGroupSender(ProtoMessage protoMessage){
+        if(protoMessage.getDirection() == 1 && protoMessage.getConversationType() == ProtoConstants.ConversationType.ConversationType_Group){
+            protoService.getImMemoryStore().setGroupReportUsers(protoMessage.getTarget(),protoMessage.getFrom());
+        }
     }
 }

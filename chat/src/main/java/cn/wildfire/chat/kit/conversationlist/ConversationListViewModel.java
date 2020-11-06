@@ -16,6 +16,7 @@ import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ConversationInfo;
 import cn.wildfirechat.model.GroupInfo;
 import cn.wildfirechat.model.UnreadCount;
+import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.remote.ChatManager;
 import cn.wildfirechat.remote.GeneralCallback;
 import cn.wildfirechat.remote.OnClearMessageListener;
@@ -249,6 +250,10 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
 
     public void setConversationTop(ConversationInfo conversationInfo, boolean top) {
         ChatManager.Instance().setConversationTop(conversationInfo.conversation, top);
+    }
+
+    public void uploadReport(ConversationInfo conversationInfo){
+        ChatManager.Instance().uploadReport(2,conversationInfo.conversation.target,conversationInfo.conversation.type.getValue(),null,null);
     }
 
     /**

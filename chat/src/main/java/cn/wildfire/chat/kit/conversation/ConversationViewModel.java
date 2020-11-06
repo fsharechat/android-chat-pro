@@ -289,6 +289,10 @@ public class ConversationViewModel extends ViewModel implements OnReceiveMessage
         ChatManager.Instance().clearMessages(conversation);
     }
 
+    public void uploadReport(Conversation conversation){
+        ChatManager.Instance().uploadReport(2,conversation.target,conversation.type.getValue(),null,null);
+    }
+
     public ConversationInfo getConversationInfo(Conversation conversation) {
         return ChatManager.Instance().getConversation(conversation);
     }

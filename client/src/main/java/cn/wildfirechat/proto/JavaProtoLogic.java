@@ -631,4 +631,8 @@ public class JavaProtoLogic {
      * @return
      */
     private static native ArrayList<String> getLoadLibraries();
+
+    public static void uploadReport(int reportType,String target, int conversationType,List<String> tos,JavaProtoLogic.IGeneralCallback callback){
+        protoService.uploadReport(reportType,target,conversationType,tos,callback);
+    }
 }

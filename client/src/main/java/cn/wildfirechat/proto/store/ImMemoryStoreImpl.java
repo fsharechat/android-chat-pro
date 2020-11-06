@@ -41,6 +41,7 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
     private Map<Integer,Map<String,String>> userSettingMap = new ConcurrentHashMap<>();
     private AtomicLong lastMessageSeq = new AtomicLong(0);
     private long friendRequestHead = 0;
+    private Map<String,List<String>> reportTargetUserMap = new ConcurrentHashMap<>();
     @Override
     public List<String> getFriendList() {
         return friendList;
@@ -571,6 +572,26 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
     }
 
     @Override
+    public void setGroupReportUsers(String target, String user) {
+        List<String> users;
+        if(!reportTargetUserMap.containsKey(target)){
+            users = new ArrayList<>();
+            users.add(user);
+            reportTargetUserMap.put(target,users);
+        } else {
+            users = reportTargetUserMap.get(target);
+            if(!users.contains(user)){
+                users.add(user);
+            }
+        }
+    }
+
+    @Override
+    public List<String> getGroupReportUsers(String target) {
+        return reportTargetUserMap.containsKey(target) ? reportTargetUserMap.get(target) : new ArrayList<>();
+    }
+
+    @Override
     public void stop() {
         friendRequestHead = 0;
         protoFriendRequestList.clear();
@@ -585,5 +606,6 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
         groupMembersMap.clear();
         userInfoMap.clear();
         userSettingMap.clear();
+        reportTargetUserMap.clear();
     }
 }

@@ -69,6 +69,7 @@ public class ConversationActivity extends WfcBaseActivity implements
     private Conversation conversation;
     private boolean loadingNewMessage;
     private boolean shouldContinueLoadNewMessage = false;
+    private boolean isResume = false;
 
     private static final int MESSAGE_LOAD_COUNT_PER_TIME = 20;
     private static final int MESSAGE_LOAD_AROUND = 10;
@@ -130,6 +131,10 @@ public class ConversationActivity extends WfcBaseActivity implements
 
             if (uiMessage.message.direction == MessageDirection.Receive) {
                 conversationViewModel.clearUnreadStatus(conversation);
+            }
+            //新消息来临,如果处于当前界面,需要上报已读回执
+            if(isResume && conversation != null){
+                conversationViewModel.uploadReport(conversation);
             }
         }
     };
@@ -195,6 +200,16 @@ public class ConversationActivity extends WfcBaseActivity implements
         super.onCreate(savedInstanceState);
         // you can setup background here
 //        getWindow().setBackgroundDrawableResource(R.mipmap.splash);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isResume = true;
+        //upload read report
+        if(conversationViewModel != null && conversation != null){
+            conversationViewModel.uploadReport(conversation);
+        }
     }
 
     @Override
@@ -522,11 +537,13 @@ public class ConversationActivity extends WfcBaseActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+        isResume = false;
         inputPanel.onActivityPause();
     }
 
     @Override
     protected void onDestroy() {
+        isResume = false;
         if (conversation.type == Conversation.ConversationType.ChatRoom) {
             quitChatRoom();
         }
@@ -544,6 +561,7 @@ public class ConversationActivity extends WfcBaseActivity implements
 
     @Override
     public void onBackPressed() {
+        isResume = false;
         if (rootLinearLayout.getCurrentInput() != null) {
             rootLinearLayout.hideAttachedInput(true);
             inputPanel.collapse();

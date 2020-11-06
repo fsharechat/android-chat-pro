@@ -1501,6 +1501,29 @@ public class ClientService extends Service implements
             return out;
         }
 
+        @Override
+        public void uploadReport(int reportType, String target, int conversationType, List<String> tos, IGeneralCallback callback) throws RemoteException {
+            JavaProtoLogic.uploadReport(reportType, target, conversationType, tos, new JavaProtoLogic.IGeneralCallback() {
+                @Override
+                public void onSuccess() {
+                    try {
+                        callback.onSuccess();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(int errorCode) {
+                    try {
+                        callback.onFailure(errorCode);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
     }
 
     private ChannelInfo converProtoChannelInfo(ProtoChannelInfo protoChannelInfo) {

@@ -123,6 +123,12 @@ public class ProtoConstants {
         int UserType_Device = 2;
     }
 
+    public interface MessageReportType {
+        int ReportType_ALL = 0;
+        int ReportType_Delivery = 1;
+        int ReportType_Read = 2;
+    }
+
 
 
 

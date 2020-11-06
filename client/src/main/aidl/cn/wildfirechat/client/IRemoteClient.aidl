@@ -158,4 +158,5 @@ interface IRemoteClient {
     oneway void destoryChannel(in String channelId, in IGeneralCallback callback);
     List<String> getMyChannels();
     List<String> getListenedChannels();
+    oneway void uploadReport(in int reportType,in String target, in int conversationType,in List<String> tos,in IGeneralCallback callback);
 }

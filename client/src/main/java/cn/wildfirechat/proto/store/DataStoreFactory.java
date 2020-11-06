@@ -38,7 +38,7 @@ public class DataStoreFactory implements ImMemoryStore{
     private SharedPreferences preferences;
 
     private static final String LAST_MESSAGE_SEQ = "last_message_seq";
-    private static final String REQUESt_PROMESSAGE_IDS = "request_protomessage_ids";
+    private static final String REQUEST_PROMESSAGE_IDS = "request_protomessage_ids";
 
     public static ImMemoryStore getDataStore(Context context){
         if(dataStoreFactory == null){
@@ -412,19 +412,29 @@ public class DataStoreFactory implements ImMemoryStore{
 
     @Override
     public void saveRequestProtoMessageIds(Set<String> protoMessageIds) {
-        preferences.edit().putStringSet(REQUESt_PROMESSAGE_IDS,protoMessageIds).apply();
+        preferences.edit().putStringSet(REQUEST_PROMESSAGE_IDS,protoMessageIds).apply();
     }
 
     @Override
     public Set<String> getRequestProtoMessageIds() {
-        return preferences.getStringSet(REQUESt_PROMESSAGE_IDS, Collections.EMPTY_SET);
+        return preferences.getStringSet(REQUEST_PROMESSAGE_IDS, Collections.EMPTY_SET);
     }
 
     @Override
     public void stop() {
         preferences.edit().putLong(LAST_MESSAGE_SEQ,0).apply();
-        preferences.edit().putStringSet(REQUESt_PROMESSAGE_IDS,Collections.EMPTY_SET).apply();
+        preferences.edit().putStringSet(REQUEST_PROMESSAGE_IDS,Collections.EMPTY_SET).apply();
         memoryStore.stop();
         protoMessageDataStore.stop();
+    }
+
+    @Override
+    public void setGroupReportUsers(String target,String user) {
+        memoryStore.setGroupReportUsers(target,user);
+    }
+
+    @Override
+    public List<String> getGroupReportUsers(String target) {
+        return memoryStore.getGroupReportUsers(target);
     }
 }

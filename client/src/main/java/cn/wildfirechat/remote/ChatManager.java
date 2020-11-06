@@ -75,6 +75,7 @@ import cn.wildfirechat.model.NullGroupInfo;
 import cn.wildfirechat.model.NullUserInfo;
 import cn.wildfirechat.model.UnreadCount;
 import cn.wildfirechat.model.UserInfo;
+import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.proto.ProtoService;
 
 import static android.content.Context.BIND_AUTO_CREATE;
@@ -3069,6 +3070,31 @@ public class ChatManager {
         ConversationInfo conversationInfo = getConversation(conversation);
         for (OnConversationInfoUpdateListener listener : conversationInfoUpdateListeners) {
             listener.onConversationSilentUpdate(conversationInfo, silent);
+        }
+    }
+
+    public void uploadReport(int reportType, String target, int conversationType, List<String> tos, GeneralCallback callback){
+        if (!checkRemoteService()) {
+            return;
+        }
+        try {
+            mClient.uploadReport(reportType, target, conversationType, tos, new IGeneralCallback.Stub() {
+                @Override
+                public void onSuccess() throws RemoteException {
+                    if(callback != null){
+                        callback.onSuccess();
+                    }
+                }
+
+                @Override
+                public void onFailure(int errorCode) throws RemoteException {
+                    if(callback != null){
+                        callback.onFail(errorCode);
+                    }
+                }
+            });
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
