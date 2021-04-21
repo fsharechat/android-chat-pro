@@ -18,7 +18,7 @@ public class MyApp extends BaseApp {
         super.onCreate();
 
         // 只在主进程初始化
-        if (getCurProcessName(this).equals("cn.comsince.fschat")) {
+        if (getCurProcessName(this).equals("cn.comsince.fschatyasua")) {
             wfcUIKit = new WfcUIKit();
             wfcUIKit.init(this);
             MessageViewHolderManager.getInstance().registerMessageViewHolder(LocationMessageContentViewHolder.class);

@@ -3,21 +3,21 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         wfc {
-            keyAlias 'wfc'
-            keyPassword 'wildfirechat'
-            storeFile file('../wfc.keystore')
-            storePassword 'wildfirechat'
+            keyAlias 'fshare'
+            keyPassword 'fsharechat'
+            storeFile file('../fsharechat.keystore')
+            storePassword 'fsharechat'
         }
     }
     compileSdkVersion 28
     aaptOptions.cruncherEnabled = false
     aaptOptions.useNewCruncher = false
     defaultConfig {
-        applicationId "cn.comsince.fschat"
+        applicationId "cn.comsince.fschatyasua"
         minSdkVersion 16
         targetSdkVersion 28 //当targetversion大于23时，需要使用fileprovider
-        versionCode 850
-        versionName "0.8.5"
+        versionCode 860
+        versionName "0.8.6"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -25,7 +25,7 @@ android {
             }
         }
         manifestPlaceholders = [
-                APP_ID       : "cn.comsince.fschat",
+                APP_ID       : "cn.comsince.fschatyasua",
 
                 MI_APP_ID    : "2882303761517722456",
                 MI_APP_KEY   : "5731772292456",
