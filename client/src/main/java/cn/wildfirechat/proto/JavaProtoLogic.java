@@ -429,10 +429,12 @@ public class JavaProtoLogic {
     }
 
     public static String getFriendAlias(String userId){
-        return null;
+        return protoService.getFriendAlias(userId);
     }
 
-    public static void setFriendAlias(String userId, String alias, JavaProtoLogic.IGeneralCallback callback){}
+    public static void setFriendAlias(String userId, String alias, JavaProtoLogic.IGeneralCallback callback){
+        protoService.setFriendAlias(userId,alias,callback);
+    }
 
     //- (void)loadFriendRequestFromRemote
     public static void loadFriendRequestFromRemote(){}

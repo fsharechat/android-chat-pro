@@ -29,6 +29,7 @@ import static cn.wildfirechat.remote.UserSettingScope.ConversationTop;
 public class ImMemoryStoreImpl extends DataStoreAdapter{
     Log logger = LoggerFactory.getLogger(ImMemoryStoreImpl.class);
     private List<String> friendList = Collections.synchronizedList(new ArrayList<>());
+    private Map<String,String> friendAliasMap = new ConcurrentHashMap<>();
     private Map<String,List<ProtoMessage>> protoMessageMap = new ConcurrentHashMap<>();
     private Map<String,Integer> unReadCountMap = new ConcurrentHashMap<>();
     private Map<String,Long> unReadMessageIdMap = new ConcurrentHashMap<>();
@@ -66,6 +67,18 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
                 }
             }
         }
+    }
+
+    @Override
+    public void setFriendAlias(String friendId, String alias) {
+        if(!TextUtils.isEmpty(friendId)){
+            friendAliasMap.put(friendId,alias);
+        }
+    }
+
+    @Override
+    public String getFriendAlias(String userId) {
+        return friendAliasMap.get(userId);
     }
 
     @Override
@@ -510,6 +523,7 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
     @Override
     public void addUserInfo(ProtoUserInfo protoUserInfos) {
         if(protoUserInfos != null){
+            protoUserInfos.setFriendAlias(friendAliasMap.get(protoUserInfos.getUid()));
             userInfoMap.put(protoUserInfos.getUid(),protoUserInfos);
         }
     }

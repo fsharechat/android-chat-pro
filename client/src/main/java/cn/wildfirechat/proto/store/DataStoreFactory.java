@@ -74,6 +74,16 @@ public class DataStoreFactory implements ImMemoryStore{
     }
 
     @Override
+    public void setFriendAlias(String friendId, String alias) {
+        memoryStore.setFriendAlias(friendId,alias);
+    }
+
+    @Override
+    public String getFriendAlias(String userId) {
+        return memoryStore.getFriendAlias(userId);
+    }
+
+    @Override
     public boolean hasFriend() {
         return memoryStore.hasFriend();
     }

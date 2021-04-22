@@ -1,5 +1,6 @@
 package cn.wildfire.chat.kit.conversation;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -164,7 +165,7 @@ public class ConversationMemberAdapter extends RecyclerView.Adapter<Conversation
             this.userInfo = userInfo;
             this.type = TYPE_USER;
             nameTextView.setVisibility(View.VISIBLE);
-            nameTextView.setText(userInfo.displayName);
+            nameTextView.setText(!TextUtils.isEmpty(userInfo.friendAlias) ? userInfo.friendAlias : userInfo.displayName);
             Glide.with(portraitImageView).load(userInfo.portrait).apply(new RequestOptions().centerCrop().placeholder(R.mipmap.default_header)).into(portraitImageView);
         }
 

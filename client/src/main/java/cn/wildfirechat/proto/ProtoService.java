@@ -2,6 +2,7 @@ package cn.wildfirechat.proto;
 import android.content.Context;
 import android.text.TextUtils;
 import com.comsince.github.core.future.SimpleFuture;
+import com.comsince.github.proto.FSCMessage;
 import com.comsince.github.push.Signal;
 import com.comsince.github.push.SubSignal;
 import com.qiniu.android.http.ResponseInfo;
@@ -50,6 +51,7 @@ import cn.wildfirechat.proto.handler.ReceiveMessageHandler;
 import cn.wildfirechat.proto.handler.RemoteMessageHandler;
 import cn.wildfirechat.proto.handler.SearchUserResultMessageHandler;
 import cn.wildfirechat.proto.handler.SendMessageHandler;
+import cn.wildfirechat.proto.handler.SetFriendAliasRequestHandler;
 import cn.wildfirechat.proto.store.DataStoreFactory;
 import cn.wildfirechat.proto.store.ImMemoryStore;
 import cn.wildfirechat.proto.util.MessageShardingUtil;
@@ -73,6 +75,7 @@ public class ProtoService extends AbstractProtoService {
         messageHandlers.add(new SearchUserResultMessageHandler(this));
         messageHandlers.add(new GetUserInfoMessageHanlder(this));
         messageHandlers.add(new AddFriendRequestHandler(this));
+        messageHandlers.add(new SetFriendAliasRequestHandler(this));
         messageHandlers.add(new NotifyFriendHandler(this));
         messageHandlers.add(new FriendRequestHandler(this));
         messageHandlers.add(new HandlerFriendRequestHandler(this));
@@ -220,6 +223,18 @@ public class ProtoService extends AbstractProtoService {
             protoMessages = imMemoryStore.getMessages(conversationType,target,line,fromIndex,before,count,withUser);
         }
         return protoMessages;
+    }
+
+    public String getFriendAlias(String userId){
+        return imMemoryStore.getFriendAlias(userId);
+    }
+
+    public void setFriendAlias(String userId, String alias, JavaProtoLogic.IGeneralCallback callback){
+        FSCMessage.AddFriendRequest setFriendAlias = FSCMessage.AddFriendRequest.newBuilder()
+                .setTargetUid(userId)
+                .setReason(alias)
+                .build();
+        sendMessage(Signal.PUBLISH,SubSignal.FALS,setFriendAlias.toByteArray(),callback);
     }
 
     public ProtoMessage getMessage(long messageId){

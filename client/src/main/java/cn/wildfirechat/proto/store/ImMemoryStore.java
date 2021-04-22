@@ -19,6 +19,8 @@ public interface ImMemoryStore {
     String[] getFriendListArr();
     void setFriendArr(String[] friendArr,boolean refresh);
     void setFriendArr(String[] friendArr);
+    void setFriendAlias(String friendId, String alias);
+    String getFriendAlias(String userId);
     boolean hasFriend();
     boolean isMyFriend(String userId);
     ProtoUserInfo[] searchFriends(String keyword);

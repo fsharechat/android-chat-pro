@@ -1,5 +1,7 @@
 package cn.wildfire.chat.kit.user;
 
+import android.text.TextUtils;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -117,6 +119,14 @@ public class UserViewModel extends ViewModel implements AppScopeViewModel, OnUse
 
     public String getUserDisplayName(UserInfo userInfo) {
         return ChatManager.Instance().getUserDisplayName(userInfo);
+    }
+
+    public String getUserNickName(String uid){
+        String displayName = ChatManager.Instance().getUserInfo(uid,false).displayName;
+        if(TextUtils.isEmpty(displayName)){
+            displayName = "<" + uid + ">";
+        }
+        return displayName;
     }
 
     public String getUserDisplayName(String uid){

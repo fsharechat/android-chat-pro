@@ -35,6 +35,16 @@ public class DataStoreAdapter implements ImMemoryStore{
     }
 
     @Override
+    public void setFriendAlias(String friendId, String alias) {
+
+    }
+
+    @Override
+    public String getFriendAlias(String userId) {
+        return null;
+    }
+
+    @Override
     public boolean hasFriend() {
         return false;
     }

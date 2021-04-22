@@ -35,7 +35,9 @@ public class FriendPullHandler extends AbstractMessageHandler {
             for(int i = 0;i < getFriendsResult.getEntryCount(); i++){
                 friendList[i] = getFriendsResult.getEntry(i).getUid();
                 String friend = friendList[i];
-                log.i("friend list "+friend);
+                String alias = getFriendsResult.getEntry(i).getAlias();
+                log.i("friend list "+friend+" alias "+alias);
+                protoService.getImMemoryStore().setFriendAlias(friend,alias);
             }
 
             if(friendList.length != 0){
