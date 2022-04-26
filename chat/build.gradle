@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
-        wfc {
-            keyAlias 'wfc'
-            keyPassword 'wildfirechat'
-            storeFile file('../wfc.keystore')
-            storePassword 'wildfirechat'
+        fsharechat {
+            keyAlias 'fshare'
+            keyPassword 'fsharechat'
+            storeFile file('../fsharechat.keystore')
+            storePassword 'fsharechat'
         }
     }
     compileSdkVersion 28
@@ -16,7 +16,7 @@ android {
         applicationId "cn.comsince.fschat"
         minSdkVersion 16
         targetSdkVersion 28 //当targetversion大于23时，需要使用fileprovider
-        versionCode 842
+        versionCode 843
         versionName "0.8.4"
         multiDexEnabled true
         javaCompileOptions {
@@ -35,7 +35,7 @@ android {
                 MEIZU_APP_ID : "113616",
                 MEIZU_APP_KEY: "fcd886f51c144b45b87a67a28e2934d1"
         ]
-        signingConfig signingConfigs.wfc
+        signingConfig signingConfigs.fsharechat
 
 
         ndk {
@@ -47,10 +47,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.wfc
+            signingConfig signingConfigs.fsharechat
         }
         debug {
-            signingConfig signingConfigs.wfc
+            signingConfig signingConfigs.fsharechat
         }
     }
     compileOptions {
