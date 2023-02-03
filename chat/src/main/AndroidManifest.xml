@@ -189,7 +189,7 @@
         <activity android:name="cn.wildfire.chat.kit.channel.ChannelInfoActivity" />
         <activity
             android:name="cn.wildfire.chat.app.main.MainActivity"
-            android:label="火信">
+            android:label="飞享">
             <intent-filter>
                 <action android:name="cn.wildfirechat.chat.main" />
                 <category android:name="android.intent.category.DEFAULT" />

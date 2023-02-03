@@ -262,7 +262,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
                 break;
             case REQUEST_IGNORE_BATTERY_CODE:
                 if (resultCode == RESULT_CANCELED) {
-                    Toast.makeText(this, "允许野火IM后台运行，更能保证消息的实时性", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "允许飞享IM后台运行，更能保证消息的实时性", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:

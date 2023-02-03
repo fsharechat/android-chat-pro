@@ -318,37 +318,38 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 }
 
                 int finalMessageId = messageId;
-                alarmWrapper.schedule(new Timer.Builder().period(3 * 1000)
-                        .wakeup(true)
-                        .action(new Runnable() {
-                            @Override
-                            public void run() {
-                                RequestInfo requestInfo = requestMap.remove(finalMessageId);
-                                if(requestInfo != null && requestInfo.getCallback() != null && protoMessageId != 0){
-                                    log.i("send message timeout");
-                                    try {
-                                        if(requestInfo.getSubSignal() == SubSignal.MS){
-                                            //重新加入到请求队列
-                                            requestMap.put(finalMessageId,requestInfo);
-                                            saveProtoMessageIds();
-                                        } else {
+                //只有消息发送才需要重试
+                if(subSignal == SubSignal.MS){
+                    alarmWrapper.schedule(new Timer.Builder().period(5 * 1000)
+                            .wakeup(true)
+                            .action(new Runnable() {
+                                @Override
+                                public void run() {
+                                    RequestInfo requestInfo = requestMap.remove(finalMessageId);
+                                    if(requestInfo != null && requestInfo.getCallback() != null && protoMessageId != 0){
+                                        log.i("send message timeout");
+
+                                        //发送失败更新消息状态
+                                        try {
                                             Method onFailure = requestInfo.getType().getMethod("onFailure",int.class);
                                             onFailure.invoke(requestInfo.getCallback(),ErrorCode.SERVICE_DIED);
-                                            imMemoryStore.updateMessageStatus(protoMessageId,MessageStatus.Send_Failure.ordinal());
+                                            imMemoryStore.updateMessageStatus(requestInfo.getProtoMessageId(),MessageStatus.Send_Failure.ordinal());
+                                        } catch (Exception e) {
+                                            log.e("send message error "+finalMessageId,e);
                                         }
+
+                                        //重新加入到请求队列
+                                        int newMessageId = PreferenceManager.getDefaultSharedPreferences(context).getInt("message_id",0);
+                                        requestMap.put(newMessageId,requestInfo);
+                                        saveProtoMessageIds();
 
                                         //如果发送失败，代表链接断开，需要重连
                                         forceConnect();
-                                    } catch (NoSuchMethodException e) {
-                                        e.printStackTrace();
-                                    } catch (IllegalAccessException e) {
-                                        e.printStackTrace();
-                                    } catch (InvocationTargetException e) {
-                                        e.printStackTrace();
                                     }
                                 }
-                            }
-                        }).build());
+                            }).build());
+                }
+
 
                 PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("message_id",++messageId).apply();
 
