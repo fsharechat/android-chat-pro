@@ -6,7 +6,7 @@
     android:autoLink="phone|email|map|web"
     android:background="@drawable/img_bubble_receive"
     android:gravity="left|center_vertical"
-    android:maxWidth="320dp"
+    android:maxWidth="290dp"
     android:minHeight="40dp"
     android:paddingBottom="12dp"
     android:paddingLeft="16dp"
@@ -15,4 +15,4 @@
     android:text="嗯嗯嗯嗯嗯嗯嗯"
     android:textColor="#444444"
     android:textColorLink="#666666"
-    android:textSize="16sp" />
+    android:textSize="14sp" />

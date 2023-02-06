@@ -117,7 +117,7 @@
                     android:ellipsize="marquee"
                     android:singleLine="true"
                     android:textColor="@color/gray1"
-                    android:textSize="15sp"
+                    android:textSize="14sp"
                     tools:text="content" />
 
             </LinearLayout>
