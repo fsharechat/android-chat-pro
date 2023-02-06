@@ -7,7 +7,7 @@
     android:background="@drawable/img_bubble_send"
     android:gravity="left|center_vertical"
     android:linksClickable="true"
-    android:maxWidth="240dp"
+    android:maxWidth="320dp"
     android:minHeight="40dp"
     android:paddingLeft="16dp"
     android:paddingTop="12dp"
