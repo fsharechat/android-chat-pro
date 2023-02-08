@@ -158,10 +158,12 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
     public void onClick(View itemView) {
         conversationListViewModel.clearConversationUnreadStatus(conversationInfo);
         boolean connected = conversationListViewModel.connectionStatusLiveData().getValue() != null ? conversationListViewModel.connectionStatusLiveData().getValue() == ConnectionStatus.ConnectionStatusConnected : false;
+        Log.d("ConversationViewHolder","connection status "+connected);
         if(conversationInfo.conversation.type == Conversation.ConversationType.Group && connected){
             List<GroupMember> groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,false);
+            Log.d("ConversationViewHolder","get group member "+groupMembers.size());
             if(groupMembers == null || (groupMembers != null && groupMembers.size() == 0)){
-                groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,false);
+                groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,true);
                 Log.d("ConversationViewHolder","force refresh groupMemember");
             }
             GroupMember groupMember = null;
