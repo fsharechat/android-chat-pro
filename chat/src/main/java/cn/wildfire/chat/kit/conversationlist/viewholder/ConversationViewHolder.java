@@ -3,17 +3,22 @@ package cn.wildfire.chat.kit.conversationlist.viewholder;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.lqr.emoji.MoonUtils;
 
 import java.util.Arrays;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -25,10 +30,14 @@ import cn.wildfire.chat.kit.conversationlist.ConversationListViewModelFactory;
 import cn.wildfire.chat.kit.group.GroupViewModel;
 import cn.wildfire.chat.kit.third.utils.TimeUtils;
 import cn.wildfirechat.chat.R;
+import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.core.MessageDirection;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ConversationInfo;
+import cn.wildfirechat.model.GroupInfo;
+import cn.wildfirechat.model.GroupMember;
+import cn.wildfirechat.remote.ChatManager;
 
 @SuppressWarnings("unused")
 public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
@@ -148,6 +157,36 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
 
     public void onClick(View itemView) {
         conversationListViewModel.clearConversationUnreadStatus(conversationInfo);
+        boolean connected = conversationListViewModel.connectionStatusLiveData().getValue() != null ? conversationListViewModel.connectionStatusLiveData().getValue() == ConnectionStatus.ConnectionStatusConnected : false;
+        if(conversationInfo.conversation.type == Conversation.ConversationType.Group && connected){
+            List<GroupMember> groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,false);
+            if(groupMembers == null || (groupMembers != null && groupMembers.size() == 0)){
+                groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,false);
+                Log.d("ConversationViewHolder","force refresh groupMemember");
+            }
+            GroupMember groupMember = null;
+            for(GroupMember member : groupMembers){
+                if(member.memberId.equals(ChatManager.Instance().getUserId())){
+                    groupMember = member;
+                    break;
+                }
+            }
+            if(groupMember == null){
+                new MaterialDialog.Builder(fragment.getActivity())
+                        .content("您已经不再群组中,是否删除改会话")
+                        .negativeText("取消")
+                        .positiveText("确认")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                conversationListViewModel.removeConversation(conversationInfo);
+                            }
+                        })
+                        .build()
+                        .show();
+                return;
+            }
+        }
         Intent intent = new Intent(fragment.getActivity(), ConversationActivity.class);
         intent.putExtra("conversation", conversationInfo.conversation);
         fragment.startActivity(intent);
