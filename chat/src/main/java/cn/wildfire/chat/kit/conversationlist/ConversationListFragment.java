@@ -1,6 +1,7 @@
 package cn.wildfire.chat.kit.conversationlist;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,9 +48,10 @@ public class ConversationListFragment extends Fragment {
         public void onChanged(@Nullable ConversationInfo conversationInfo) {
             // just handle what we care about
             if (types.contains(conversationInfo.conversation.type) && lines.contains(conversationInfo.conversation.line)) {
+                Log.d("ConversationList", "onChanged: "+conversationInfo.conversation.type);
                 adapter.submitConversationInfo(conversationInfo);
                 // scroll or not?
-                recyclerView.scrollToPosition(0);
+                //recyclerView.scrollToPosition(0);
             }
         }
     };

@@ -7,7 +7,7 @@ public class HeartbeatManager {
     private Log logger = LoggerFactory.getLogger(HeartbeatManager.class);
 
     private final long MIN_HEARTBEAT_INTERVAL = 2 * 60 * 1000;
-    private final long MAX_HEARTBEAT_INTERVAL = 12 * 60 * 1000;
+    private final long MAX_HEARTBEAT_INTERVAL = 6 * 60 * 1000;
     private final long MIDDLE_HEARTBEAT_INTERVAL = 3 * 60 * 1000;
     private volatile long currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;

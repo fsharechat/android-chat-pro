@@ -53,8 +53,15 @@ public class TimeUtils {
             }
             return "";
         } else {
-            //12月22日
-            return msgTime.toString("MM月dd日 " + getTime(msgTime));
+            int currentYear = nowTime.getYear();
+            int msgYear = msgTime.getYear();
+            if(currentYear == msgYear){
+                //12月22日
+                return msgTime.toString("MM月dd日 " + getTime(msgTime));
+            } else {
+                return msgTime.toString("YYYY年MM月dd日 " + getTime(msgTime));
+            }
+
         }
     }
 

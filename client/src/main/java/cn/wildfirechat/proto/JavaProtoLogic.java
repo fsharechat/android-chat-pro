@@ -359,7 +359,7 @@ public class JavaProtoLogic {
 
     public static  ProtoConversationInfo getConversation(int conversationType, String target, int line){
         ProtoConversationInfo protoConversationInfo = protoService.getImMemoryStore().getConversation(conversationType,target,line);
-        protoConversationInfo.setTimestamp(System.currentTimeMillis());
+//        protoConversationInfo.setTimestamp(System.currentTimeMillis());
         return protoConversationInfo;
     }
 

@@ -393,7 +393,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         if(conversation != null && conversation.size() == 1){
             protoConversationInfo = (ProtoConversationInfo) conversation.get(0).get(COLUMN_CONVERSATION_INFO);
             protoConversationInfo.setLastMessage(lastProtoMessage);
-            protoConversationInfo.setTimestamp(System.currentTimeMillis());
+            protoConversationInfo.setTimestamp(lastProtoMessage.getTimestamp());
             setUnReadCount(protoConversationInfo);
             updateConversation(type,target,0,protoConversationInfo);
         } else {
@@ -419,7 +419,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         protoConversationInfo.setSilent(conversationSetting(ConversationSilent,type,target));
         protoConversationInfo.setLastMessage(lastProtoMessage);
         setUnReadCount(protoConversationInfo);
-        protoConversationInfo.setTimestamp(System.currentTimeMillis());
+        protoConversationInfo.setTimestamp(lastProtoMessage.getTimestamp());
         return protoConversationInfo;
     }
 

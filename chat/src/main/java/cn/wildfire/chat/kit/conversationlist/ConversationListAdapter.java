@@ -1,5 +1,6 @@
 package cn.wildfire.chat.kit.conversationlist;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -108,7 +109,7 @@ public class ConversationListAdapter extends RecyclerView.Adapter<RecyclerView.V
         int currentPosition, targetPosition;
         currentPosition = currentPosition(conversationInfo);
         targetPosition = targetPosition(conversationInfo, currentPosition);
-
+        Log.d("ConversationList",conversationInfo.conversation.target+" currentPosition:"+currentPosition+" targetPosition:"+targetPosition);
         if (currentPosition >= 0) {
             if (currentPosition == targetPosition) {
                 conversationInfos.set(targetPosition, conversationInfo);
