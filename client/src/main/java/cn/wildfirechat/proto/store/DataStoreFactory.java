@@ -340,8 +340,8 @@ public class DataStoreFactory implements ImMemoryStore{
     }
 
     @Override
-    public ProtoConversationInfo[] getConversations(int[] conversationTypes, int[] lines) {
-        return new ProtoConversationInfo[0];
+    public List<ProtoConversationInfo> getConversations(int[] conversationTypes, int[] lines) {
+        return protoMessageDataStore.getConversations(conversationTypes,lines);
     }
 
     @Override

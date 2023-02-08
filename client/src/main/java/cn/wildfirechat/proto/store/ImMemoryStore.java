@@ -55,7 +55,7 @@ public interface ImMemoryStore {
     void createGroupConversation(String groupId);
     List<ProtoConversationInfo> getGroupConversations();
     ProtoConversationInfo getConversation(int conversationType, String target, int line);
-    ProtoConversationInfo[] getConversations(int[] conversationTypes, int[] lines);
+    List<ProtoConversationInfo> getConversations(int[] conversationTypes, int[] lines);
     ProtoGroupInfo getGroupInfo(String groupId);
     void addGroupInfo(String groupId,ProtoGroupInfo protoGroupInfo,boolean refresh);
     ProtoGroupMember[] getGroupMembers(String groupId);

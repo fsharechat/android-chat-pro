@@ -414,8 +414,8 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
     }
 
     @Override
-    public ProtoConversationInfo[] getConversations(int[] conversationTypes, int[] lines) {
-        return new ProtoConversationInfo[0];
+    public List<ProtoConversationInfo> getConversations(int[] conversationTypes, int[] lines) {
+        return new ArrayList<>();
     }
 
     @Override

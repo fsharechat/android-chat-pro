@@ -385,6 +385,22 @@ public class ConversationListAdapter extends RecyclerView.Adapter<RecyclerView.V
         if (currentPosition >= 0 && position > currentPosition) {
             position = position - 1;
         }
+
+        //计算新加的会话位置
+        if(currentPosition == -1){
+            position = conversationInfos.size();
+            for (int i = 0; i < conversationInfos.size(); i++) {
+                info = conversationInfos.get(i);
+                if (info.isTop) {
+                    // do nothing, just continue
+                } else {
+                    if (conversationInfo.timestamp >= info.timestamp) {
+                        position = i;
+                        break;
+                    }
+                }
+            }
+        }
         return position;
     }
 }

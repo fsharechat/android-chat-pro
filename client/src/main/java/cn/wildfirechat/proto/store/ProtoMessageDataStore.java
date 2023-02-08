@@ -480,8 +480,22 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     }
 
     @Override
-    public ProtoConversationInfo[] getConversations(int[] conversationTypes, int[] lines) {
-        return new ProtoConversationInfo[0];
+    public List<ProtoConversationInfo> getConversations(int[] conversationTypes, int[] lines) {
+        String queryString = "";
+        for(int i=0; i<conversationTypes.length; i++){
+            if(i > 0){
+                queryString += " OR ";
+            }
+            queryString += COLUMN_CONVERSATION_TYPE +"="+conversationTypes[i];
+        }
+        logger.i("getConversations query :"+queryString);
+        List<Map<String,Object>> conversations = queryConversation(queryString,null);
+        List<ProtoConversationInfo> protoConversationInfoList = new ArrayList<>();
+        for(Map<String,Object> objectMap : conversations){
+            ProtoConversationInfo protoConversationInfo = (ProtoConversationInfo) objectMap.get(COLUMN_CONVERSATION_INFO);
+            protoConversationInfoList.add(protoConversationInfo);
+        }
+        return protoConversationInfoList;
     }
 
     @Override

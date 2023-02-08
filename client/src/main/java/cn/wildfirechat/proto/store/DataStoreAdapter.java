@@ -1,5 +1,6 @@
 package cn.wildfirechat.proto.store;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -215,8 +216,8 @@ public class DataStoreAdapter implements ImMemoryStore{
     }
 
     @Override
-    public ProtoConversationInfo[] getConversations(int[] conversationTypes, int[] lines) {
-        return new ProtoConversationInfo[0];
+    public List<ProtoConversationInfo> getConversations(int[] conversationTypes, int[] lines) {
+        return new ArrayList<>();
     }
 
     @Override

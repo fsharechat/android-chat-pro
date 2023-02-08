@@ -4,6 +4,8 @@ import android.content.Context;
 import com.comsince.github.logger.Log;
 import com.comsince.github.logger.LoggerFactory;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -320,37 +322,68 @@ public class JavaProtoLogic {
 
     public static  ProtoConversationInfo[] getConversations(int[] conversationTypes, int[] lines){
         List<ProtoConversationInfo> protoConversationInfos = new ArrayList<>();
-        List<ProtoConversationInfo> privateConversationInfos = null;
-        List<ProtoConversationInfo> groupProtoConversationInfos = null;
-        for(int conversationType : conversationTypes){
-            if(conversationType == ProtoConstants.ConversationType.ConversationType_Private){
-                privateConversationInfos = protoService.getImMemoryStore().getPrivateConversations();
-                Iterator<ProtoConversationInfo> privateIterator = privateConversationInfos.iterator();
-                while (privateIterator.hasNext()){
-                    ProtoConversationInfo privateProtoConversationInfo = privateIterator.next();
-                    if(privateProtoConversationInfo.isTop()){
-                        privateIterator.remove();
-                        protoConversationInfos.add(privateProtoConversationInfo);
-                    }
-                }
-            } else if(conversationType == ProtoConstants.ConversationType.ConversationType_Group){
-                groupProtoConversationInfos = protoService.getImMemoryStore().getGroupConversations();
-                Iterator<ProtoConversationInfo> groupIterator = groupProtoConversationInfos.iterator();
-                while (groupIterator.hasNext()){
-                    ProtoConversationInfo groupProtoConversationInfo = groupIterator.next();
-                    if(groupProtoConversationInfo.isTop()){
-                        groupIterator.remove();
-                        protoConversationInfos.add(groupProtoConversationInfo);
-                    }
-                }
+//        List<ProtoConversationInfo> privateConversationInfos = null;
+//        List<ProtoConversationInfo> groupProtoConversationInfos = null;
+//        for(int conversationType : conversationTypes){
+//            if(conversationType == ProtoConstants.ConversationType.ConversationType_Private){
+//                privateConversationInfos = protoService.getImMemoryStore().getPrivateConversations();
+//                Iterator<ProtoConversationInfo> privateIterator = privateConversationInfos.iterator();
+//                while (privateIterator.hasNext()){
+//                    ProtoConversationInfo privateProtoConversationInfo = privateIterator.next();
+//                    if(privateProtoConversationInfo.isTop()){
+//                        privateIterator.remove();
+//                        protoConversationInfos.add(privateProtoConversationInfo);
+//                    }
+//                }
+//            } else if(conversationType == ProtoConstants.ConversationType.ConversationType_Group){
+//                groupProtoConversationInfos = protoService.getImMemoryStore().getGroupConversations();
+//                Iterator<ProtoConversationInfo> groupIterator = groupProtoConversationInfos.iterator();
+//                while (groupIterator.hasNext()){
+//                    ProtoConversationInfo groupProtoConversationInfo = groupIterator.next();
+//                    if(groupProtoConversationInfo.isTop()){
+//                        groupIterator.remove();
+//                        protoConversationInfos.add(groupProtoConversationInfo);
+//                    }
+//                }
+//            }
+//        }
+//        Collections.sort(privateConversationInfos, new Comparator<ProtoConversationInfo>() {
+//            @Override
+//            public int compare(ProtoConversationInfo o1, ProtoConversationInfo o2) {
+//                return (int) (o1.getTimestamp() - o2.getTimestamp());
+//            }
+//        });
+//        if(privateConversationInfos != null && privateConversationInfos.size() > 0){
+//            protoConversationInfos.addAll(privateConversationInfos);
+//        }
+//        if(groupProtoConversationInfos != null && groupProtoConversationInfos.size() > 0){
+//            protoConversationInfos.addAll(groupProtoConversationInfos);
+//        }
+
+        List<ProtoConversationInfo> protoConversationInfoList = protoService.getImMemoryStore().getConversations(conversationTypes,lines);
+        Iterator<ProtoConversationInfo> protoConversationInfoIterator = protoConversationInfoList.iterator();
+        while (protoConversationInfoIterator.hasNext()){
+            ProtoConversationInfo protoConversationInfo = protoConversationInfoIterator.next();
+            if(protoConversationInfo.isTop()){
+                protoConversationInfoIterator.remove();
+                protoConversationInfos.add(protoConversationInfo);
             }
         }
-        if(privateConversationInfos != null && privateConversationInfos.size() > 0){
-            protoConversationInfos.addAll(privateConversationInfos);
+
+        Collections.sort(protoConversationInfoList, new Comparator<ProtoConversationInfo>() {
+            @Override
+            public int compare(ProtoConversationInfo o1, ProtoConversationInfo o2) {
+                //long转换int可能导致精度丢失,导致排序结果混乱
+                int result =  o2.getTimestamp() - o1.getTimestamp() >= 0  ? 1 : -1;
+                logger.i("getConversations",o1.getTarget() +" :"+o2.getTarget()+" result "+result);
+                return result;
+            }
+        });
+        for(ProtoConversationInfo protoConversationInfo: protoConversationInfoList){
+            logger.i("getConversations","timestamp:"+protoConversationInfo.getTimestamp()+ " target:"+protoConversationInfo.getTarget() + " type:"+protoConversationInfo.getConversationType());
         }
-        if(groupProtoConversationInfos != null && groupProtoConversationInfos.size() > 0){
-            protoConversationInfos.addAll(groupProtoConversationInfos);
-        }
+        protoConversationInfos.addAll(protoConversationInfoList);
+
         ProtoConversationInfo[] protoConversationInfosArr = new ProtoConversationInfo[protoConversationInfos.size()];
         protoConversationInfos.toArray(protoConversationInfosArr);
         return protoConversationInfosArr;
