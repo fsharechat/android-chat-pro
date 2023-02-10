@@ -16,6 +16,7 @@ import cn.wildfirechat.model.ProtoConversationInfo;
 import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoUnreadCount;
 
+import static cn.wildfirechat.Constants.USER_SETTING_SPLIT_TAG;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Accept;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Accept_T;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_End;
@@ -507,7 +508,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         scopeMap.put(key,value);
         userSettingMap.put(scope,scopeMap);
         if(!TextUtils.isEmpty(key)){
-            String[] keys = key.split("-");
+            String[] keys = key.split(USER_SETTING_SPLIT_TAG);
             int conversationType = Integer.parseInt(keys[0]);
             int line = Integer.parseInt(keys[1]);
             String target = keys[2];

@@ -87,6 +87,8 @@ import cn.wildfirechat.model.UserInfo;
 import cn.wildfirechat.proto.AndroidLogger;
 import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.remote.RecoverReceiver;
+
+import static cn.wildfirechat.Constants.USER_SETTING_SPLIT_TAG;
 import static cn.wildfirechat.client.ConnectionStatus.ConnectionStatusConnected;
 import static cn.wildfirechat.client.ConnectionStatus.ConnectionStatusLogout;
 import static cn.wildfirechat.client.ConnectionStatus.ConnectionStatusUnconnected;
@@ -543,7 +545,7 @@ public class ClientService extends Service implements
 
         @Override
         public void setConversationTop(int conversationType, String target, int line, boolean top) throws RemoteException {
-            setUserSetting(ConversationTop, conversationType + "-" + line + "-" + target, top ? "1" : "0", null);
+            setUserSetting(ConversationTop, conversationType + USER_SETTING_SPLIT_TAG + line + USER_SETTING_SPLIT_TAG + target, top ? "1" : "0", null);
         }
 
         @Override
@@ -553,7 +555,7 @@ public class ClientService extends Service implements
 
         @Override
         public void setConversationSilent(int conversationType, String target, int line, boolean silent) throws RemoteException {
-            setUserSetting(ConversationSilent, conversationType + "-" + line + "-" + target, silent ? "1" : "0", null);
+            setUserSetting(ConversationSilent, conversationType + USER_SETTING_SPLIT_TAG + line + USER_SETTING_SPLIT_TAG + target, silent ? "1" : "0", null);
         }
 
         @Override
