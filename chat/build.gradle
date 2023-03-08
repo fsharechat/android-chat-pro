@@ -9,14 +9,14 @@ android {
             storePassword 'fsharechat'
         }
     }
-    compileSdkVersion 28
+    compileSdkVersion 31
     aaptOptions.cruncherEnabled = false
     aaptOptions.useNewCruncher = false
     defaultConfig {
         applicationId "cn.comsince.fschat"
-        minSdkVersion 16
-        targetSdkVersion 28 //当targetversion大于23时，需要使用fileprovider
-        versionCode 856
+        minSdkVersion 21
+        targetSdkVersion 31 //当targetversion大于23时，需要使用fileprovider
+        versionCode 857
         versionName "0.8.5"
         multiDexEnabled true
         javaCompileOptions {
@@ -96,9 +96,10 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation files('libs/TencentLocationSDK_v4.9.7.12_r247861_161205_1104.jar')
-    implementation files('libs/TencentMapSDK_Raster_v_1.2.7_51ae0e7.jar')
+//    implementation files('libs/TencentLocationSDK_v4.9.7.12_r247861_161205_1104.jar')
+    implementation files('libs/TencentMapSDK_Raster_v_1.3.4.1.jar')
     implementation files('libs/TencentSearch1.1.3.jar')
+    implementation 'com.tencent.map.geolocation:TencentLocationSdk-openplatform:7.2.6'
     implementation 'org.webrtc:google-webrtc:1.0.30039'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation 'q.rorbin:badgeview:1.1.3'

@@ -6,29 +6,29 @@ import android.os.Environment;
  * Created by heavyrain lee on 2017/11/24.
  */
 
-public interface Config {
+public class Config {
 
 //    String IM_SERVER_HOST = "192.168.0.102";
-    String IM_SERVER_HOST = "chat.comsince.cn";
+    public static String IM_SERVER_HOST = "chat.comsince.cn";
 //    String IM_SERVER_HOST = "172.16.46.201";
-    int IM_SERVER_PORT = 6789;
+    public static int IM_SERVER_PORT = 6789;
 
 //    String APP_SERVER_HOST = "192.168.0.102";
-    String APP_SERVER_HOST = "chat.comsince.cn";
+    public static String APP_SERVER_HOST = "chat.comsince.cn";
 //    String APP_SERVER_HOST = "172.16.46.201";
-    int APP_SERVER_PORT = 8081;
+    public static int APP_SERVER_PORT = 8081;
 
-    String ICE_ADDRESS = "turn:turn.fsharechat.cn:3478";
-    String ICE_USERNAME = "comsince";
-    String ICE_PASSWORD = "comsince";
+    public static String ICE_ADDRESS = "turn:turn.fsharechat.cn:3478";
+    public static String ICE_USERNAME = "comsince";
+    public static String ICE_PASSWORD = "comsince";
 
-    int DEFAULT_MAX_AUDIO_RECORD_TIME_SECOND = 120;
+    public static int DEFAULT_MAX_AUDIO_RECORD_TIME_SECOND = 120;
 
-    String SP_NAME = "config";
-    String SP_KEY_SHOW_GROUP_MEMBER_ALIAS = "show_group_member_alias:%s";
+    public static String SP_NAME = "config";
+    public static String SP_KEY_SHOW_GROUP_MEMBER_ALIAS = "show_group_member_alias:%s";
 
-    String VIDEO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/video";
-    String AUDIO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/audio";
-    String PHOTO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/photo";
-    String FILE_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/file";
+    public static String VIDEO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/video";
+    public static String AUDIO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/audio";
+    public static String PHOTO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/photo";
+    public static String FILE_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/file";
 }

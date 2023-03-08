@@ -39,6 +39,9 @@
     <!-- 蓝牙分享所需的权限 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
     <application
         android:name="cn.wildfire.chat.app.MyApp"
@@ -48,6 +51,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
 
         <meta-data
@@ -71,11 +75,12 @@
         <!--地图-->
         <meta-data
             android:name="TencentMapSDK"
-            android:value="TOEBZ-67IR4-ZDHUV-DSDXX-TJZU7-UYFE7" />
+            android:value="E4SBZ-L2PLS-L24O7-6V7P7-AD3HH-WMFD2" />
 
         <activity
             android:name="cn.wildfire.chat.app.main.SplashActivity"
             android:screenOrientation="portrait"
+            android:exported="true"
             android:theme="@style/AppTheme.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -124,7 +129,9 @@
         <activity
             android:name="cn.wildfire.chat.kit.preview.MMPreviewActivity"
             android:theme="@style/AppTheme.FullScreen" />
-        <activity android:name="cn.wildfire.chat.kit.voip.SingleVoipCallActivity">
+        <activity
+            android:name="cn.wildfire.chat.kit.voip.SingleVoipCallActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="cn.wildfirechat.kit.chat.voip.single" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -189,6 +196,7 @@
         <activity android:name="cn.wildfire.chat.kit.channel.ChannelInfoActivity" />
         <activity
             android:name="cn.wildfire.chat.app.main.MainActivity"
+            android:exported="true"
             android:label="飞享">
             <intent-filter>
                 <action android:name="cn.wildfirechat.chat.main" />

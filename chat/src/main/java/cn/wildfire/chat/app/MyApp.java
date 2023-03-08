@@ -22,27 +22,35 @@ public class MyApp extends BaseApp {
             wfcUIKit = new WfcUIKit();
             wfcUIKit.init(this);
             MessageViewHolderManager.getInstance().registerMessageViewHolder(LocationMessageContentViewHolder.class);
-            seuptwfcdirs();
+//            seuptwfcdirs();
+            setupWFCDirs();
         }
     }
 
-    private void seuptwfcdirs() {
-        File file = new File(Config.VIDEO_SAVE_DIR);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        file = new File(Config.AUDIO_SAVE_DIR);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        file = new File(Config.FILE_SAVE_DIR);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        file = new File(Config.PHOTO_SAVE_DIR);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
+//    private void seuptwfcdirs() {
+//        File file = new File(Config.VIDEO_SAVE_DIR);
+//        if (!file.exists()) {
+//            file.mkdirs();
+//        }
+//        file = new File(Config.AUDIO_SAVE_DIR);
+//        if (!file.exists()) {
+//            file.mkdirs();
+//        }
+//        file = new File(Config.FILE_SAVE_DIR);
+//        if (!file.exists()) {
+//            file.mkdirs();
+//        }
+//        file = new File(Config.PHOTO_SAVE_DIR);
+//        if (!file.exists()) {
+//            file.mkdirs();
+//        }
+//    }
+
+    private void setupWFCDirs() {
+        Config.VIDEO_SAVE_DIR = this.getDir("video", Context.MODE_PRIVATE).getAbsolutePath();
+        Config.AUDIO_SAVE_DIR = this.getDir("audio", Context.MODE_PRIVATE).getAbsolutePath();
+        Config.PHOTO_SAVE_DIR = this.getDir("photo", Context.MODE_PRIVATE).getAbsolutePath();
+        Config.FILE_SAVE_DIR = this.getDir("file", Context.MODE_PRIVATE).getAbsolutePath();
     }
 
     public static String getCurProcessName(Context context) {

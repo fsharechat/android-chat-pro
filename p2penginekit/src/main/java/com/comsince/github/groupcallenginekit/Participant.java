@@ -107,6 +107,7 @@ public class Participant implements GroupPeerConnectionClient.PeerConnectionEven
 
     public void dispose(){
         if(this.groupPeerConnectionClient != null){
+            this.groupPeerConnectionClient.removeVideoTrack();
             this.groupPeerConnectionClient.close();
             this.groupPeerConnectionClient = null;
         }

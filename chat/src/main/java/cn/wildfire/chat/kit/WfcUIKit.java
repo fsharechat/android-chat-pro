@@ -96,7 +96,7 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
             SharedPreferences sp = application.getSharedPreferences("config", Context.MODE_PRIVATE);
             String id = sp.getString("id", null);
             String token = sp.getString("token", null);
-
+            Log.i("comsince","login userId="+id+" token="+token);
             AVGroupEngineKit.init(application,id,this);
             ChatManagerHolder.avGroupEngineKit = AVGroupEngineKit.Instance();
             ChatManagerHolder.avGroupEngineKit.addIceServer(Config.ICE_ADDRESS, Config.ICE_USERNAME, Config.ICE_PASSWORD);
@@ -193,6 +193,7 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
 
     @Override
     public void onReceiveMessage(List<Message> messages, boolean hasMore) {
+        Log.i("comsince","notification message size "+messages.size()+" backgroud "+isBackground);
         if (isBackground) {
             // FIXME: 2018/5/28 只是临时方案，No_Persist消息，我觉得不应当到这儿，注册监听时，
             // 就表明自己关系哪些类型的消息, 设置哪些种类的消息
@@ -208,10 +209,11 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
             while (iterator.hasNext()) {
                 Message message = iterator.next();
                 if (message.content.getPersistFlag() == PersistFlag.No_Persist
-                        || now - (message.serverTime - delta) > 10 * 1000) {
+                        || now - (message.serverTime - delta) > 24 * 60 * 60 * 1000) {
                     iterator.remove();
                 }
             }
+            Log.i("comsince","notification message size "+msgs.size());
             WfcNotificationManager.getInstance().handleReceiveMessage(application, msgs);
         } else {
             // do nothing

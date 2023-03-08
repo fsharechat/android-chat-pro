@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -65,10 +66,10 @@ public class WfcNotificationManager {
 
     private void showNotification(Context context, String tag, int id, String title, String content, PendingIntent pendingIntent) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId = "wfc_notification";
+        String channelId = "fsharechat_notification";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "wildfire chat message",
+                    "fshare chat message",
                     NotificationManager.IMPORTANCE_HIGH);
 
             channel.enableLights(true); //是否在桌面icon右上角展示小红点
@@ -99,8 +100,8 @@ public class WfcNotificationManager {
         if (messages == null || messages.isEmpty()) {
             return;
         }
-
         for (Message message : messages) {
+            Log.i("comsince","notification message direction "+message.direction + " persistFlag="+message.content.getPersistFlag());
             if (message.direction == MessageDirection.Send || (message.content.getPersistFlag() != Persist_And_Count && !(message.content instanceof RecallMessageContent))) {
                 continue;
             }
@@ -113,6 +114,14 @@ public class WfcNotificationManager {
                     pushContent = "[图片]";
                 } else if (message.content.getType() == MessageContentType.ContentType_Voice) {
                     pushContent = "[语音]";
+                } else if(message.content.getType() == MessageContentType.ContentType_Location){
+                    pushContent = "[位置]";
+                } else if(message.content.getType() == MessageContentType.ContentType_File){
+                    pushContent = "[文件]";
+                } else if(message.content.getType() == MessageContentType.ContentType_Sticker){
+                    pushContent = "[表情]";
+                } else if(message.content.getType() == MessageContentType.ContentType_Video){
+                    pushContent = "[视频]";
                 } else if (message.content.getType() == MessageContentType.ContentType_Recall) {
                     pushContent = "撤回了一条消息";
                 }
@@ -122,7 +131,7 @@ public class WfcNotificationManager {
             if (unreadCount > 1) {
                 pushContent = "[" + unreadCount + "条]" + pushContent;
             }
-
+            Log.i("comsince","notification push content "+pushContent);
             String title = "";
             if (message.conversation.type == Single) {
                 String name = ChatManager.Instance().getUserDisplayName(message.conversation.target);
@@ -137,8 +146,9 @@ public class WfcNotificationManager {
             Intent conversationIntent = new Intent(context, ConversationActivity.class);
             conversationIntent.putExtra("conversation", message.conversation);
             PendingIntent pendingIntent = PendingIntent.getActivities(context, notificationId(message.conversation), new Intent[]{mainIntent, conversationIntent}, PendingIntent.FLAG_UPDATE_CURRENT);
-            String tag = "wfc notification tag";
+            String tag = "fsharechat notification tag";
             startVibrator(context);
+            Log.i("comsince","notification title "+title+" message "+pushContent);
             showNotification(context, tag, notificationId(message.conversation), title, pushContent, pendingIntent);
         }
     }

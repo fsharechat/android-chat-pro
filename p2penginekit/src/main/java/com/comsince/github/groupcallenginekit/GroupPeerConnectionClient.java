@@ -343,6 +343,7 @@ public class GroupPeerConnectionClient {
         Log.d("PCRTCClient", "Closing peer connection done.");
         this.events.onPeerConnectionClosed();
         this.events = null;
+        this.localVideoTrack = null;
     }
 
     public boolean isHDVideo() {

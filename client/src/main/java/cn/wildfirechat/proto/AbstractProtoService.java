@@ -142,14 +142,16 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     @Override
     public void receiveException(Exception e) {
-        log.e("comsince receive exception ",e);
+        log.e("comsince receive exception "+e);
+        //降低heartbeat间隔
+        heartbeatManager.reportHeartbeatExceptionTime(System.currentTimeMillis());
         JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusUnconnected);
         cancelHeartTimer();
         if(!userDisconnect && reconnectNum <= 3){
             log.i("reconnect num "+reconnectNum);
             reconnectNum++;
             alarmWrapper.schedule(reconnectTimer =
-                    new Timer.Builder().period(reconnectNum * 10 * 1000)
+                    new Timer.Builder().period(reconnectNum * 2 * 1000)
                             .wakeup(true)
                             .action(new Runnable() {
                                 @Override

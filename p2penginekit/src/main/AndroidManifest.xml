@@ -27,6 +27,7 @@
             android:name=".ui.ChatRoomActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:screenOrientation="fullUser"
+            android:exported="true"
             android:theme="@style/Webrtc.AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="cn.wildfirechat.kit.chat.voip.group" />

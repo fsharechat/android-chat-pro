@@ -38,12 +38,12 @@ public class AlarmWrapper {
         log.i(tag, "start with " + mAuthority + " Android " + Build.VERSION.SDK_INT);
         mAlarmManager = (AlarmManager)
                 mAppContext.getSystemService(Context.ALARM_SERVICE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             mTimerReceiver = new TimerReceiver();
             IntentFilter filter = new IntentFilter(mAuthority);
             filter.addDataScheme(scheme);
             mAppContext.registerReceiver(mTimerReceiver, filter);
-        }
+//        }
     }
 
     public void stop() {
@@ -75,7 +75,7 @@ public class AlarmWrapper {
         Intent intent = new Intent(mAuthority);
         intent.setData(Uri.parse(scheme + "://" + mAuthority + "/" + key));
         return PendingIntent.getBroadcast(mAppContext,
-                0, intent, PendingIntent.FLAG_ONE_SHOT);
+                0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private synchronized int key() {
@@ -95,9 +95,12 @@ public class AlarmWrapper {
                     mTimerMap.put(timer.key, timer);
                     int type = timer.wakeup ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        mAlarmManager.setExact(type,
-                                System.currentTimeMillis() + timer.period,
-                                null, new TimerListener(timer), timer.schedule.handler());
+//                        mAlarmManager.setExact(type,
+//                                System.currentTimeMillis() + timer.period,
+//                                null, new TimerListener(timer), timer.schedule.handler());
+
+                        timer.pendingIntent = pendingIntent(timer.key);
+                        mAlarmManager.setExactAndAllowWhileIdle(type,System.currentTimeMillis() + timer.period,timer.pendingIntent);
                     } else {
                         timer.pendingIntent = pendingIntent(timer.key);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -128,7 +131,7 @@ public class AlarmWrapper {
                 public void run() {
                     if (mTimerMap.remove(timer.key) != null) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            mAlarmManager.cancel(timer.onAlarmListener);
+                            mAlarmManager.cancel(timer.pendingIntent);
                         } else {
                             mAlarmManager.cancel(timer.pendingIntent);
                         }

@@ -1,5 +1,12 @@
 # 飞享
 
+## 更新日志
+### 0.8.5 版本更新[857]
+* 升级SDK为31 ,需要JDK 11编译
+* 代码兼容android 13
+* 升级腾讯MAP,更新Key
+* 升级google webrtc
+
 ![image](http://image.comsince.cn/fx-chat.png)
 
 **NOTE:** 本项目为`飞享`即时通讯系统的Android客户端

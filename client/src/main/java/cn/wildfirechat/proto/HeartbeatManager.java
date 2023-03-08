@@ -46,6 +46,8 @@ public class HeartbeatManager {
                 } else if (absDiff < 90 * 1000){
                     //步进试探失败
                     currentMaxHeartbeatInterval = interval - absDiff / 2;
+                } else {
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 30 * 1000;
                 }
             }
         }
@@ -95,7 +97,7 @@ public class HeartbeatManager {
         if(currentSendSuccessTime != 0 && currentScheduleTime != 0){
             long interval = currentSendSuccessTime - currentScheduleTime;
             long diff = interval - currentMaxHeartbeatInterval;
-            logger.i("recalculateMaxHeartbeatInterval diff "+diff);
+            logger.i("recalculateMaxHeartbeatInterval diff:"+diff+" upSearchingMaxInterval: "+upSearchingMaxInterval);
             if(diff > 0 && diff < 90 * 1000){
                 // 只有在合理间隔的增加值才算是有效的心跳间隔，心跳步进策略最大每次增加60s
                 if(upSearchingMaxInterval){

@@ -476,6 +476,7 @@ public class AVGroupEngineKit implements OnReceiveMessageListener {
                     for(String userId : participants.keySet()){
                         Participant participant = participants.get(userId);
                         if(participant != null){
+                            Log.i(TAG,"close participant "+userId);
                             participant.dispose();
                         }
                     }

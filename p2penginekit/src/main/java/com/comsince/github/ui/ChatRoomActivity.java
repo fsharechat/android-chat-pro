@@ -381,6 +381,7 @@ public class ChatRoomActivity extends FragmentActivity implements AVGroupEngineK
         _videoViews.clear();
         _sinks.clear();
         _infos.clear();
+        _localVideoTrack = null;
 
     }
 
