@@ -9,13 +9,13 @@ android {
             storePassword 'fsharechat'
         }
     }
-    compileSdkVersion 31
+    compileSdkVersion 29
     aaptOptions.cruncherEnabled = false
     aaptOptions.useNewCruncher = false
     defaultConfig {
         applicationId "cn.comsince.fschat"
         minSdkVersion 21
-        targetSdkVersion 31 //当targetversion大于23时，需要使用fileprovider
+        targetSdkVersion 29 //当targetversion大于23时，需要使用fileprovider
         versionCode 857
         versionName "0.8.5"
         multiDexEnabled true

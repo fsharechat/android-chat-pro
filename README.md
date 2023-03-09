@@ -3,9 +3,11 @@
 ## 更新日志
 ### 0.8.5 版本更新[857]
 * 升级SDK为31 ,需要JDK 11编译
-* 代码兼容android 13
+* 代码兼容android 13,闹钟模式更新,心跳机制优化,断线之后减少心跳间隔
+* 用户短信之后,重新拉取消息,弹出通知到提示
 * 升级腾讯MAP,更新Key
-* 升级google webrtc
+* 升级google webrtc,Flyme 10 应用分身可能导致同一个应用获取相机是吧,必须等待一段时间.
+* targetSdkVersion 降为29 防止升级导致无法读取图片
 
 ![image](http://image.comsince.cn/fx-chat.png)
 
