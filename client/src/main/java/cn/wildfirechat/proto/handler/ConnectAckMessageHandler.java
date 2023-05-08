@@ -49,7 +49,7 @@ public class ConnectAckMessageHandler extends AbstractMessageHandler {
                     }
 
                     //校准消息序列号
-                    protoService.getImMemoryStore().updateMessageSeq(connectAckPayload.getMsgHead());
+//                    protoService.getImMemoryStore().updateMessageSeq(connectAckPayload.getMsgHead());
 
                     //重新发送失败的消息
                     protoService.resendMessage();

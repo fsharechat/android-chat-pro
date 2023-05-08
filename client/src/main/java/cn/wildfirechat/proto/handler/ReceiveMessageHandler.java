@@ -68,6 +68,7 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
                         } else {
                             processNotifyPullMessage(pullMessageResult.getMessageList());
                         }
+                        protoService.getImMemoryStore().updateMessageSeq(head);
                     }
                 });
             } catch (InvalidProtocolBufferException e) {
@@ -86,14 +87,17 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
             ProtoMessage protoMessage = protoService.convertProtoMessage(wfcMessage);
             //logger.i("current message target "+protoMessage.getTarget()+" contentType "+protoMessage.getContent().getType());
 
-            if(protoService.getImMemoryStore().canPersistent(protoMessage.getContent().getType())){
-                String target = protoMessage.getTarget();
-                List<ProtoMessage> protoMessages = protoMessageMap.get(target);
-                if(protoMessages == null){
-                    protoMessages = new ArrayList<>();
+            ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessage(protoMessage.getMessageId());
+            if(existProtoMessage == null){
+                if(protoService.getImMemoryStore().canPersistent(protoMessage.getContent().getType())){
+                    String target = protoMessage.getTarget();
+                    List<ProtoMessage> protoMessages = protoMessageMap.get(target);
+                    if(protoMessages == null){
+                        protoMessages = new ArrayList<>();
+                    }
+                    protoMessages.add(protoMessage);
+                    protoMessageMap.put(target,protoMessages);
                 }
-                protoMessages.add(protoMessage);
-                protoMessageMap.put(target,protoMessages);
             }
         }
         List<ProtoMessage> conversationProtoMessage = new ArrayList<>();
