@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -15,6 +17,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
@@ -72,6 +78,20 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
     private ContactFragment contactFragment;
     private DiscoveryFragment discoveryFragment;
     private MeFragment meFragment;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(new LifecycleObserver() {
+            @OnLifecycleEvent(Lifecycle.Event.ON_START)
+            public void onForeground(){
+                if(conversationListFragment != null){
+                    Log.i("Main","reload conversation");
+                    conversationListFragment.reloadConversations();
+                }
+            }
+        });
+    }
 
     @Override
     protected int contentLayout() {

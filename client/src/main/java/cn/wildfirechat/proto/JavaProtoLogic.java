@@ -370,6 +370,16 @@ public class JavaProtoLogic {
             }
         }
 
+        //排序置顶会话
+        Collections.sort(protoConversationInfos, new Comparator<ProtoConversationInfo>() {
+            @Override
+            public int compare(ProtoConversationInfo o1, ProtoConversationInfo o2) {
+                int result =  o2.getTimestamp() - o1.getTimestamp() >= 0  ? 1 : -1;
+                logger.i("getConversations top ",o1.getTarget() +" :"+o2.getTarget()+" result "+result);
+                return result;
+            }
+        });
+
         Collections.sort(protoConversationInfoList, new Comparator<ProtoConversationInfo>() {
             @Override
             public int compare(ProtoConversationInfo o1, ProtoConversationInfo o2) {

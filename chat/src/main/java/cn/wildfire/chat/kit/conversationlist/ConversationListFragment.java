@@ -147,12 +147,14 @@ public class ConversationListFragment extends Fragment {
         });
     }
 
-    private void reloadConversations() {
-        conversationListViewModel.getConversationListAsync(types, lines)
-                .observe(this, conversationInfos -> {
-                    adapter.setConversationInfos(conversationInfos);
-                    adapter.notifyDataSetChanged();
-                });
+    public void reloadConversations() {
+        if(conversationListViewModel != null){
+            conversationListViewModel.getConversationListAsync(types, lines)
+                    .observe(this, conversationInfos -> {
+                        adapter.setConversationInfos(conversationInfos);
+                        adapter.notifyDataSetChanged();
+                    });
+        }
     }
 
     @Override

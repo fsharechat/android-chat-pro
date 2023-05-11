@@ -420,7 +420,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         protoConversationInfo.setSilent(conversationSetting(ConversationSilent,type,target));
         protoConversationInfo.setLastMessage(lastProtoMessage);
         setUnReadCount(protoConversationInfo);
-        protoConversationInfo.setTimestamp(lastProtoMessage.getTimestamp());
+        protoConversationInfo.setTimestamp(lastProtoMessage != null ? lastProtoMessage.getTimestamp() : System.currentTimeMillis());
         return protoConversationInfo;
     }
 

@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -27,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 
@@ -267,8 +269,76 @@ public class FileUtils {
      * @see #getFile(Context, Uri)
      */
     public static String getPath(final Context context, final Uri uri) {
-        String absolutePath = getLocalPath(context, uri);
-        return absolutePath != null ? absolutePath : uri.toString();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            String absolutePath = getLocalPath(context, uri);
+            if (absolutePath != null) {
+                File file = new File(absolutePath);
+                if (file.exists() && file.canRead()) {
+                    return absolutePath;
+                }
+            }
+        }
+        File tmpDri = context.getExternalCacheDir();
+        Cursor cursor =
+                context.getContentResolver().query(uri, null, null, null, null);
+        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        cursor.moveToFirst();
+        String fileName = cursor.getString(nameIndex);
+        cursor.close();
+        File tmpFile = new File(tmpDri, fileName);
+        if (copyFile(context, uri, tmpFile)) {
+            return tmpFile.getAbsolutePath();
+        }
+
+        return null;
+    }
+
+    private static boolean copyFile(Context context, Uri srcUri, File dstFile) {
+        try {
+            InputStream inputStream = context.getContentResolver().openInputStream(srcUri);
+            if (inputStream == null) return false;
+            if (inputStream instanceof FileInputStream) {
+                FileChannel src = ((FileInputStream) inputStream).getChannel();
+                FileChannel dst = new FileOutputStream(dstFile).getChannel();
+                dst.transferFrom(src, 0, src.size());
+                src.close();
+                dst.close();
+            } else {
+                OutputStream outputStream = new FileOutputStream(dstFile);
+                copyStream(inputStream, outputStream);
+                inputStream.close();
+                outputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private static int copyStream(InputStream input, OutputStream output) throws Exception, IOException {
+        final int BUFFER_SIZE = 1024 * 2;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        BufferedInputStream in = new BufferedInputStream(input, BUFFER_SIZE);
+        BufferedOutputStream out = new BufferedOutputStream(output, BUFFER_SIZE);
+        int count = 0, n = 0;
+        try {
+            while ((n = in.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                out.write(buffer, 0, n);
+                count += n;
+            }
+            out.flush();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+            }
+            try {
+                in.close();
+            } catch (IOException e) {
+            }
+        }
+        return count;
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
