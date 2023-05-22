@@ -472,6 +472,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
             List<Map<String,Object>> conversation = queryConversation(COLUMN_CONVERSATION_TARGET +"="+"'"+target+"'"+" and "+COLUMN_CONVERSATION_TYPE+"="+conversationType,null);
             if(conversation != null && conversation.size() == 1){
                 protoConversationInfo = (ProtoConversationInfo) conversation.get(0).get(COLUMN_CONVERSATION_INFO);
+                updateConverSationWhenNeed(target,conversationType,line,protoConversationInfo);
             } else {
                 protoConversationInfo = newProtoConversation(target,conversationType,null);
                 insertConversations(target,conversationType,0,protoConversationInfo);
@@ -494,9 +495,20 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         List<ProtoConversationInfo> protoConversationInfoList = new ArrayList<>();
         for(Map<String,Object> objectMap : conversations){
             ProtoConversationInfo protoConversationInfo = (ProtoConversationInfo) objectMap.get(COLUMN_CONVERSATION_INFO);
+            updateConverSationWhenNeed(protoConversationInfo.getTarget(),protoConversationInfo.getConversationType(),protoConversationInfo.getLine(),protoConversationInfo);
             protoConversationInfoList.add(protoConversationInfo);
         }
         return protoConversationInfoList;
+    }
+
+    private void updateConverSationWhenNeed(String target,int conversationType,int line,ProtoConversationInfo lastProtoConversation){
+        ProtoMessage lastMessage = getLastMessage(target);
+        if(lastMessage != null &&
+                lastProtoConversation.getLastMessage() != null &&
+                lastMessage.getMessageId() != lastProtoConversation.getLastMessage().getMessageId()){
+            lastProtoConversation.setLastMessage(lastMessage);
+            updateConversation(conversationType,target,line,lastProtoConversation);
+        }
     }
 
     @Override
