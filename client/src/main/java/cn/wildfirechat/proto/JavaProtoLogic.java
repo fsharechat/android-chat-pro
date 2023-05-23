@@ -389,11 +389,11 @@ public class JavaProtoLogic {
                 return result;
             }
         });
-        for(ProtoConversationInfo protoConversationInfo: protoConversationInfoList){
-            logger.i("getConversations","timestamp:"+protoConversationInfo.getTimestamp()+ " target:"+protoConversationInfo.getTarget() + " type:"+protoConversationInfo.getConversationType());
-        }
-        protoConversationInfos.addAll(protoConversationInfoList);
 
+        protoConversationInfos.addAll(protoConversationInfoList);
+        for(ProtoConversationInfo protoConversationInfo: protoConversationInfos){
+            logger.i("getConversations","timestamp:"+protoConversationInfo.getTimestamp()+ " target:"+protoConversationInfo.getTarget() + " type:"+protoConversationInfo.getConversationType() +" lastMessage: "+protoConversationInfo.getLastMessage().getContent().getSearchableContent());
+        }
         ProtoConversationInfo[] protoConversationInfosArr = new ProtoConversationInfo[protoConversationInfos.size()];
         protoConversationInfos.toArray(protoConversationInfosArr);
         return protoConversationInfosArr;
