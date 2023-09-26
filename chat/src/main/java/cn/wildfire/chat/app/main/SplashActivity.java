@@ -40,6 +40,8 @@ public class SplashActivity extends AppCompatActivity {
             Manifest.permission.CAMERA,
             //存储空间
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            //蓝牙
+            Build.VERSION.SDK_INT >= 31 ? "android.permission.BLUETOOTH_CONNECT" : Manifest.permission.BLUETOOTH
     };
     private static final int REQUEST_CODE_DRAW_OVERLAY = 101;
 
