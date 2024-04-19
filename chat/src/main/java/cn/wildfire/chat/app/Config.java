@@ -9,12 +9,12 @@ import android.os.Environment;
 public class Config {
 
 //    String IM_SERVER_HOST = "192.168.0.102";
-    public static String IM_SERVER_HOST = "chat.comsince.cn";
+    public static String IM_SERVER_HOST = "server.comsince.cn";
 //    String IM_SERVER_HOST = "172.16.46.201";
     public static int IM_SERVER_PORT = 6789;
 
 //    String APP_SERVER_HOST = "192.168.0.102";
-    public static String APP_SERVER_HOST = "chat.comsince.cn";
+    public static String APP_SERVER_HOST = "server.comsince.cn";
 //    String APP_SERVER_HOST = "172.16.46.201";
     public static int APP_SERVER_PORT = 8081;
 
