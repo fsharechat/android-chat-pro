@@ -16,7 +16,7 @@ public class Config {
 //    String APP_SERVER_HOST = "192.168.0.102";
     public static String APP_SERVER_HOST = "backend-http.fsharechat.cn";
 //    String APP_SERVER_HOST = "172.16.46.201";
-    public static int APP_SERVER_PORT = 8081;
+    public static int APP_SERVER_PORT = 443;
 
     public static String ICE_ADDRESS = "turn:turn.fsharechat.cn:3478";
     public static String ICE_USERNAME = "comsince";
