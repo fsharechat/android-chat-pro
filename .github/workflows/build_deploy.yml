@@ -1,0 +1,53 @@
+name: Android Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'  # 只有以 'v' 开头的标签才会触发工作流程
+
+jobs:
+  build-and-release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Get Tag Name
+      id: get_tag_name
+      run: echo ::set-output name=tag_name::${GITHUB_REF#refs/tags/}  # 提取版本号部分
+
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}  # 使用提取的版本号作为标签名称
+        release_name: Release ${{ steps.get_tag_name.outputs.tag_name }}  # 使用提取的版本号作为发布名称
+        draft: false
+        prerelease: false
+
+    - name: Upload APK artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: chat/build/outputs/apk/release/chat-release.apk
+        asset_name: fsharechat-release-${{ steps.get_tag_name.outputs.tag_name }}.apk
+        asset_content_type: application/vnd.android.package-archive
