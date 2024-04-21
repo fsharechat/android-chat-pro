@@ -35,15 +35,15 @@ jobs:
 #        source: "chat/build/outputs/apk/release/"
 #        target: "/data0/minio/miniodata/minio-bucket-file-name/"  # 更改为您的目标服务器目录
 
-    - name: Deploy to Server # 第二步，rsync推文件
-      uses: easingthemes/ssh-deploy@v5.0.3 # 使用别人包装好的步骤镜像
-      with:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        ARGS: '-avzr --delete'
-        REMOTE_HOST:  ${{ secrets.SERVER_HOST }}
-        REMOTE_USER: ${{ secrets.SERVER_USERNAME }}
-        SOURCE: 'chat/build/outputs/apk/release/'
-        TARGET: '/data0/minio/miniodata/minio-bucket-file-name/'
+#    - name: Deploy to Server # 第二步，rsync推文件
+#      uses: easingthemes/ssh-deploy@v5.0.3 # 使用别人包装好的步骤镜像
+#      with:
+#        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#        ARGS: '-avzr'
+#        REMOTE_HOST:  ${{ secrets.SERVER_HOST }}
+#        REMOTE_USER: ${{ secrets.SERVER_USERNAME }}
+#        SOURCE: 'chat/build/outputs/apk/release/'
+#        TARGET: '/data0/minio/miniodata/minio-bucket-file-name/'
 
     - name: Create Release
       id: create_release
