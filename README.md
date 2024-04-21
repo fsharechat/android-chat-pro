@@ -1,5 +1,13 @@
 # 飞享
 
+# 版本自动编译流程
+```
+# 只有提交tag命令，才会触发提交
+git commit -m ""
+git tag v***
+git push && git push --tags
+```
+
 ## 更新日志
 ### 0.8.5 版本更新[857]
 * 升级SDK为31 ,需要JDK 11编译
