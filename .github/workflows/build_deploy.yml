@@ -26,6 +26,15 @@ jobs:
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
+    - name: Deploy to File server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        source: "chat/build/outputs/apk/release/chat-release.apk"
+        target: "/data0/minio/miniodata/minio-bucket-file-name/"  # 更改为您的目标服务器目录
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -46,12 +55,3 @@ jobs:
         asset_path: chat/build/outputs/apk/release/chat-release.apk
         asset_name: fsharechat-release-${{ github.ref_name }}.apk
         asset_content_type: application/vnd.android.package-archive
-
-    - name: Deploy to File server
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        password: ${{ secrets.SERVER_PASSWORD }}
-        source: "chat/build/outputs/apk/release/chat-release.apk"
-        target: "/data0/minio/miniodata/minio-bucket-file-name/"  # 更改为您的目标服务器目录
