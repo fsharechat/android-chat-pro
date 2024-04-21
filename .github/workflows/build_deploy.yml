@@ -33,7 +33,7 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         password: ${{ secrets.SERVER_PASSWORD }}
         source: "chat/build/outputs/apk/release/chat-release.apk"
-        target: "/data0/minio/miniodata/minio-bucket-file-name/"  # 更改为您的目标服务器目录
+        target: "/data0/minio/miniodata/minio-bucket-file-name/chat-release.apk"  # 更改为您的目标服务器目录
 
     - name: Create Release
       id: create_release
