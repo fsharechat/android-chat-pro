@@ -87,7 +87,7 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
             ProtoMessage protoMessage = protoService.convertProtoMessage(wfcMessage);
             //logger.i("current message target "+protoMessage.getTarget()+" contentType "+protoMessage.getContent().getType());
 
-            ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessage(protoMessage.getMessageId());
+            ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessageByUid(protoMessage.getMessageUid());
             if(existProtoMessage == null){
                 if(protoService.getImMemoryStore().canPersistent(protoMessage.getContent().getType())){
                     String target = protoMessage.getTarget();
@@ -128,7 +128,7 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
 
             //为什么要去重，因为语音通话消息信令发送频繁，容易出现消息重复，可能影响通话流程
             //这里的消息最好在一个线程里面进行，不然插入数据还没生效，可能出现幻读，否则会出现信令重复，可能出现意想不到的结果
-            ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessage(protoMessage.getMessageId());
+            ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessageByUid(protoMessage.getMessageUid());
             if(existProtoMessage == null) {
                 resultProtoMessageList.add(protoMessage);
                 //所有透传的消息都要发送给目标，只是存储的时候需要过滤,这里透传消息功能没有完成，还是需要存储
