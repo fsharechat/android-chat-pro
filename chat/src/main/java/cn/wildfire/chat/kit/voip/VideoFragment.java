@@ -246,7 +246,7 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
 
     @OnClick(R.id.minimizeImageView)
     public void minimize() {
-        gEngineKit.getCurrentSession().stopVideoSource();
+//        gEngineKit.getCurrentSession().stopVideoSource();
         ((SingleVoipCallActivity) getActivity()).showFloatingView();
     }
 
