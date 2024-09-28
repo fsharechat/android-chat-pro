@@ -31,6 +31,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import butterknife.ButterKnife;
 import com.comsince.github.p2penginekit.AVEngineKit;
+import com.comsince.github.p2penginekit.VideoProfile;
+
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.client.NotInitializedExecption;
 
@@ -158,6 +160,7 @@ public class SingleVoipCallActivity extends FragmentActivity implements AVEngine
 
         if (outgoing) {
             gEngineKit.startCall(targetId, audioOnly, SingleVoipCallActivity.this);
+            gEngineKit.setVideoProfile(VideoProfile.VP720P,false);
             gEngineKit.startPreview();
         } else {
             if (session == null) {
