@@ -47,7 +47,7 @@ public class SMSLoginActivity extends WfcBaseActivity {
     @OnTextChanged(value = R.id.phoneNumberEditText, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     void inputPhoneNumber(Editable editable) {
         String phone = editable.toString().trim();
-        if (phone.length() == 11) {
+        if (phone.length() == 11 || phone.contains("@")) {
             requestAuthCodeButton.setEnabled(true);
         } else {
             requestAuthCodeButton.setEnabled(false);

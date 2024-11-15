@@ -3,6 +3,7 @@ package cn.wildfire.chat.kit.user;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,7 +135,11 @@ public class UserInfoFragment extends Fragment {
         nameTextView.setVisibility(View.GONE);
         nickyNameTextView.setText(userViewModel.getUserDisplayName(userInfo.uid));
         if (ChatManager.Instance().isMyFriend(userInfo.uid)) {
-            mobileTextView.setText("电话:" + userInfo.mobile);
+            String mobileText = userInfo.mobile;
+            if(TextUtils.isEmpty(userInfo.mobile)){
+                mobileText = userInfo.email;
+            }
+            mobileTextView.setText("电话/邮箱: " + mobileText);
             mobileTextView.setVisibility(View.VISIBLE);
         }
     }
