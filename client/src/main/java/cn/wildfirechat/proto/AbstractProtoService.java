@@ -604,7 +604,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         builder.setKey(key);
         SimpleFuture<MinioMessage> minioMessageSimpleFuture = sendMessageSync(Signal.PUBLISH,SubSignal.GMURL,builder.build().toByteArray());
         try {
-            return minioMessageSimpleFuture.get(200,TimeUnit.MILLISECONDS);
+            return minioMessageSimpleFuture.get(2000,TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
