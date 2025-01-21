@@ -65,9 +65,11 @@ public class LocationMessageContent extends MessageContent {
     public MessagePayload encode() {
         MessagePayload payload = new MessagePayload();
         payload.searchableContent = title;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        thumbnail.compress(Bitmap.CompressFormat.JPEG, 75, baos);
-        payload.binaryContent = baos.toByteArray();
+        if(thumbnail != null){
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            thumbnail.compress(Bitmap.CompressFormat.JPEG, 75, baos);
+            payload.binaryContent = baos.toByteArray();
+        }
 
         try {
             JSONObject objWrite = new JSONObject();

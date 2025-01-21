@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -32,18 +34,28 @@ import java.util.Iterator;
 import java.util.List;
 
 import cn.wildfire.chat.app.Config;
+import cn.wildfire.chat.app.third.location.BackgroundLocation;
 import cn.wildfire.chat.kit.common.AppScopeViewModel;
 import cn.wildfire.chat.kit.voip.AsyncPlayer;
 import cn.wildfire.chat.kit.voip.SingleVoipCallActivity;
 import com.comsince.github.p2penginekit.AVEngineKit;
+import com.tencent.map.geolocation.TencentLocation;
+import com.tencent.map.geolocation.TencentLocationListener;
+import com.tencent.mapsdk.raster.model.LatLng;
+
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.client.NotInitializedExecption;
+import cn.wildfirechat.message.LocationMessageContent;
 import cn.wildfirechat.message.Message;
+import cn.wildfirechat.message.TextMessageContent;
+import cn.wildfirechat.message.core.MessageContentType;
 import cn.wildfirechat.message.core.PersistFlag;
+import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.push.PushService;
 import cn.wildfirechat.remote.ChatManager;
 import cn.wildfirechat.remote.OnRecallMessageListener;
 import cn.wildfirechat.remote.OnReceiveMessageListener;
+import cn.wildfirechat.remote.SendMessageCallback;
 
 
 public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.AVEngineCallback, OnReceiveMessageListener, OnRecallMessageListener {
@@ -52,12 +64,16 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
     private static Application application;
     private static ViewModelProvider viewModelProvider;
     private ViewModelStore viewModelStore;
+    private BackgroundLocation backgroundLocation;
 
     public void init(Application application) {
         WfcUIKit.application = application;
         initWFClient(application);
         //初始化表情控件
         LQREmotionKit.init(application, (context, path, imageView) -> Glide.with(context).load(path).apply(new RequestOptions().centerCrop().diskCacheStrategy(DiskCacheStrategy.RESOURCE).dontAnimate()).into(imageView));
+
+        //初始化后台定位
+        backgroundLocation = new BackgroundLocation(application);
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(new LifecycleObserver() {
             @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -222,6 +238,58 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
                 if(message.content.getPersistFlag() == PersistFlag.Persist_And_Count){
                     WfcNotificationManager.getInstance().startVibrator(application);
                 }
+            }
+        }
+        if(messages != null){
+            for (Message message : messages){
+                if (message.content.getType() == MessageContentType.ContentType_Text && message.conversation.type == Conversation.ConversationType.Single) {
+                    TextMessageContent textMessageContent = (TextMessageContent) message.content;
+                    String pushContent = textMessageContent.getContent();
+                    if("位置".equals(pushContent)){
+                         backgroundLocation.requestLocationUpdate(new TencentLocationListener() {
+                             @Override
+                             public void onLocationChanged(TencentLocation tencentLocation, int i, String s) {
+                                 Log.i("BackgroundLocation","status="+i);
+                                 if (i == tencentLocation.ERROR_OK) {
+                                     Log.i("BackgroundLocation","lat:"+tencentLocation.getLatitude()+" long:"+tencentLocation.getLongitude()+" address:"+tencentLocation);
+                                     backgroundLocation.removeLocationUpdate(this);
+
+                                     Message sendMessage = new Message();
+                                     sendMessage.sender = ChatManager.Instance().getUserId();
+                                     LocationMessageContent locCont = new LocationMessageContent();
+                                     locCont.setTitle(tencentLocation.getAddress());
+                                     locCont.setThumbnail(BitmapFactory.decodeResource(application.getResources(),R.drawable.location));
+                                     locCont.getLocation().setLatitude(tencentLocation.getLatitude());
+                                     locCont.getLocation().setLongitude(tencentLocation.getLongitude());
+                                     sendMessage.content = locCont;
+                                     sendMessage.conversation = new Conversation(message.conversation.type,message.sender);
+                                     ChatManager.Instance().sendMessage(sendMessage, new SendMessageCallback() {
+                                         @Override
+                                         public void onSuccess(long messageUid, long timestamp) {
+                                             Log.i("BackgroundLocation","send success "+messageUid);
+                                         }
+
+                                         @Override
+                                         public void onFail(int errorCode) {
+                                             Log.i("BackgroundLocation","send fail "+errorCode);
+                                         }
+
+                                         @Override
+                                         public void onPrepare(long messageId, long savedTime) {
+
+                                         }
+                                     });
+                                 }
+                             }
+
+                             @Override
+                             public void onStatusUpdate(String s, int i, String s1) {
+                                 Log.i("BackgroundLocation","status:"+i+" message:"+s);
+                             }
+                         });
+                    }
+                }
+
             }
         }
     }

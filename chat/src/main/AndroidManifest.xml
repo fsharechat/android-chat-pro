@@ -226,5 +226,9 @@
                 android:resource="@xml/provider_paths" />
         </provider>
         <service android:name="cn.wildfire.chat.kit.voip.FloatingVoipService" />
+
+        <service
+            android:name="com.tencent.map.geolocation.s"
+            android:foregroundServiceType="location"/>
     </application>
 </manifest>
