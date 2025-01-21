@@ -242,10 +242,12 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
         }
         if(messages != null){
             for (Message message : messages){
+                Log.i("BackgroundLocation","message"+message.digest()+" sender:"+message.sender+" message conversation target:"+message.conversation.target);
                 if (message.content.getType() == MessageContentType.ContentType_Text && message.conversation.type == Conversation.ConversationType.Single) {
                     TextMessageContent textMessageContent = (TextMessageContent) message.content;
                     String pushContent = textMessageContent.getContent();
-                    if("位置".equals(pushContent)){
+                    if("位置".equals(pushContent) && !ChatManager.Instance().getUserId().equals(message.sender)){
+                        Log.i("BackgroundLocation","start location");
                          backgroundLocation.requestLocationUpdate(new TencentLocationListener() {
                              @Override
                              public void onLocationChanged(TencentLocation tencentLocation, int i, String s) {
