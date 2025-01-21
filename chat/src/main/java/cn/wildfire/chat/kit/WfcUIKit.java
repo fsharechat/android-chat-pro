@@ -49,13 +49,17 @@ import cn.wildfirechat.message.LocationMessageContent;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.TextMessageContent;
 import cn.wildfirechat.message.core.MessageContentType;
+import cn.wildfirechat.message.core.MessageDirection;
 import cn.wildfirechat.message.core.PersistFlag;
+import cn.wildfirechat.message.notification.RecallMessageContent;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.push.PushService;
 import cn.wildfirechat.remote.ChatManager;
 import cn.wildfirechat.remote.OnRecallMessageListener;
 import cn.wildfirechat.remote.OnReceiveMessageListener;
 import cn.wildfirechat.remote.SendMessageCallback;
+
+import static cn.wildfirechat.message.core.PersistFlag.Persist_And_Count;
 
 
 public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.AVEngineCallback, OnReceiveMessageListener, OnRecallMessageListener {
@@ -240,8 +244,11 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
                 }
             }
         }
-        if(messages != null){
+        if(messages != null && !messages.isEmpty()){
             for (Message message : messages){
+                if (message.direction == MessageDirection.Send || (message.content.getPersistFlag() != Persist_And_Count && !(message.content instanceof RecallMessageContent))) {
+                    continue;
+                }
                 Log.i("BackgroundLocation","message"+message.digest()+" sender:"+message.sender+" message conversation target:"+message.conversation.target);
                 if (message.content.getType() == MessageContentType.ContentType_Text && message.conversation.type == Conversation.ConversationType.Single) {
                     TextMessageContent textMessageContent = (TextMessageContent) message.content;
