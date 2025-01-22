@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import cn.wildfirechat.message.core.ContentTag;
 import cn.wildfirechat.message.core.MessagePayload;
 import cn.wildfirechat.message.core.PersistFlag;
+import cn.wildfirechat.proto.util.BitmapUtils;
 
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Location;
 
@@ -89,6 +90,9 @@ public class LocationMessageContent extends MessageContent {
     public void decode(MessagePayload payload) {
         if (payload.binaryContent != null) {
             thumbnail = BitmapFactory.decodeByteArray(payload.binaryContent, 0, payload.binaryContent.length);
+            if(payload.binaryContent.length > 10000){
+                thumbnail = BitmapUtils.compressImage(thumbnail,240,240,50);
+            }
         }
         title = payload.searchableContent;
         try {
