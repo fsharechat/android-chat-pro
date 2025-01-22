@@ -29,6 +29,7 @@ import com.comsince.github.groupcallenginekit.AVGroupEngineKit;
 import com.comsince.github.ui.ChatRoomActivity;
 import com.lqr.emoji.LQREmotionKit;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -267,7 +268,10 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
                                      sendMessage.sender = ChatManager.Instance().getUserId();
                                      LocationMessageContent locCont = new LocationMessageContent();
                                      locCont.setTitle(tencentLocation.getAddress());
-                                     locCont.setThumbnail(BitmapFactory.decodeResource(application.getResources(),R.drawable.location));
+                                     Bitmap orignal = BitmapFactory.decodeResource(application.getResources(),R.drawable.location);
+                                     Bitmap thumbnail = compressImage(orignal,240,240,60);
+                                     Log.i("BackgroundLocation","orignal size:"+orignal.getByteCount()+" thumbnai size:"+thumbnail.getByteCount());
+                                     locCont.setThumbnail(thumbnail);
                                      locCont.getLocation().setLatitude(tencentLocation.getLatitude());
                                      locCont.getLocation().setLongitude(tencentLocation.getLongitude());
                                      sendMessage.content = locCont;
@@ -309,4 +313,37 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
             WfcNotificationManager.getInstance().handleRecallMessage(application, message);
         }
     }
+
+    public static Bitmap compressImage(Bitmap originalBitmap, int maxWidth, int maxHeight, int quality) {
+        // 获取原始图片的宽度和高度
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+
+        // 计算宽高比例
+        float aspectRatio = (float) originalWidth / originalHeight;
+
+        // 计算新的宽度和高度，保持比例
+        int newWidth = maxWidth;
+        int newHeight = (int) (newWidth / aspectRatio);
+
+        // 如果新的高度大于最大高度，则调整为最大高度
+        if (newHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = (int) (newHeight * aspectRatio);
+        }
+
+        // 根据计算出来的宽高来缩放图片
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
+
+        // 压缩图片到指定质量
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        scaledBitmap.compress(Bitmap.CompressFormat.PNG, quality, byteArrayOutputStream);
+
+        // 获取压缩后的字节数据
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+        // 将压缩后的字节数据解码回 Bitmap
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+    }
+
 }
