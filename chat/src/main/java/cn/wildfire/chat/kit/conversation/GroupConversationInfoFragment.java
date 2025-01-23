@@ -183,7 +183,7 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
             enableRemoveMember = true;
         }
         conversationMemberAdapter = new ConversationMemberAdapter(true, enableRemoveMember);
-        List<UserInfo> members = contactViewModel.getContacts(memberIds);
+        List<UserInfo> members = contactViewModel.getContacts(memberIds,groupInfo.target);
 
         for (GroupMember member : groupMembers) {
             for (UserInfo userInfo : members) {

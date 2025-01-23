@@ -159,36 +159,36 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
         conversationListViewModel.clearConversationUnreadStatus(conversationInfo);
         boolean connected = conversationListViewModel.connectionStatusLiveData().getValue() != null ? conversationListViewModel.connectionStatusLiveData().getValue() == ConnectionStatus.ConnectionStatusConnected : false;
         Log.d("ConversationViewHolder","connection status "+connected);
-        if(conversationInfo.conversation.type == Conversation.ConversationType.Group && connected){
-            List<GroupMember> groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,false);
-            Log.d("ConversationViewHolder","get group member "+groupMembers.size());
-            if(groupMembers == null || (groupMembers != null && groupMembers.size() == 0)){
-                groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,true);
-                Log.d("ConversationViewHolder","force refresh groupMemember");
-            }
-            GroupMember groupMember = null;
-            for(GroupMember member : groupMembers){
-                if(member.memberId.equals(ChatManager.Instance().getUserId())){
-                    groupMember = member;
-                    break;
-                }
-            }
-            if(groupMember == null){
-                new MaterialDialog.Builder(fragment.getActivity())
-                        .content("您已经不再群组中,是否删除改会话")
-                        .negativeText("取消")
-                        .positiveText("确认")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                conversationListViewModel.removeConversation(conversationInfo);
-                            }
-                        })
-                        .build()
-                        .show();
-                return;
-            }
-        }
+//        if(conversationInfo.conversation.type == Conversation.ConversationType.Group && connected){
+//            List<GroupMember> groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,false);
+//            Log.d("ConversationViewHolder","get group member "+groupMembers.size());
+//            if(groupMembers == null || (groupMembers != null && groupMembers.size() == 0)){
+//                groupMembers = ChatManager.Instance().getGroupMembers(conversationInfo.conversation.target,true);
+//                Log.d("ConversationViewHolder","force refresh groupMemember");
+//            }
+//            GroupMember groupMember = null;
+//            for(GroupMember member : groupMembers){
+//                if(member.memberId.equals(ChatManager.Instance().getUserId())){
+//                    groupMember = member;
+//                    break;
+//                }
+//            }
+//            if(groupMember == null){
+//                new MaterialDialog.Builder(fragment.getActivity())
+//                        .content("您已经不再群组中,是否删除改会话")
+//                        .negativeText("取消")
+//                        .positiveText("确认")
+//                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+//                            @Override
+//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                                conversationListViewModel.removeConversation(conversationInfo);
+//                            }
+//                        })
+//                        .build()
+//                        .show();
+//                return;
+//            }
+//        }
         Intent intent = new Intent(fragment.getActivity(), ConversationActivity.class);
         intent.putExtra("conversation", conversationInfo.conversation);
         fragment.startActivity(intent);

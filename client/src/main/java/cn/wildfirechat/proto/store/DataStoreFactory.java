@@ -3,12 +3,16 @@ package cn.wildfirechat.proto.store;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.ArraySet;
 
+import com.alibaba.fastjson.JSON;
 import com.comsince.github.logger.Log;
 import com.comsince.github.logger.LoggerFactory;
+import com.qiniu.android.utils.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +43,9 @@ public class DataStoreFactory implements ImMemoryStore{
 
     private static final String LAST_MESSAGE_SEQ = "last_message_seq";
     private static final String REQUEST_PROMESSAGE_IDS = "request_protomessage_ids";
+
+    private static final String USERINFO_PREFIX = "user_info_";
+    private static final String GROUPINFO_PREFIX = "group_info_";
 
     public static ImMemoryStore getDataStore(Context context){
         if(dataStoreFactory == null){
@@ -346,12 +353,18 @@ public class DataStoreFactory implements ImMemoryStore{
 
     @Override
     public ProtoGroupInfo getGroupInfo(String groupId) {
-        return memoryStore.getGroupInfo(groupId);
+        String groupInfoJson =  preferences.getString(GROUPINFO_PREFIX + groupId,"");
+        if(TextUtils.isEmpty(groupInfoJson)){
+            return null;
+        }
+        return JSON.parseObject(groupInfoJson,ProtoGroupInfo.class);
     }
 
     @Override
     public void addGroupInfo(String groupId, ProtoGroupInfo protoGroupInfo, boolean refresh) {
-        memoryStore.addGroupInfo(groupId,protoGroupInfo,refresh);
+        String groupJson = JSON.toJSONString(protoGroupInfo);
+        logger.i("add groupInfo "+groupJson);
+        preferences.edit().putString(GROUPINFO_PREFIX + groupId,groupJson).apply();
     }
 
     @Override
@@ -382,17 +395,34 @@ public class DataStoreFactory implements ImMemoryStore{
 
     @Override
     public ProtoUserInfo getUserInfo(String userId) {
-        return memoryStore.getUserInfo(userId);
+        String userInfoJson = preferences.getString(USERINFO_PREFIX + userId,"");
+        if(TextUtils.isEmpty(userInfoJson)){
+            return null;
+        }
+        return JSON.parseObject(userInfoJson,ProtoUserInfo.class);
     }
 
     @Override
     public ProtoUserInfo[] getUserInfos(String[] userIds) {
-        return memoryStore.getUserInfos(userIds);
+        if(userIds != null){
+            List<ProtoUserInfo> protoUserInfos = new ArrayList<>();
+            for(String userId : userIds){
+                ProtoUserInfo protoUserInfo = getUserInfo(userId);
+                if(protoUserInfo != null){
+                    protoUserInfos.add(protoUserInfo);
+                }
+            }
+
+            return protoUserInfos.toArray(new ProtoUserInfo[protoUserInfos.size()]);
+        }
+        return null;
     }
 
     @Override
     public void addUserInfo(ProtoUserInfo protoUserInfos) {
-        memoryStore.addUserInfo(protoUserInfos);
+        String userJson = JSON.toJSONString(protoUserInfos);
+        logger.i("add userInfo "+userJson);
+        preferences.edit().putString(USERINFO_PREFIX + protoUserInfos.getUid(),userJson).apply();
     }
 
     @Override
@@ -424,6 +454,7 @@ public class DataStoreFactory implements ImMemoryStore{
     public void stop() {
         preferences.edit().putLong(LAST_MESSAGE_SEQ,0).apply();
         preferences.edit().putStringSet(REQUEST_PROMESSAGE_IDS,Collections.EMPTY_SET).apply();
+        preferences.edit().clear().apply();
         memoryStore.stop();
         protoMessageDataStore.stop();
     }

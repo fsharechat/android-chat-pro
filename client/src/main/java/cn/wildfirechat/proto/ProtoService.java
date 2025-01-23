@@ -10,6 +10,7 @@ import com.qiniu.android.storage.UploadManager;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +117,7 @@ public class ProtoService extends AbstractProtoService {
                     .build();
             SimpleFuture<ProtoUserInfo[]> simpleFuture = sendMessageSync(Signal.PUBLISH,SubSignal.UPUI,request.toByteArray());
             try {
-                simpleFuture.get(500,TimeUnit.MILLISECONDS);
+                simpleFuture.get(200,TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -136,19 +137,35 @@ public class ProtoService extends AbstractProtoService {
     public ProtoUserInfo[] getUserInfos(String[] userIds, String groupId){
         log.i("getUserInfos "+Arrays.toString(userIds)+" groupId "+groupId);
 
+        List<ProtoUserInfo> resultProtoUserInfoList = new ArrayList<>();
         WFCMessage.PullUserRequest.Builder userRequestBuilder = WFCMessage.PullUserRequest.newBuilder();
         for(String user : userIds){
+            ProtoUserInfo protoUserInfo = imMemoryStore.getUserInfo(user);
+            if(protoUserInfo != null){
+                resultProtoUserInfoList.add(protoUserInfo);
+                continue;
+            }
             WFCMessage.UserRequest userRequest = WFCMessage.UserRequest.newBuilder().setUid(user).build();
             userRequestBuilder.addRequest(userRequest);
         }
-        SimpleFuture<ProtoUserInfo[]> simpleFuture = sendMessageSync(Signal.PUBLISH,SubSignal.UPUI,userRequestBuilder.build().toByteArray());
-        try {
-            return simpleFuture.get(200,TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            log.e("getuserinfo error ",e);
+        log.i("getUserInfos from backendService size:"+userRequestBuilder.getRequestList());
+        if(!userRequestBuilder.getRequestList().isEmpty()){
+            SimpleFuture<ProtoUserInfo[]> simpleFuture = sendMessageSync(Signal.PUBLISH,SubSignal.UPUI,userRequestBuilder.build().toByteArray());
+            try {
+                ProtoUserInfo[]  protoUserInfos;
+                if(!TextUtils.isEmpty(groupId)){
+                    protoUserInfos = simpleFuture.get();
+                } else {
+                    protoUserInfos = simpleFuture.get(200,TimeUnit.MILLISECONDS);
+                }
+                if(protoUserInfos != null && protoUserInfos.length > 0){
+                    resultProtoUserInfoList.addAll(Arrays.asList(protoUserInfos));
+                }
+            } catch (Exception e) {
+                log.e("getuserinfo error ",e);
+            }
         }
-
-        return imMemoryStore.getUserInfos(userIds);
+        return resultProtoUserInfoList.toArray(new ProtoUserInfo[resultProtoUserInfoList.size()]);
     }
 
     public void sendFriendRequest(String userId, String reason, JavaProtoLogic.IGeneralCallback callback){
