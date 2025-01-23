@@ -454,7 +454,6 @@ public class DataStoreFactory implements ImMemoryStore{
     public void stop() {
         preferences.edit().putLong(LAST_MESSAGE_SEQ,0).apply();
         preferences.edit().putStringSet(REQUEST_PROMESSAGE_IDS,Collections.EMPTY_SET).apply();
-        preferences.edit().clear().apply();
         memoryStore.stop();
         protoMessageDataStore.stop();
     }
