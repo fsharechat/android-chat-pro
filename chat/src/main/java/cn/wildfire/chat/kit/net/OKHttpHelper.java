@@ -134,7 +134,13 @@ public class OKHttpHelper {
                         callback.onFailure(statusResult.getCode(), statusResult.getMessage());
                     }
                 } else {
-                    ResultWrapper<T> wrapper = gson.fromJson(response.body().string(), new ResultType(type));
+                    String bodyResult = response.body().string();
+                    statusResult = gson.fromJson(bodyResult, StatusResult.class);
+                    if(!statusResult.isSuccess()){
+                        callback.onFailure(statusResult.getCode(),statusResult.getMessage());
+                        return;
+                    }
+                    ResultWrapper<T> wrapper = gson.fromJson(bodyResult, new ResultType(type));
                     if (wrapper == null) {
                         callback.onFailure(-1, "response is null");
                         return;
