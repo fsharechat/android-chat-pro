@@ -38,6 +38,7 @@ import cn.wildfirechat.model.ConversationInfo;
 import cn.wildfirechat.model.GroupInfo;
 import cn.wildfirechat.model.GroupMember;
 import cn.wildfirechat.remote.ChatManager;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 @SuppressWarnings("unused")
 public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
@@ -53,7 +54,7 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
     @Bind(R.id.timeTextView)
     protected TextView timeTextView;
     @Bind(R.id.portraitImageView)
-    protected ImageView portraitImageView;
+    protected CircleImageView portraitImageView;
     @Bind(R.id.slient)
     protected ImageView silentImageView;
     @Bind(R.id.unreadCountTextView)

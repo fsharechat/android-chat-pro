@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -21,7 +22,7 @@
     <LinearLayout
         android:id="@+id/contactLinearLayout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="55dp"
         android:background="@drawable/selector_common_item"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/item_margin_left_and_right"
@@ -29,12 +30,21 @@
         android:paddingRight="@dimen/item_margin_left_and_right"
         android:paddingBottom="@dimen/item_margin_top_and_bottom">
 
-        <ImageView
+<!--        <ImageView-->
+<!--            android:id="@+id/portraitImageView"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp"-->
+<!--            android:scaleType="centerCrop"-->
+<!--            android:src="@mipmap/default_header" />-->
+
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/portraitImageView"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:scaleType="centerCrop"
-            android:src="@mipmap/default_header" />
+            android:src="@mipmap/default_header"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#2196F3"/>
 
         <TextView
             android:id="@+id/nameTextView"

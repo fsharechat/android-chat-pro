@@ -1,5 +1,6 @@
 package cn.wildfire.chat.kit.conversationlist.viewholder;
 
+import android.graphics.Color;
 import android.view.View;
 
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -36,6 +37,7 @@ public class GroupConversationViewHolder extends ConversationViewHolder {
             name = "Group<" + conversationInfo.conversation.target + ">";
             portrait = null;
         }
+        portraitImageView.setBorderColor(0xFFF44336);
         GlideApp
                 .with(fragment)
                 .load(portrait)
