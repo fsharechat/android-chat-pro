@@ -16,8 +16,8 @@ android {
         applicationId "cn.comsince.fschat"
         minSdkVersion 21
         targetSdkVersion 29 //当targetversion大于23时，需要使用fileprovider
-        versionCode 926
-        versionName "0.9.2-beta"
+        versionCode 930
+        versionName "0.9.3-beta"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {

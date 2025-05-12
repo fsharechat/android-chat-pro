@@ -37,7 +37,7 @@ public class GroupConversationViewHolder extends ConversationViewHolder {
             name = "Group<" + conversationInfo.conversation.target + ">";
             portrait = null;
         }
-        portraitImageView.setBorderColor(0xFFF44336);
+//        portraitImageView.setBorderColor(0xFFF44336);
         GlideApp
                 .with(fragment)
                 .load(portrait)

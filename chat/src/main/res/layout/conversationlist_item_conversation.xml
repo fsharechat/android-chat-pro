@@ -30,7 +30,7 @@
             android:layout_marginTop="6dp"
             android:src="@mipmap/ic_launcher"
             app:civ_border_width="1dp"
-            app:civ_border_color="#FFC107"/>
+            app:civ_border_color="@color/gray"/>
 
         <!--未读消息数-->
         <TextView
