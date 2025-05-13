@@ -3,6 +3,7 @@ package cn.wildfire.chat.kit.conversation.message.viewholder;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
@@ -18,6 +19,8 @@ import butterknife.OnClick;
 import cn.wildfire.chat.kit.annotation.EnableContextMenu;
 import cn.wildfire.chat.kit.annotation.LayoutRes;
 import cn.wildfire.chat.kit.annotation.MessageContentType;
+import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
+import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfire.chat.kit.utils.FileUtils;
@@ -27,12 +30,17 @@ import cn.wildfirechat.message.FileMessageContent;
 import cn.wildfirechat.message.core.MessageStatus;
 
 @MessageContentType(FileMessageContent.class)
-@LayoutRes(resId = R.layout.conversation_item_file_send)
+@SendLayoutRes(resId = R.layout.conversation_item_file_send)
+@ReceiveLayoutRes(resId = R.layout.conversation_item_file_receive)
 @EnableContextMenu
 public class FileMessageContentViewHolder extends MediaMessageContentViewHolder {
 
-    @Bind(R.id.imageView)
+    @Bind(R.id.fileIconImageView)
     BubbleImageView imageView;
+    @Bind(R.id.fileNameTextView)
+    TextView fileNameTextView;
+    @Bind(R.id.fileSizeTextView)
+    TextView fileSizeTextView;
     private FileMessageContent fileMessageContent;
 
     public FileMessageContentViewHolder(FragmentActivity context, RecyclerView.Adapter adapter, View itemView) {
@@ -51,11 +59,14 @@ public class FileMessageContentViewHolder extends MediaMessageContentViewHolder 
             imageView.setProgressVisible(false);
             imageView.showShadow(false);
         }
-        Glide.with(context).load(R.mipmap.ic_file)
-                .apply(new RequestOptions().override(UIUtils.dip2Px(150), UIUtils.dip2Px(150)).centerCrop()).into(imageView);
+//        Glide.with(context).load(R.mipmap.ic_file)
+//                .apply(new RequestOptions().override(UIUtils.dip2Px(150), UIUtils.dip2Px(150)).centerCrop()).into(imageView);
+        fileNameTextView.setText(fileMessageContent.getName());
+        fileNameTextView.setSelected(true);
+        fileSizeTextView.setText(FileUtils.getReadableFileSize(fileMessageContent.getSize()));
     }
 
-    @OnClick(R.id.imageView)
+    @OnClick(R.id.fileIconImageView)
     public void onClick(View view) {
         if (message.isDownloading) {
             return;

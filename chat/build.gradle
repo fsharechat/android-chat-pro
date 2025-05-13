@@ -16,7 +16,7 @@ android {
         applicationId "cn.comsince.fschat"
         minSdkVersion 21
         targetSdkVersion 29 //当targetversion大于23时，需要使用fileprovider
-        versionCode 930
+        versionCode 931
         versionName "0.9.3-beta"
         multiDexEnabled true
         javaCompileOptions {
@@ -42,6 +42,15 @@ android {
             abiFilters "armeabi-v7a", 'x86', 'x86_64' // ，'armeabi', 'arm64-v8a', 'x86', 'x86_64'
         }
 
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def versionName = variant.versionName
+            def versionCode = variant.versionCode
+            def date = new Date().format("yyyyMMdd")
+            def fileName = "Fsharechat-${versionName}-${versionCode}-${date}.apk"
+            outputFileName = fileName
+        }
     }
     buildTypes {
         release {
