@@ -62,8 +62,13 @@ public class FileMessageContentViewHolder extends MediaMessageContentViewHolder 
 //        Glide.with(context).load(R.mipmap.ic_file)
 //                .apply(new RequestOptions().override(UIUtils.dip2Px(150), UIUtils.dip2Px(150)).centerCrop()).into(imageView);
         fileNameTextView.setText(fileMessageContent.getName());
-        fileNameTextView.setSelected(true);
         fileSizeTextView.setText(FileUtils.getReadableFileSize(fileMessageContent.getSize()));
+    }
+
+    @OnClick(R.id.fileNameTextView)
+    public void onClickName(View view){
+        boolean fileNameSelected = view.isSelected();
+        fileNameTextView.setSelected(!fileNameSelected);
     }
 
     @OnClick(R.id.fileIconImageView)
