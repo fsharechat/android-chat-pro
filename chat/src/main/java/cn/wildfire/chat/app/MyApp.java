@@ -23,7 +23,7 @@ public class MyApp extends BaseApp {
             wfcUIKit.init(this);
             MessageViewHolderManager.getInstance().registerMessageViewHolder(LocationMessageContentViewHolder.class);
 //            seuptwfcdirs();
-            setupWFCDirs();
+//            setupWFCDirs();
         }
     }
 

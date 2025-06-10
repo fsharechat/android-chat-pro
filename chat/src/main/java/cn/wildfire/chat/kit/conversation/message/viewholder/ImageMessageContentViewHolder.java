@@ -5,6 +5,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,14 @@ import cn.wildfire.chat.kit.GlideApp;
 import cn.wildfire.chat.kit.GlideRequest;
 import cn.wildfire.chat.kit.annotation.EnableContextMenu;
 import cn.wildfire.chat.kit.annotation.MessageContentType;
+import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.ConversationMessageAdapter;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.preview.MMPreviewActivity;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
+import cn.wildfire.chat.kit.utils.SaveMediaUtils;
 import cn.wildfire.chat.kit.widget.BubbleImageView;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.ImageMessageContent;
@@ -121,5 +124,12 @@ public class ImageMessageContentViewHolder extends MediaMessageContentViewHolder
                 imageView.showShadow(false);
             }
         }
+    }
+
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_SAVE, title = "保存图片", priority = 13)
+    public void recall(View itemView, UiMessage message) {
+        ImageMessageContent imageMessage = (ImageMessageContent) message.message.content;
+        SaveMediaUtils.saveFileToGalleryAsync(context,imageMessage.remoteUrl,false);
+//        Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
     }
 }

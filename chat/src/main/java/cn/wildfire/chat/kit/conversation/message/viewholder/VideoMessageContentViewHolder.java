@@ -13,11 +13,14 @@ import butterknife.OnClick;
 import cn.wildfire.chat.kit.annotation.EnableContextMenu;
 import cn.wildfire.chat.kit.annotation.LayoutRes;
 import cn.wildfire.chat.kit.annotation.MessageContentType;
+import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.conversation.ConversationMessageAdapter;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.preview.MMPreviewActivity;
+import cn.wildfire.chat.kit.utils.SaveMediaUtils;
 import cn.wildfire.chat.kit.widget.BubbleImageView;
 import cn.wildfirechat.chat.R;
+import cn.wildfirechat.message.ImageMessageContent;
 import cn.wildfirechat.message.VideoMessageContent;
 
 @MessageContentType(VideoMessageContent.class)
@@ -76,5 +79,12 @@ public class VideoMessageContentViewHolder extends MediaMessageContentViewHolder
         } else {
             return super.contextMenuItemFilter(uiMessage, tag);
         }
+    }
+
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_SAVE, title = "保存视频", priority = 13)
+    public void recall(View itemView, UiMessage message) {
+        VideoMessageContent videoMessageContent = (VideoMessageContent) message.message.content;
+        SaveMediaUtils.saveFileToGalleryAsync(context,videoMessageContent.remoteUrl,true);
+//        Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
     }
 }

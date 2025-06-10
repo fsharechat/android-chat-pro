@@ -27,8 +27,8 @@ public class Config {
     public static String SP_NAME = "config";
     public static String SP_KEY_SHOW_GROUP_MEMBER_ALIAS = "show_group_member_alias:%s";
 
-    public static String VIDEO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/video";
-    public static String AUDIO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/audio";
-    public static String PHOTO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/photo";
-    public static String FILE_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/wfc/file";
+    public static String VIDEO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/FshareChat/video";
+    public static String AUDIO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/FshareChat/audio";
+    public static String PHOTO_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/FshareChat/photo";
+    public static String FILE_SAVE_DIR = Environment.getExternalStorageDirectory().getPath() + "/FshareChat/file";
 }

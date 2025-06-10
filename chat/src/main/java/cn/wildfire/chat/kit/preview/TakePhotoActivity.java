@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.SystemClock;
 
 import com.cjt2325.cameralibrary.JCameraView;
@@ -37,6 +38,11 @@ public class TakePhotoActivity extends AppCompatActivity {
         //设置小视频保存路径
         File file = new File(Config.VIDEO_SAVE_DIR);
         if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        file = new File(Config.PHOTO_SAVE_DIR);
+        if(!file.exists()){
             file.mkdirs();
         }
 

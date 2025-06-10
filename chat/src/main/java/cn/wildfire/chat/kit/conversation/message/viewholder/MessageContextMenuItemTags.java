@@ -6,4 +6,5 @@ public interface MessageContextMenuItemTags {
     String TAG_CLIP = "clip";
     String TAG_FORWARD = "forward";
     String TAG_CHANEL_PRIVATE_CHAT = "chanelPrivateChat";
+    String TAG_SAVE = "save";
 }
