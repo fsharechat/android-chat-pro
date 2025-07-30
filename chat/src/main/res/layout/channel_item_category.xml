@@ -17,11 +17,12 @@
         android:textSize="13sp"
         android:visibility="visible" />
 
-    <View
+    <!-- 移除分割线 -->
+    <!-- <View
         android:id="@+id/dividerLine"
         style="@style/Line"
         android:layout_marginLeft="@dimen/item_margin_left_and_right"
         android:layout_marginRight="@dimen/item_margin_left_and_right"
-        android:visibility="visible" />
+        android:visibility="visible" /> -->
 
 </LinearLayout>
