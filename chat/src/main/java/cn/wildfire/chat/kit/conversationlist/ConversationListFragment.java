@@ -104,9 +104,10 @@ public class ConversationListFragment extends Fragment {
                 });
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        DividerItemDecoration itemDecor = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
-        itemDecor.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.recyclerview_horizontal_divider));
-        recyclerView.addItemDecoration(itemDecor);
+        // 移除分割线
+        // DividerItemDecoration itemDecor = new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL);
+        // itemDecor.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.recyclerview_horizontal_divider));
+        // recyclerView.addItemDecoration(itemDecor);
         recyclerView.setAdapter(adapter);
         ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 

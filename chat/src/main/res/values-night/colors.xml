@@ -36,4 +36,7 @@
     <!--快速索引bar颜色-->
     <color name="side_bar">#919091</color>
     <color name="side_bar_pressed">#BFBFBF</color>
+    
+    <!--底部导航栏背景色-->
+    <color name="bottom_nav_background">#121212</color>
 </resources> 
