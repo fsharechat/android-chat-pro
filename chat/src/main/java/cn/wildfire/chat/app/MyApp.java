@@ -17,6 +17,9 @@ public class MyApp extends BaseApp {
     public void onCreate() {
         super.onCreate();
 
+        // 应用主题设置
+        ThemeManager.getInstance(this).applyCurrentTheme();
+
         // 只在主进程初始化
         if (getCurProcessName(this).equals("cn.comsince.fschat")) {
             wfcUIKit = new WfcUIKit();

@@ -123,6 +123,10 @@
             android:label="关于"
             android:screenOrientation="portrait" />
         <activity
+            android:name="cn.wildfire.chat.kit.setting.ThemeSettingActivity"
+            android:label="主题设置"
+            android:screenOrientation="portrait" />
+        <activity
             android:name="cn.wildfire.chat.app.third.location.ui.activity.ShowLocationActivity"
             android:screenOrientation="portrait" />
 
