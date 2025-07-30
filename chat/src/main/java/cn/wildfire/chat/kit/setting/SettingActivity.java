@@ -39,4 +39,10 @@ public class SettingActivity extends WfcBaseActivity {
         Intent intent = new Intent(this, AboutActivity.class);
         startActivity(intent);
     }
+
+    @OnClick(R.id.themeSettingOptionItemView)
+    void themeSetting() {
+        Intent intent = new Intent(this, ThemeSettingActivity.class);
+        startActivity(intent);
+    }
 }
