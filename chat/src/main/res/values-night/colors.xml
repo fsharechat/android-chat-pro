@@ -4,7 +4,7 @@
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#7e7e7e</color>
 
-    <color name="white">#121212</color>
+    <color name="white">#000000</color>
     <color name="line">#2D2D2D</color>
 
     <color name="gray0">#E0E0E0</color>
@@ -38,5 +38,11 @@
     <color name="side_bar_pressed">#BFBFBF</color>
     
     <!--底部导航栏背景色-->
-    <color name="bottom_nav_background">#121212</color>
+    <color name="bottom_nav_background">#000000</color>
+    <!--底部导航栏选中颜色-->
+    <color name="bottom_nav_selected_color">#FFFFFF</color>
+    
+    <!--联系人列表字母分组头颜色-->
+    <color name="contact_section_header_bg">#2D2D2D</color>
+    <color name="contact_section_header_text">#B0B0B0</color>
 </resources> 

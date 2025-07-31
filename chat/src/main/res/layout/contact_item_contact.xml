@@ -11,11 +11,11 @@
         android:id="@+id/categoryTextView"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        android:background="#E5E5E5"
+        android:background="@color/contact_section_header_bg"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/item_margin_left_and_right"
         android:text="A"
-        android:textColor="#989898"
+        android:textColor="@color/contact_section_header_text"
         android:textSize="12sp"
         android:visibility="visible" />
 

@@ -12,13 +12,14 @@
         <item name="colorBackgroundFloating">@color/white</item>
         <item name="android:windowBackground">@color/white</item>
         <item name="android:colorBackground">@color/white</item>
+        <item name="android:navigationBarColor">@color/white</item>
     </style>
 
     <style name="AppTheme.Appbar">
         <item name="actionMenuTextColor">@color/menu_text_color</item>
         <item name="overlapAnchor">false</item>
         <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
