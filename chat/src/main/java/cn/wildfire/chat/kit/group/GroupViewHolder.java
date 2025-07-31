@@ -22,8 +22,6 @@ public class GroupViewHolder extends RecyclerView.ViewHolder {
     TextView nameTextView;
     @Bind(R.id.categoryTextView)
     TextView categoryTextView;
-    @Bind(R.id.dividerLine)
-    View dividerLine;
 
     protected GroupInfo groupInfo;
 

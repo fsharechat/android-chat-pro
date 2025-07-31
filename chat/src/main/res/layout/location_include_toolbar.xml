@@ -13,7 +13,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@color/colorPrimary">
+            android:background="@color/location_toolbar_background">
 
             <ImageView
                 android:id="@+id/backImageView"
@@ -21,7 +21,8 @@
                 android:layout_height="20dp"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:src="@mipmap/ic_back" />
+                android:src="@mipmap/ic_back"
+                android:tint="@color/location_toolbar_icon_color" />
 
             <View
                 android:id="@+id/backDividerView"
@@ -45,7 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textColor="@color/white"
+                    android:textColor="@color/location_toolbar_text_color"
                     android:textSize="17sp"
                     android:visibility="visible" />
 
@@ -53,7 +54,7 @@
                     android:id="@+id/subTitleTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
+                    android:textColor="@color/location_toolbar_text_color"
                     android:textSize="13sp"
                     android:visibility="gone"
                     tools:text="sub title"
@@ -70,6 +71,7 @@
                 android:layout_marginRight="@dimen/item_margin_left_and_right"
                 android:background="@null"
                 android:src="@mipmap/ic_add"
+                android:tint="@color/location_toolbar_icon_color"
                 android:visibility="gone"
                 tools:visibility="gone" />
 
@@ -96,7 +98,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:text="@string/add_friend"
-                    android:textColor="@color/white"
+                    android:textColor="@color/location_toolbar_text_color"
                     android:textSize="15sp" />
             </LinearLayout>
 
@@ -127,8 +129,8 @@
                     android:focusableInTouchMode="true"
                     android:hint="@string/search"
                     android:maxLines="1"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/gray1"
+                    android:textColor="@color/location_toolbar_text_color"
+                    android:textColorHint="@color/location_toolbar_hint_color"
                     android:textSize="12sp" />
 
                 <View
@@ -148,6 +150,7 @@
                 android:layout_toLeftOf="@id/ibAddMenu"
                 android:background="@null"
                 android:src="@mipmap/ic_search"
+                android:tint="@color/location_toolbar_icon_color"
                 android:visibility="gone"
                 tools:visibility="gone" />
 
@@ -160,7 +163,7 @@
                 android:layout_margin="10dp"
                 android:background="@drawable/selector_login_btn"
                 android:text="@string/send"
-                android:textColor="@color/white"
+                android:textColor="@color/location_toolbar_text_color"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
@@ -173,6 +176,7 @@
                 android:layout_margin="10dp"
                 android:background="@null"
                 android:src="@mipmap/ic_friend_more"
+                android:tint="@color/location_toolbar_icon_color"
                 android:visibility="gone"
                 tools:visibility="gone" />
 

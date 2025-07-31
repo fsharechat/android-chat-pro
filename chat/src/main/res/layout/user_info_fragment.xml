@@ -59,7 +59,7 @@
                         android:gravity="center"
                         android:singleLine="true"
                         android:text="wfc"
-                        android:textColor="@color/gray0"
+                        android:textColor="@color/user_info_name_text"
                         android:textSize="15sp" />
 
                     <ImageView
@@ -78,7 +78,7 @@
                     android:layout_marginTop="3dp"
                     android:singleLine="true"
                     android:text="@string/nickname_colon"
-                    android:textColor="@color/gray2"
+                    android:textColor="@color/user_info_nickname_text"
                     android:textSize="12sp" />
 
                 <TextView
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:text="@string/my_chat_account"
-                    android:textColor="@color/gray2"
+                    android:textColor="@color/user_info_nickname_text"
                     android:textSize="12sp"
                     android:visibility="gone" />
 
@@ -100,7 +100,8 @@
             style="@style/OptionItem"
             android:layout_marginTop="20dp"
             android:background="@drawable/selector_common_item"
-            app:left_text="设置昵称或别名" />
+            app:left_text="设置昵称或别名"
+            app:left_text_color="@color/user_info_option_text" />
 
         <com.lqr.optionitemview.OptionItemView
             android:id="@+id/qrCodeOptionItemView"
@@ -109,6 +110,7 @@
             android:background="@drawable/selector_common_item"
             android:visibility="gone"
             app:left_text="二维码"
+            app:left_text_color="@color/user_info_option_text"
             app:right_src="@mipmap/qr_code" />
 
 
@@ -123,7 +125,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/shape_user_info_send_msg"
             android:text="@string/send_message"
-            android:textColor="@color/white"
+            android:textColor="@color/user_info_button_text"
             android:textSize="16sp" />
 
         <Button
@@ -137,7 +139,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/shape_session_btn_voice_normal"
             android:text="视频聊天"
-            android:textColor="@color/gray0"
+            android:textColor="@color/user_info_voip_button_text"
             android:textSize="16sp"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -153,7 +155,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/shape_user_info_add_to_contact"
             android:text="@string/add_to_contact"
-            android:textColor="@color/white"
+            android:textColor="@color/user_info_button_text"
             android:textSize="16sp"
             android:visibility="gone"
             tools:visibility="visible" />
