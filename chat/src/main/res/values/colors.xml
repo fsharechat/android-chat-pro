@@ -5,6 +5,8 @@
     <color name="colorAccent">#7e7e7e</color>
 
     <color name="white">#ffffff</color>
+    <color name="badge_text_color">#FFFFFF</color>
+    <color name="text_color_white">#FFFFFF</color>
     <color name="line">#D2D2D2</color>
 
     <color name="gray0">#464646</color>

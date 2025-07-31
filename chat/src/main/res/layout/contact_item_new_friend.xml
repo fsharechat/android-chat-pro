@@ -73,7 +73,7 @@
             android:layout_marginLeft="10dp"
             android:background="@drawable/shape_new_friend_agree"
             android:text="接受"
-            android:textColor="@color/white"
+            android:textColor="@color/text_color_white"
             android:textSize="13sp"
             android:visibility="gone"
             tools:visibility="visible" />
