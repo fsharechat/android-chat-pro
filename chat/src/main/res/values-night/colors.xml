@@ -40,7 +40,9 @@
     <!--底部导航栏背景色-->
     <color name="bottom_nav_background">#000000</color>
     <!--底部导航栏选中颜色-->
-    <color name="bottom_nav_selected_color">#FFFFFF</color>
+    <color name="bottom_nav_selected_color">#5a7cff</color>
+    <!--底部导航栏选中填充颜色-->
+    <color name="bottom_nav_selected_color_filled">#5a7cff</color>
     
     <!--联系人列表字母分组头颜色-->
     <color name="contact_section_header_bg">#2D2D2D</color>

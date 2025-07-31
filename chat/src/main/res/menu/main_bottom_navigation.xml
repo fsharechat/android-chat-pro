@@ -4,20 +4,20 @@
 
     <item
         android:id="@+id/conversation_list"
-        android:icon="@mipmap/message_normal"
+        android:icon="@drawable/bottom_nav_message_selector"
         android:title="会话"
         app:showAsAction="never" />
     <item
         android:id="@+id/contact"
-        android:icon="@mipmap/contacts_normal"
+        android:icon="@drawable/bottom_nav_contacts_selector"
         android:title="联系人" />
     <item
         android:id="@+id/discovery"
-        android:icon="@mipmap/discovery_normal"
+        android:icon="@drawable/bottom_nav_discovery_selector"
         android:title="发现" />
     <item
         android:id="@+id/me"
-        android:icon="@mipmap/me_normal"
+        android:icon="@drawable/bottom_nav_me_selector"
         android:title="我" />
 
 </menu>
