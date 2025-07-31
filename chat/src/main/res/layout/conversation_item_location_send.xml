@@ -17,8 +17,8 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:text="嗯嗯嗯嗯嗯嗯嗯"
-        android:textColor="#444444"
-        android:textColorLink="#666666"
+        android:textColor="@color/location_text_send"
+        android:textColorLink="@color/location_text_link_send"
         android:textSize="12sp" />
 
     <ImageView

@@ -46,4 +46,14 @@
     <!--联系人列表字母分组头颜色-->
     <color name="contact_section_header_bg">#E5E5E5</color>
     <color name="contact_section_header_text">#989898</color>
+    
+    <!--聊天消息文字颜色（白天模式保持原有样式）-->
+    <color name="message_text_receive_dark">#444444</color>
+    <color name="message_text_send_dark">#FFFFFF</color>
+    <color name="message_text_link_receive_dark">#666666</color>
+    <color name="message_text_link_send_dark">#3655bf</color>
+    
+    <!--位置消息文字颜色（白天模式）-->
+    <color name="location_text_send">#000000</color>
+    <color name="location_text_link_send">#3655bf</color>
 </resources>
