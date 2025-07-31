@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="voip"
-            android:textColor="@color/white" />
+            android:textColor="@color/text_color_white" />
 
         <TextView
             android:id="@+id/descTextView"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="邀请你进行语音通话"
-            android:textColor="@color/white" />
+            android:textColor="@color/text_color_white" />
     </LinearLayout>
 
     <include

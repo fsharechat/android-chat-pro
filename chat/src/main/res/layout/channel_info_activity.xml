@@ -58,7 +58,7 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/shape_user_info_send_msg"
         android:text="收听频道"
-        android:textColor="@color/white"
+        android:textColor="@color/text_color_white"
         android:textSize="16sp" />
 </LinearLayout>
 

@@ -326,7 +326,7 @@
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/shape_btn_delete"
                 android:text="@string/delete_and_exit"
-                android:textColor="@color/white"
+                android:textColor="@color/text_color_white"
                 android:textSize="16sp"
                 android:visibility="gone"
                 tools:visibility="visible" />

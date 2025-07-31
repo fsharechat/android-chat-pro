@@ -34,7 +34,7 @@
         android:layout_marginRight="15dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/shape_user_info_send_msg"
-        android:textColor="@color/white"
+        android:textColor="@color/text_color_white"
         android:textSize="16sp"
         tools:text="加入群聊" />
 </LinearLayout>
