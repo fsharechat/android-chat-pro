@@ -56,4 +56,21 @@
     <!--位置消息文字颜色（白天模式）-->
     <color name="location_text_send">#000000</color>
     <color name="location_text_link_send">#3655bf</color>
+    
+    <!--用户信息页面文字颜色（白天模式）-->
+    <color name="user_info_name_text">#464646</color>
+    <color name="user_info_nickname_text">#969696</color>
+    <color name="user_info_option_text">#000000</color>
+    <color name="user_info_button_text">#FFFFFF</color>
+    <color name="user_info_voip_button_text">#464646</color>
+    
+    <!--群聊列表标题头颜色（白天模式）-->
+    <color name="group_list_header_bg">#E5E5E5</color>
+    <color name="group_list_header_text">#989898</color>
+    
+    <!--位置信息页面toolbar颜色（白天模式）-->
+    <color name="location_toolbar_background">#3e64e4</color>
+    <color name="location_toolbar_text_color">#FFFFFF</color>
+    <color name="location_toolbar_icon_color">#FFFFFF</color>
+    <color name="location_toolbar_hint_color">#7e7e7e</color>
 </resources>

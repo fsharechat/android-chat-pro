@@ -15,11 +15,11 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="23dp"
-            android:background="#E5E5E5"
+            android:background="@color/group_list_header_bg"
             android:gravity="center_vertical"
             android:paddingLeft="15dp"
             android:text="@string/group_cheat"
-            android:textColor="#989898"
+            android:textColor="@color/group_list_header_text"
             android:textSize="13sp"
             android:visibility="visible" />
 
