@@ -20,12 +20,13 @@
             android:id="@+id/searchEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="#80ffffff"
+            android:background="@color/search_bar_bg_transparent"
             android:drawableLeft="@mipmap/ic_search1"
             android:drawablePadding="10dp"
             android:hint="@string/search"
             android:paddingLeft="10dp"
-            android:textColorHint="@color/gray2"
+            android:textColor="@color/search_text_color"
+            android:textColorHint="@color/search_hint_color"
             android:textSize="14sp" />
     </FrameLayout>
 </LinearLayout>

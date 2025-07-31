@@ -73,4 +73,18 @@
     <color name="location_toolbar_text_color">#FFFFFF</color>
     <color name="location_toolbar_icon_color">#FFFFFF</color>
     <color name="location_toolbar_hint_color">#7e7e7e</color>
+    
+    <!--聊天界面辅助文字颜色（白天模式）-->
+    <color name="conversation_time_text">#FFFFFF</color>
+    <color name="conversation_name_text">#666666</color>
+    
+    <!--搜索界面表头颜色（白天模式）-->
+    <color name="search_category_header_bg">#E5E5E5</color>
+    <color name="search_category_header_text">#989898</color>
+    
+    <!--搜索栏颜色（白天模式）-->
+    <color name="search_bar_bg">#FFFFFF</color>
+    <color name="search_bar_bg_transparent">#80ffffff</color>
+    <color name="search_text_color">#000000</color>
+    <color name="search_hint_color">#969696</color>
 </resources>

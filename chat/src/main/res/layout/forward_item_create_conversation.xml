@@ -15,7 +15,7 @@
         android:background="@drawable/selector_common_item"
         android:gravity="center_vertical"
         android:text="创建新聊天"
-        android:textColor="#989898"
+        android:textColor="@color/search_category_header_text"
         android:textSize="13sp"
         android:visibility="visible" />
 

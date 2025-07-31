@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#e0ffffff"
+    android:background="@color/search_bar_bg"
     android:orientation="vertical">
 
     <!--联系人选择列表-->

@@ -8,9 +8,10 @@
         android:id="@+id/categoryTextView"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="#E5E5E5"
+        android:background="@color/search_category_header_bg"
         android:gravity="center_vertical"
-        android:text="聊天记录" />
+        android:text="聊天记录"
+        android:textColor="@color/search_category_header_text" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
