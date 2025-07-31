@@ -45,4 +45,16 @@
     <!--联系人列表字母分组头颜色-->
     <color name="contact_section_header_bg">#2D2D2D</color>
     <color name="contact_section_header_text">#B0B0B0</color>
+    
+    <!--聊天消息气泡颜色（重新设计黑暗模式）-->
+    <color name="message_bubble_receive_bg_dark">#3A3A3A</color>
+    <color name="message_bubble_send_bg_dark">#07C160</color>
+    <color name="message_text_receive_dark">#FFFFFF</color>
+    <color name="message_text_send_dark">#FFFFFF</color>
+    <color name="message_text_link_receive_dark">#E0E0E0</color>
+    <color name="message_text_link_send_dark">#E0E0E0</color>
+    
+    <!--位置消息文字颜色（黑暗模式）-->
+    <color name="location_text_send">#FFFFFF</color>
+    <color name="location_text_link_send">#E0E0E0</color>
 </resources> 

@@ -14,7 +14,7 @@
     android:paddingTop="12dp"
     android:paddingRight="16dp"
     android:paddingBottom="12dp"
-    android:textColor="#ffff"
-    android:textColorLink="#3655bf"
+    android:textColor="@color/message_text_send_dark"
+    android:textColorLink="@color/message_text_link_send_dark"
     android:textSize="15sp"
     tools:text="对方已挂断" />

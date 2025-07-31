@@ -61,6 +61,7 @@
         android:scrollHorizontally="true"
         android:focusable="true"
         android:focusableInTouchMode="true"
+        android:textColor="@color/message_text_send_dark"
         tools:text="测试文件名称萨的发色" />
 
     <TextView
@@ -73,6 +74,7 @@
         android:layout_toRightOf="@id/fileIconImageView"
         android:maxLines="1"
         android:text="20.15M"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textColor="@color/message_text_send_dark" />
 
 </RelativeLayout>
