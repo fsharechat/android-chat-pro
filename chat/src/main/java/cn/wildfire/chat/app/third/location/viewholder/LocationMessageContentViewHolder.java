@@ -17,6 +17,8 @@ import cn.wildfire.chat.app.third.location.ui.activity.ShowLocationActivity;
 import cn.wildfire.chat.kit.annotation.EnableContextMenu;
 import cn.wildfire.chat.kit.annotation.LayoutRes;
 import cn.wildfire.chat.kit.annotation.MessageContentType;
+import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
+import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.conversation.message.viewholder.NormalMessageContentViewHolder;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
@@ -24,7 +26,8 @@ import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.LocationMessageContent;
 
 @MessageContentType(LocationMessageContent.class)
-@LayoutRes(resId = R.layout.conversation_item_location_send)
+@SendLayoutRes(resId = R.layout.conversation_item_location_send)
+@ReceiveLayoutRes(resId = R.layout.conversation_item_location_receive)
 @EnableContextMenu
 public class LocationMessageContentViewHolder extends NormalMessageContentViewHolder {
 
