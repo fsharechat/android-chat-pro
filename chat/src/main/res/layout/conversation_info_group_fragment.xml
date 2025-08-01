@@ -150,7 +150,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginLeft="@dimen/option_item_margin_left"
                         android:layout_weight="1"
                         android:text="@string/message_free"
                         android:textColor="@color/black0"
@@ -184,7 +184,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginLeft="@dimen/option_item_margin_left"
                         android:layout_weight="1"
                         android:text="@string/set_conversation_to_top"
                         android:textColor="@color/black0"
@@ -213,7 +213,7 @@
                 <LinearLayout
                     android:id="@+id/markGroupLinearLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
+                    android:layout_height="50dp"
                     android:gravity="center_vertical"
                     android:visibility="gone"
                     tools:visibility="visible">
@@ -221,7 +221,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="15dp"
+                        android:layout_marginLeft="@dimen/option_item_margin_left"
                         android:layout_weight="1"
                         android:text="保存到通讯录"
                         android:textColor="@color/black0"
@@ -231,7 +231,7 @@
                         android:id="@+id/markGroupSwitchButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="15dp"
+                        android:layout_marginRight="@dimen/option_item_margin_right"
                         app:kswBackDrawable="@drawable/ios_back_drawable"
                         app:kswBackMeasureRatio="1.8"
                         app:kswThumbDrawable="@drawable/ios_thumb_selector"
@@ -281,7 +281,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginLeft="@dimen/option_item_margin_left"
                         android:layout_weight="1"
                         android:text="@string/show_group_member_name"
                         android:textColor="@color/black0"

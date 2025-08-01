@@ -46,7 +46,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginLeft="@dimen/option_item_margin_left"
                         android:layout_weight="1"
                         android:text="@string/message_free"
                         android:textColor="@color/black0"
@@ -80,7 +80,7 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:layout_marginLeft="@dimen/option_item_margin_left"
                         android:layout_weight="1"
                         android:text="@string/set_conversation_to_top"
                         android:textColor="@color/black0"

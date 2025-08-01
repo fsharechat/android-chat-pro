@@ -25,6 +25,20 @@ public class ThemeSettingActivity extends WfcBaseActivity {
     protected void afterViews() {
         super.afterViews();
         setTitle("主题设置");
+        
+        // 显示当前模式
+        updateCurrentModeDisplay();
+    }
+    
+    private void updateCurrentModeDisplay() {
+        ThemeManager themeManager = ThemeManager.getInstance(this);
+        int currentMode = themeManager.getThemeMode();
+        String currentModeString = themeManager.getThemeModeString(currentMode);
+        
+        android.widget.TextView currentModeTextView = findViewById(R.id.currentModeTextView);
+        if (currentModeTextView != null) {
+            currentModeTextView.setText(currentModeString);
+        }
     }
 
     @OnClick(R.id.lightModeOptionItemView)
