@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#000000</color>
-    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorPrimary">#1A1A1A</color>
+    <color name="colorPrimaryDark">#1A1A1A</color>
     <color name="colorAccent">#7e7e7e</color>
 
-    <color name="white">#000000</color>
+    <color name="white">#1A1A1A</color>
     <color name="badge_text_color">#FFFFFF</color>
     <color name="text_color_white">#FFFFFF</color>
     <color name="line">#2D2D2D</color>
@@ -14,7 +14,7 @@
     <color name="gray2">#969696</color>
     <color name="gray3">#696969</color>
     <color name="gray4">#2D2D2D</color>
-    <color name="gray5">#1E1E1E</color>
+    <color name="gray5">#1A1A1A</color>
     <color name="gray7">#666666</color>
     <color name="gray8">#404040</color>
     <color name="gray10">#2A2A2A</color>
@@ -40,7 +40,7 @@
     <color name="side_bar_pressed">#BFBFBF</color>
     
     <!--底部导航栏背景色-->
-    <color name="bottom_nav_background">#000000</color>
+    <color name="bottom_nav_background">#1A1A1A</color>
     <!--底部导航栏选中颜色-->
     <color name="bottom_nav_selected_color">#5a7cff</color>
     <!--底部导航栏选中填充颜色-->
@@ -92,74 +92,74 @@
     <color name="search_hint_color">#B0B0B0</color>
     
     <!--会话列表专用颜色（黑暗模式）-->
-    <color name="conversation_list_bg">#000000</color>
-    <color name="conversation_item_bg">#000000</color>
+    <color name="conversation_list_bg">#1A1A1A</color>
+    <color name="conversation_item_bg">#1A1A1A</color>
     <color name="conversation_item_name_text">#FFFFFF</color>
     <color name="conversation_item_time_text">#E0E0E0</color>
     <color name="conversation_item_content_text">#B0B0B0</color>
     
     <!--联系人列表专用颜色（黑暗模式）-->
-    <color name="contact_list_bg">#000000</color>
-    <color name="contact_item_bg">#000000</color>
+    <color name="contact_list_bg">#1A1A1A</color>
+    <color name="contact_item_bg">#1A1A1A</color>
     <color name="contact_item_name_text">#FFFFFF</color>
     <color name="contact_item_section_header_bg">#1E1E1E</color>
     <color name="contact_item_section_header_text">#B0B0B0</color>
     
     <!--发现页面专用颜色（黑暗模式）-->
-    <color name="discovery_page_bg">#000000</color>
+    <color name="discovery_page_bg">#1A1A1A</color>
     <color name="discovery_item_text">#FFFFFF</color>
     <color name="discovery_item_bg">#2D2D2D</color>
     
     <!--"我"页面专用颜色（黑暗模式）-->
-    <color name="me_page_bg">#000000</color>
+    <color name="me_page_bg">#1A1A1A</color>
     <color name="me_item_bg">#2D2D2D</color>
     <color name="me_item_text">#FFFFFF</color>
     <color name="me_user_name_text">#FFFFFF</color>
     <color name="me_user_account_text">#B0B0B0</color>
     
     <!--设置页面专用颜色（黑暗模式）-->
-    <color name="setting_page_bg">#000000</color>
+    <color name="setting_page_bg">#1A1A1A</color>
     <color name="setting_section_bg">#2D2D2D</color>
     <color name="setting_item_text">#FFFFFF</color>
     
     <!--主题设置页面专用颜色（黑暗模式）-->
-    <color name="theme_setting_page_bg">#000000</color>
+    <color name="theme_setting_page_bg">#1A1A1A</color>
     <color name="theme_setting_section_bg">#2D2D2D</color>
     <color name="theme_setting_item_text">#FFFFFF</color>
     
     <!--关于页面专用颜色（黑暗模式）-->
-    <color name="about_page_bg">#000000</color>
+    <color name="about_page_bg">#1A1A1A</color>
     <color name="about_section_bg">#2D2D2D</color>
     <color name="about_item_text">#FFFFFF</color>
     <color name="about_app_name_text">#B0B0B0</color>
     
     <!--用户信息页面专用颜色（黑暗模式）-->
-    <color name="user_info_page_bg">#000000</color>
+    <color name="user_info_page_bg">#1A1A1A</color>
     <color name="user_info_item_bg">#2D2D2D</color>
     
     <!--修改用户名页面专用颜色（黑暗模式）-->
-    <color name="change_name_page_bg">#000000</color>
+    <color name="change_name_page_bg">#1A1A1A</color>
     <color name="change_name_edit_text_color">#FFFFFF</color>
     <color name="change_name_tip_text_color">#B0B0B0</color>
     
     <!--Fragment容器页面专用颜色（黑暗模式）-->
-    <color name="fragment_container_bg">#000000</color>
+    <color name="fragment_container_bg">#1A1A1A</color>
     
     <!--会话详情页面专用颜色（黑暗模式）-->
-    <color name="conversation_info_page_bg">#000000</color>
+    <color name="conversation_info_page_bg">#1A1A1A</color>
     <color name="conversation_info_section_bg">#2D2D2D</color>
     <color name="conversation_info_item_text">#FFFFFF</color>
     <color name="conversation_info_option_text">#FFFFFF</color>
     <color name="conversation_info_hint_text">#B0B0B0</color>
     
     <!--创建会话页面专用颜色（黑暗模式）-->
-    <color name="create_conversation_page_bg">#000000</color>
-    <color name="create_conversation_search_bg">#000000</color>
+    <color name="create_conversation_page_bg">#1A1A1A</color>
+    <color name="create_conversation_search_bg">#1A1A1A</color>
     <color name="create_conversation_search_text">#FFFFFF</color>
     <color name="create_conversation_search_hint">#B0B0B0</color>
 
     <!--搜索结果页面专用颜色（黑暗模式）-->
-    <color name="search_result_page_bg">#000000</color>
+    <color name="search_result_page_bg">#1A1A1A</color>
     <color name="search_result_item_bg">#2D2D2D</color>
     <color name="search_result_item_text">#FFFFFF</color>
     <color name="search_result_item_desc_text">#B0B0B0</color>
@@ -168,14 +168,14 @@
     <color name="search_result_empty_text">#B0B0B0</color>
 
     <!--创建会话搜索结果专用颜色（黑暗模式）-->
-    <color name="contact_search_page_bg">#000000</color>
+    <color name="contact_search_page_bg">#1A1A1A</color>
     <color name="contact_search_item_bg">#2D2D2D</color>
     <color name="contact_search_item_text">#FFFFFF</color>
     <color name="contact_search_section_header_bg">#1E1E1E</color>
     <color name="contact_search_section_header_text">#B0B0B0</color>
 
     <!--群列表页面专用颜色（黑暗模式）-->
-    <color name="group_list_page_bg">#000000</color>
+    <color name="group_list_page_bg">#1A1A1A</color>
     <color name="group_list_header_bg">#1E1E1E</color>
     <color name="group_list_header_text">#B0B0B0</color>
     <color name="group_list_item_bg">#2D2D2D</color>
@@ -184,7 +184,7 @@
     <color name="group_list_tip_text">#B0B0B0</color>
 
     <!--添加到通讯录页面专用颜色（黑暗模式）-->
-    <color name="add_contact_page_bg">#000000</color>
+    <color name="add_contact_page_bg">#1A1A1A</color>
     <color name="add_contact_tip_text">#B0B0B0</color>
     <color name="add_contact_edit_text_color">#FFFFFF</color>
     <color name="add_contact_edit_hint_color">#B0B0B0</color>
@@ -192,7 +192,7 @@
     <color name="add_contact_search_text">#FFFFFF</color>
     <color name="add_contact_search_keyword_text">#4CAF50</color>
     <color name="add_contact_no_user_text">#B0B0B0</color>
-    <color name="add_contact_new_friend_bg">#000000</color>
+    <color name="add_contact_new_friend_bg">#1A1A1A</color>
     <color name="add_contact_new_friend_text">#B0B0B0</color>
     <color name="add_contact_new_friend_header_text">#B0B0B0</color>
 
