@@ -1,10 +1,12 @@
 package cn.wildfire.chat.app.third.location.ui.activity;
 
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -15,6 +17,7 @@ import android.widget.RelativeLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.jaeger.library.StatusBarUtil;
 import com.tencent.lbssearch.TencentSearch;
 import com.tencent.lbssearch.httpresponse.BaseObject;
 import com.tencent.lbssearch.httpresponse.HttpResponseListener;
@@ -39,6 +42,7 @@ import butterknife.Bind;
 import cn.wildfire.chat.app.third.location.ui.base.BaseActivity;
 import cn.wildfire.chat.app.third.location.ui.presenter.MyLocationAtPresenter;
 import cn.wildfire.chat.app.third.location.ui.view.IMyLocationAtView;
+import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfirechat.chat.R;
 
@@ -83,6 +87,28 @@ public class MyLocationActivity extends BaseActivity<IMyLocationAtView, MyLocati
         mLocationRequest = TencentLocationRequest.create();
         mTencentMap = mMap.getMap();
         mTencentSearch = new TencentSearch(this);
+
+        // Dark mode only: immersive status bar and light status bar icons
+        boolean isNight = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        if (isNight) {
+            StatusBarUtil.setTranslucentForImageView(this, 0, mAppBar);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                View decorView = getWindow().getDecorView();
+                int flags = decorView.getSystemUiVisibility();
+                flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR; // use light icons on dark bg
+                decorView.setSystemUiVisibility(flags);
+            }
+        } else {
+            // Day mode: set pure blue status bar without alpha overlay to avoid divider
+            StatusBarUtil.setColor(this, UIUtils.getColor(R.color.colorPrimaryDark), 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                View decorView = getWindow().getDecorView();
+                int flags = decorView.getSystemUiVisibility();
+                // ensure light icons on blue status bar
+                flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                decorView.setSystemUiVisibility(flags);
+            }
+        }
     }
 
     @Override
