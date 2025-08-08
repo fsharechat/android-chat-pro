@@ -71,8 +71,8 @@
     
 
     
-    <!--位置信息页面toolbar颜色（黑暗模式）-->
-    <color name="location_toolbar_background">#1E1E1E</color>
+    <!--位置信息页面toolbar颜色（黑暗模式，与应用背景一致）-->
+    <color name="location_toolbar_background">@color/colorPrimary</color>
     <color name="location_toolbar_text_color">#FFFFFF</color>
     <color name="location_toolbar_icon_color">#FFFFFF</color>
     <color name="location_toolbar_hint_color">#B0B0B0</color>
