@@ -82,7 +82,7 @@ public class VideoMessageContentViewHolder extends MediaMessageContentViewHolder
     }
 
     @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_SAVE, title = "保存视频", priority = 13)
-    public void recall(View itemView, UiMessage message) {
+    public void save(View itemView, UiMessage message) {
         VideoMessageContent videoMessageContent = (VideoMessageContent) message.message.content;
         SaveMediaUtils.saveFileToGalleryAsync(context,videoMessageContent.remoteUrl,true);
 //        Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();

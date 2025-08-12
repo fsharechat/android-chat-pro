@@ -127,7 +127,7 @@ public class ImageMessageContentViewHolder extends MediaMessageContentViewHolder
     }
 
     @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_SAVE, title = "保存图片", priority = 13)
-    public void recall(View itemView, UiMessage message) {
+    public void save(View itemView, UiMessage message) {
         ImageMessageContent imageMessage = (ImageMessageContent) message.message.content;
         SaveMediaUtils.saveFileToGalleryAsync(context,imageMessage.remoteUrl,false);
 //        Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
