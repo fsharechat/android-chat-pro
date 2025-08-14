@@ -52,7 +52,7 @@ public class FileLog implements Log{
             LogWriter writer = new LogWriter(mDir, mGlobalLock);
             writer.write(logs);
         } catch (Throwable throwable) {
-            //ignore
+            android.util.Log.e("write error",throwable.getMessage());
         } finally {
             if (copiedLogInfo != null) {
                 copiedLogInfo.clear();
@@ -223,11 +223,11 @@ public class FileLog implements Log{
 
         public static Builder defaultBuilder(Context context) {
             Builder builder = new Builder(context);
-            String dir = Package.processName(context);
-            if (TextUtils.isEmpty(dir)) {
-                dir = context.getPackageName();
-            }
-            builder.mDir = getDirPrefix(context) + dir;
+//            String dir = Package.processName(context);
+//            if (TextUtils.isEmpty(dir)) {
+//                dir = context.getPackageName();
+//            }
+            builder.mDir = getDirPrefix(context);
             builder.mDebug = Package.debuggable(context);
             return builder;
         }
@@ -235,9 +235,9 @@ public class FileLog implements Log{
         private static String getDirPrefix(Context context) {
             String path;
             if (Build.VERSION.SDK_INT >= 29) {
-                path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).getPath() + "/";
+                path = context.getExternalFilesDir(null)  + "/logs/";
             } else {
-                path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/";
+                path = context.getExternalFilesDir(null)  + "/logs/";
             }
             return path;
         }
