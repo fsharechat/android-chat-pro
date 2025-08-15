@@ -28,6 +28,7 @@ import cn.wildfirechat.proto.handler.AddGroupMemberHandler;
 import cn.wildfirechat.proto.handler.ConnectAckMessageHandler;
 import cn.wildfirechat.proto.handler.CreateGroupHandler;
 import cn.wildfirechat.proto.handler.DeliveryReportHandler;
+import cn.wildfirechat.proto.handler.DismissGroupHandler;
 import cn.wildfirechat.proto.handler.FriendPullHandler;
 import cn.wildfirechat.proto.handler.FriendRequestHandler;
 import cn.wildfirechat.proto.handler.GetMinioUploadUrlHandler;
@@ -88,6 +89,7 @@ public class ProtoService extends AbstractProtoService {
         messageHandlers.add(new AddGroupMemberHandler(this));
         messageHandlers.add(new KickoffMembersHandler(this));
         messageHandlers.add(new QuitGroupHandler(this));
+        messageHandlers.add(new DismissGroupHandler(this));
         messageHandlers.add(new ModifyGroupInfoHandler(this));
         messageHandlers.add(new ModifyMyInfoHandler(this));
         messageHandlers.add(new QiniuTokenHandler(this));
@@ -438,6 +440,13 @@ public class ProtoService extends AbstractProtoService {
         WFCMessage.QuitGroupRequest.Builder builder = WFCMessage.QuitGroupRequest.newBuilder();
         builder.setGroupId(groupId);
         sendMessage(Signal.PUBLISH,SubSignal.GQ,builder.build().toByteArray(),callback);
+    }
+
+    public void dismissGroup(String groupId, int[] notifyLines, ProtoMessageContent notifyMsg, JavaProtoLogic.IGeneralCallback callback){
+        log.i("dismissGroup "+groupId+" hasnotifyMsg "+(notifyMsg != null));
+        WFCMessage.DismissGroupRequest.Builder builder = WFCMessage.DismissGroupRequest.newBuilder();
+        builder.setGroupId(groupId);
+        sendMessage(Signal.PUBLISH, SubSignal.GD,builder.build().toByteArray(),callback);
     }
 
     public void modifyGroupInfo(String groupId, int modifyType, String newValue, int[] notifyLines, ProtoMessageContent notifyMsg, JavaProtoLogic.IGeneralCallback callback){
