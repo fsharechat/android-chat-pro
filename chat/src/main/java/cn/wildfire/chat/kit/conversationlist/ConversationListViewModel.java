@@ -12,6 +12,8 @@ import java.util.Map;
 
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfirechat.message.Message;
+import cn.wildfirechat.message.notification.DismissGroupNotificationContent;
+import cn.wildfirechat.message.notification.QuitGroupNotificationContent;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ConversationInfo;
 import cn.wildfirechat.model.GroupInfo;
@@ -167,6 +169,21 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
                     continue;
                 }
                 Conversation conversation = message.conversation;
+                if(conversation.type == Conversation.ConversationType.Group){
+                    if(message.content instanceof DismissGroupNotificationContent){
+                        ConversationInfo conversationInfo = ChatManager.Instance().getConversation(message.conversation);
+                        removeConversation(conversationInfo);
+                        return;
+                    }
+                    if(message.content instanceof QuitGroupNotificationContent){
+                        QuitGroupNotificationContent quitGroupNotificationContent = (QuitGroupNotificationContent) message.content;
+                        if(quitGroupNotificationContent.fromSelf){
+                            ConversationInfo conversationInfo = ChatManager.Instance().getConversation(message.conversation);
+                            removeConversation(conversationInfo);
+                            return;
+                        }
+                    }
+                }
                 if (types.contains(conversation.type) && lines.contains(conversation.line)) {
                     ConversationInfo conversationInfo = ChatManager.Instance().getConversation(message.conversation);
                     postConversationInfo(conversationInfo);
@@ -219,6 +236,9 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
     }
 
     public void removeConversation(ConversationInfo conversationInfo) {
+        //清楚计数标记
+        clearConversationUnreadStatus(conversationInfo);
+
         Conversation conversation = conversationInfo.conversation;
         if (!types.contains(conversation.type) || !lines.contains(conversation.line)) {
             Log.e(ConversationListViewModel.class.getSimpleName(), "this conversationListViewModel can not remove the target conversation");

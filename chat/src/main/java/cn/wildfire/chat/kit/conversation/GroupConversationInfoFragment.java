@@ -1,5 +1,6 @@
 package cn.wildfire.chat.kit.conversation;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,7 +23,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.lqr.optionitemview.OptionItemView;
@@ -114,6 +114,10 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
     private static final int REQUEST_REMOVE_MEMBER = 200;
     private static final int REQUEST_CODE_SET_GROUP_NAME = 300;
 
+    public static final int RESULT_QUIT_GROUP_CONVERSATION_SUCCESS = 2;
+    public static final int RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS = 3;
+    public static final int RESULT_USER_CHECK_REMOVE_GROUP_CONVERSATION_SUCCESS = 4;
+
     public static GroupConversationInfoFragment newInstance(ConversationInfo conversationInfo) {
         GroupConversationInfoFragment fragment = new GroupConversationInfoFragment();
         Bundle args = new Bundle();
@@ -163,7 +167,9 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
         groupInfo = groupViewModel.getGroupInfo(conversationInfo.conversation.target, false);
 
         if (groupMember == null || groupInfo == null) {
-            Toast.makeText(getActivity(), "你不在群组或发生错误, 请稍后再试", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getActivity(), "你不在群组或发生错误, 请稍后再试", Toast.LENGTH_SHORT).show();
+            String groupName = groupInfo != null ? groupInfo.name : "";
+            getActivity().setResult(RESULT_USER_CHECK_REMOVE_GROUP_CONVERSATION_SUCCESS,new Intent().putExtra("conversationInfo",conversationInfo).putExtra("groupName",groupName));
             getActivity().finish();
             return;
         }
@@ -264,13 +270,14 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
         if(groupInfo != null && userViewModel.getUserId().equals(groupInfo.owner) ){
             MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
                     .title("解散群组")
-                    .content("请确认是否要解散此群组，群组解散将不能恢复,请谨慎操作")
+                    .content("请确认是否要解散此群组,群组解散将不能恢复,请谨慎操作")
                     .positiveText("确认")
                     .negativeText("取消")
                     .onPositive(((quitDialog, which) -> {
                         groupViewModel.dismissGroup(conversationInfo.conversation.target,Collections.singletonList(0))
                                 .observe(this, aBoolean -> {
                                     if (aBoolean != null && aBoolean) {
+                                        getActivity().setResult(RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS,new Intent().putExtra("conversationInfo",conversationInfo).putExtra("groupName",groupInfo.name));
                                         getActivity().finish();
                                     } else {
                                         Toast.makeText(getActivity(), "解散群组失败", Toast.LENGTH_SHORT).show();
@@ -282,13 +289,26 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
                     }).build();
             dialog.show();
         } else {
-            groupViewModel.quitGroup(conversationInfo.conversation.target, Collections.singletonList(0)).observe(this, aBoolean -> {
-                if (aBoolean != null && aBoolean) {
-                    getActivity().finish();
-                } else {
-                    Toast.makeText(getActivity(), "退出群组失败", Toast.LENGTH_SHORT).show();
-                }
-            });
+            MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
+                    .title("退出群组")
+                    .content("请确认是否要退出此群组")
+                    .positiveText("确认")
+                    .negativeText("取消")
+                    .onPositive(((quitDialog, which) -> {
+                        groupViewModel.quitGroup(conversationInfo.conversation.target, Collections.singletonList(0)).observe(this, aBoolean -> {
+                            if (aBoolean != null && aBoolean) {
+                                getActivity().setResult(RESULT_QUIT_GROUP_CONVERSATION_SUCCESS,new Intent().putExtra("conversationInfo",conversationInfo).putExtra("groupName",groupInfo.name));
+                                getActivity().finish();
+                            } else {
+                                Toast.makeText(getActivity(), "退出群组失败", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }))
+                    .onNegative((quitDialog, which) -> {
+                        quitDialog.dismiss();
+                    }).build();
+            dialog.show();
+
         }
 
     }

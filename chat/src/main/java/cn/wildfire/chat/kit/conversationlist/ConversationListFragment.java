@@ -1,10 +1,13 @@
 package cn.wildfire.chat.kit.conversationlist;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,12 +20,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import cn.wildfire.chat.kit.ChatManagerHolder;
 import cn.wildfire.chat.kit.IMServiceStatusViewModel;
 import cn.wildfire.chat.kit.WfcUIKit;
+import cn.wildfire.chat.kit.conversation.ConversationActivity;
+import cn.wildfire.chat.kit.conversation.GroupConversationInfoFragment;
 import cn.wildfire.chat.kit.conversationlist.notification.ConnectionStatusNotification;
 import cn.wildfire.chat.kit.conversationlist.notification.StatusNotificationViewModel;
 import cn.wildfire.chat.kit.user.UserViewModel;
@@ -31,6 +38,7 @@ import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ConversationInfo;
 import cn.wildfirechat.model.UserInfo;
+import cn.wildfirechat.remote.ChatManager;
 
 public class ConversationListFragment extends Fragment {
     private RecyclerView recyclerView;
@@ -39,6 +47,8 @@ public class ConversationListFragment extends Fragment {
             Conversation.ConversationType.Group,
             Conversation.ConversationType.Channel);
     private static final List<Integer> lines = Arrays.asList(0);
+
+    public static final int REQUEST_OPEN_CONVERSATION = 100;
 
     private ConversationListViewModel conversationListViewModel;
     private IMServiceStatusViewModel imServiceStatusViewModel;
@@ -168,4 +178,53 @@ public class ConversationListFragment extends Fragment {
         userViewModel.userInfoLiveData().removeObserver(userInfoLiveDataObserver);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_OPEN_CONVERSATION:
+
+                if(resultCode == GroupConversationInfoFragment.RESULT_USER_CHECK_REMOVE_GROUP_CONVERSATION_SUCCESS
+//                        || resultCode == GroupConversationInfoFragment.RESULT_QUIT_GROUP_CONVERSATION_SUCCESS
+//                        || resultCode == GroupConversationInfoFragment.RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS
+                ){
+
+                    String groupName = data.getStringExtra("groupName");
+                    String title = TextUtils.isEmpty(groupName) ? "删除会话" : groupName;
+                    String content = "你已经不在群组或者当前群组已经解散，确认是否删除会话";
+                    switch (resultCode){
+//                        case GroupConversationInfoFragment.RESULT_QUIT_GROUP_CONVERSATION_SUCCESS:
+//                            content = "你已经不在此群组，确认是否删除会话";
+//                            break;
+//                        case GroupConversationInfoFragment.RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS:
+//                            content = "当前群组已经解散，确认是否删除会话";
+//                            break;
+                        default:
+                            break;
+                    }
+                    MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
+                            .title(title)
+                            .content(content)
+                            .positiveText("确认")
+                            .negativeText("取消")
+                            .onPositive(((quitDialog, which) -> {
+                                ConversationInfo conversationInfo = data.getParcelableExtra("conversationInfo");
+                                if(conversationInfo != null){
+                                    //重新获取conversation 不然当前退出群组时，未读消息为0，导致删除会话仍然又未读消息
+                                    conversationInfo = ChatManager.Instance().getConversation(conversationInfo.conversation);
+                                    conversationListViewModel.removeConversation(conversationInfo);
+                                }
+                            }))
+                            .onNegative((quitDialog, which) -> {
+                                quitDialog.dismiss();
+                            }).build();
+                    dialog.show();
+                }
+
+                break;
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
+    }
 }

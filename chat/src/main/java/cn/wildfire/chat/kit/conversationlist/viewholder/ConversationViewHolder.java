@@ -25,6 +25,7 @@ import butterknife.ButterKnife;
 import cn.wildfire.chat.kit.annotation.ConversationContextMenuItem;
 import cn.wildfire.chat.kit.conversation.ConversationActivity;
 import cn.wildfire.chat.kit.conversation.Draft;
+import cn.wildfire.chat.kit.conversationlist.ConversationListFragment;
 import cn.wildfire.chat.kit.conversationlist.ConversationListViewModel;
 import cn.wildfire.chat.kit.conversationlist.ConversationListViewModelFactory;
 import cn.wildfire.chat.kit.group.GroupViewModel;
@@ -192,7 +193,7 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
 //        }
         Intent intent = new Intent(fragment.getActivity(), ConversationActivity.class);
         intent.putExtra("conversation", conversationInfo.conversation);
-        fragment.startActivity(intent);
+        fragment.startActivityForResult(intent, ConversationListFragment.REQUEST_OPEN_CONVERSATION);
     }
 
     @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_REMOVE,
