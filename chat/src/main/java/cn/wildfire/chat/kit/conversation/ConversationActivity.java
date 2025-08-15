@@ -65,6 +65,7 @@ public class ConversationActivity extends WfcBaseActivity implements
         ConversationMessageAdapter.OnPortraitLongClickListener, ConversationInputPanel.OnConversationInputPanelStateChangeListener {
 
     public static final int REQUEST_PICK_MENTION_CONTACT = 100;
+    public static final int REQUEST_CONVERSATION_INFO = 200;
 
     private Conversation conversation;
     private boolean loadingNewMessage;
@@ -466,7 +467,7 @@ public class ConversationActivity extends WfcBaseActivity implements
     private void showConversationInfo() {
         Intent intent = new Intent(ConversationActivity.this, ConversationInfoActivity.class);
         intent.putExtra("conversationInfo", ChatManager.Instance().getConversation(conversation));
-        startActivity(intent);
+        startActivityForResult(intent,REQUEST_CONVERSATION_INFO);
     }
 
     @OnTouch({R.id.contentLayout, R.id.msgRecyclerView})
@@ -516,6 +517,13 @@ public class ConversationActivity extends WfcBaseActivity implements
             position = position > 0 ? position - 1 : 0;
             inputPanel.editText.getEditableText().replace(position, position + 1, spannableString);
             return;
+        } else if(requestCode == REQUEST_CONVERSATION_INFO
+                && (resultCode == GroupConversationInfoFragment.RESULT_QUIT_GROUP_CONVERSATION_SUCCESS
+                || resultCode == GroupConversationInfoFragment.RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS
+                || resultCode == GroupConversationInfoFragment.RESULT_USER_CHECK_REMOVE_GROUP_CONVERSATION_SUCCESS
+        )){
+            setResult(resultCode,data);
+            finish();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
