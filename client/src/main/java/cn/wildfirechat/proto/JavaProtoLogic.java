@@ -585,7 +585,9 @@ public class JavaProtoLogic {
     }
 
 
-    public static void dismissGroup(String groupId, int[] notifyLines, ProtoMessageContent notifyMsg, JavaProtoLogic.IGeneralCallback callback){}
+    public static void dismissGroup(String groupId, int[] notifyLines, ProtoMessageContent notifyMsg, JavaProtoLogic.IGeneralCallback callback){
+        protoService.dismissGroup(groupId,notifyLines,notifyMsg,callback);
+    }
 
     public static void modifyGroupInfo(String groupId, int modifyType, String newValue, int[] notifyLines, ProtoMessageContent notifyMsg, JavaProtoLogic.IGeneralCallback callback){
         protoService.modifyGroupInfo(groupId,modifyType,newValue,notifyLines,notifyMsg,callback);

@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.lqr.optionitemview.OptionItemView;
@@ -181,6 +182,7 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
         boolean enableRemoveMember = false;
         if (groupMember.type != GroupMember.GroupMemberType.Normal || userId.equals(groupInfo.owner)) {
             enableRemoveMember = true;
+            quitGroupButton.setText(R.string.dismiss_and_exit);
         }
         conversationMemberAdapter = new ConversationMemberAdapter(true, enableRemoveMember);
         List<UserInfo> members = contactViewModel.getContacts(memberIds,groupInfo.target);
@@ -259,13 +261,36 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
 
     @OnClick(R.id.quitButton)
     void quitGroup() {
-        groupViewModel.quitGroup(conversationInfo.conversation.target, Collections.singletonList(0)).observe(this, aBoolean -> {
-            if (aBoolean != null && aBoolean) {
-                getActivity().finish();
-            } else {
-                Toast.makeText(getActivity(), "退出群组失败", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if(groupInfo != null && userViewModel.getUserId().equals(groupInfo.owner) ){
+            MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
+                    .title("解散群组")
+                    .content("请确认是否要解散此群组，群组解散将不能恢复,请谨慎操作")
+                    .positiveText("确认")
+                    .negativeText("取消")
+                    .onPositive(((quitDialog, which) -> {
+                        groupViewModel.dismissGroup(conversationInfo.conversation.target,Collections.singletonList(0))
+                                .observe(this, aBoolean -> {
+                                    if (aBoolean != null && aBoolean) {
+                                        getActivity().finish();
+                                    } else {
+                                        Toast.makeText(getActivity(), "解散群组失败", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }))
+                    .onNegative((quitDialog, which) -> {
+                        quitDialog.dismiss();
+                    }).build();
+            dialog.show();
+        } else {
+            groupViewModel.quitGroup(conversationInfo.conversation.target, Collections.singletonList(0)).observe(this, aBoolean -> {
+                if (aBoolean != null && aBoolean) {
+                    getActivity().finish();
+                } else {
+                    Toast.makeText(getActivity(), "退出群组失败", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
     }
 
     @OnClick(R.id.clearMessagesOptionItemView)
