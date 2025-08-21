@@ -93,8 +93,8 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     private int reconnectNum = 0;
     private AlarmWrapper alarmWrapper;
     private HeartbeatManager heartbeatManager;
-    Timer heartbeatTimer;
-    Timer reconnectTimer;
+    volatile Timer heartbeatTimer;
+    volatile Timer reconnectTimer;
 
     public AbstractProtoService(Context context,AlarmWrapper alarmWrapper){
         this.alarmWrapper = alarmWrapper;
@@ -221,6 +221,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     private void schedule(){
         heartbeatManager.reportHeartbeatScheduleTime(System.currentTimeMillis());
+        cancelHeartTimer();
         alarmWrapper.schedule(heartbeatTimer =
                 new Timer.Builder().period(heartbeatManager.currentHeartInterval())
                         .wakeup(true)

@@ -16,15 +16,13 @@ public class Timer {
 
     @Override
     public String toString() {
-        if (TextUtils.isEmpty(toString)) {
-            toString = "Timer{" +
-                    "key=" + key +
-                    ", period=" + period +
-                    ", wakeup=" + wakeup +
-                    ", action=" + action +
-                    ", schedule=" + schedule +
-                    '}';
-        }
+        toString = "Timer{" +
+                "key=" + key +
+                ", period=" + period +
+                ", wakeup=" + wakeup +
+                ", action=" + action +
+                ", schedule=" + schedule +
+                '}';
         return toString;
     }
 
