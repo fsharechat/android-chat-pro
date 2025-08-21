@@ -3,12 +3,14 @@ package cn.wildfirechat.proto;
 import com.comsince.github.logger.Log;
 import com.comsince.github.logger.LoggerFactory;
 
+import java.util.Random;
+
 public class HeartbeatManager {
     private Log logger = LoggerFactory.getLogger(HeartbeatManager.class);
 
-    private final long MIN_HEARTBEAT_INTERVAL = 2 * 60 * 1000;
+    private final long MIN_HEARTBEAT_INTERVAL =  30 * 1000;
     private final long MAX_HEARTBEAT_INTERVAL = 6 * 60 * 1000;
-    private final long MIDDLE_HEARTBEAT_INTERVAL = 3 * 60 * 1000;
+    private final long MIDDLE_HEARTBEAT_INTERVAL = 1 * 60 * 1000;
     private volatile long currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentScheduleTime = 0;
@@ -17,8 +19,16 @@ public class HeartbeatManager {
     private volatile boolean upSearchingMaxInterval = true;
     //连续心跳成功,中间任何一次间断进行重置
     private int currentHeartbeatSuccessNum = 0;
+    private boolean disableUpSearchingMaxInterval = false;
+    //当前心跳间隔成功次数
+    private int currentHeartbeatIntervalSuccessNum = 0;
+    private long tempHeartbeatInterval = 0;
+    private Random heartBeatRandom = new Random();
 
     public long currentHeartInterval(){
+        if(tempHeartbeatInterval > 0 ){
+            return tempHeartbeatInterval;
+        }
         return currentHeartbeatInterval;
     }
 
@@ -39,22 +49,28 @@ public class HeartbeatManager {
             if(absDiff >= 0){
                 //心跳失败，重置成功次数
                 currentHeartbeatSuccessNum = 0;
+                tempHeartbeatInterval = 0;
                 upSearchingMaxInterval = false;
                 if(absDiff < 60 * 1000){
                     //等值试探失败
                     currentMaxHeartbeatInterval = interval - 30 * 1000;
-                } else if (absDiff < 90 * 1000){
+                } else if (absDiff < 120 * 1000){
                     //步进试探失败
                     currentMaxHeartbeatInterval = interval - absDiff / 2;
+                } else if( absDiff < 6 * 60 * 1000){
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 1 * 60 * 1000;
                 } else {
-                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 30 * 1000;
+                    disableUpSearchingMaxInterval = true;
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 2 * 60 * 1000;
+                    logger.i("disable UpSearchingMaxInterval currentMaxHeartbeatInterval=" + currentMaxHeartbeatInterval);
+
                 }
             }
         }
-        if(currentMaxHeartbeatInterval < MIDDLE_HEARTBEAT_INTERVAL){
-            upSearchingMaxInterval = true;
-        }
-        if(currentMaxHeartbeatInterval < MIN_HEARTBEAT_INTERVAL){
+//        if(currentMaxHeartbeatInterval < MIDDLE_HEARTBEAT_INTERVAL){
+//            upSearchingMaxInterval = true;
+//        }
+        if(currentMaxHeartbeatInterval < 15 * 1000){
             currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
         }
         if(currentMaxHeartbeatInterval > MAX_HEARTBEAT_INTERVAL){
@@ -78,15 +94,36 @@ public class HeartbeatManager {
     }
 
     public synchronized long nextHeartbeatInterval(){
-        if(upSearchingMaxInterval){
-            currentHeartbeatInterval += 60 * 1000;
+        long maxSuccessTime = currentHeartbeatInterval / (30 * 1000);
+        logger.i("nextHeartbeatInterval currentHeartbeatInterval= "+currentHeartbeatInterval+" maxSuccessTime="+maxSuccessTime +" currentHeartbeatIntervalSuccessNum="+currentHeartbeatIntervalSuccessNum);
+        if(upSearchingMaxInterval && currentHeartbeatIntervalSuccessNum > maxSuccessTime){
+            currentHeartbeatInterval += 30 * 1000;
+            currentHeartbeatIntervalSuccessNum = 0;
+            tempHeartbeatInterval = 0;
         } else {
+            if(currentHeartbeatInterval > MIDDLE_HEARTBEAT_INTERVAL){
+                int randomInt = heartBeatRandom.nextInt((int)maxSuccessTime);
+                logger.i("nextHeartbeatInterval randomInt="+randomInt);
+                if(randomInt % 2 == 1){
+                    tempHeartbeatInterval = currentHeartbeatInterval - randomInt * 30 * 1000;
+                    if(tempHeartbeatInterval < 0){
+                        tempHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
+                    }
+                    logger.i("nextHeartbeatInterval tempHeartbeatInterval="+tempHeartbeatInterval);
+                    return tempHeartbeatInterval;
+                }
+            }
+            tempHeartbeatInterval = 0;
+            currentHeartbeatIntervalSuccessNum++;
             currentHeartbeatInterval = currentMaxHeartbeatInterval;
         }
-        if(currentHeartbeatInterval > MAX_HEARTBEAT_INTERVAL){
-            currentHeartbeatInterval = MAX_HEARTBEAT_INTERVAL;
+        if(currentHeartbeatInterval >= MAX_HEARTBEAT_INTERVAL){
+            int randomInt = heartBeatRandom.nextInt(12);
+            tempHeartbeatInterval = MAX_HEARTBEAT_INTERVAL - randomInt * 30 * 1000;
+            logger.i("nextHeartbeatInterval reach max interval so random interval="+tempHeartbeatInterval);
+            return tempHeartbeatInterval;
         }
-        logger.i("nextHeartbeatInterval current heart interval "+currentHeartbeatInterval+" max interval "+currentMaxHeartbeatInterval+" upSearchingMaxInterval "+upSearchingMaxInterval);
+        logger.i("nextHeartbeatInterval currentHeartbeatInterval="+currentHeartbeatInterval+" currentMaxHeartbeatInterval="+currentMaxHeartbeatInterval+" upSearchingMaxInterval "+upSearchingMaxInterval);
         return currentHeartbeatInterval;
     }
 
@@ -109,7 +146,9 @@ public class HeartbeatManager {
                 //防止tryheartbeat导致的无效次数
                 if(!upSearchingMaxInterval){
                     currentHeartbeatSuccessNum++;
-                    if(currentHeartbeatSuccessNum > 3){
+                    logger.i("recalculateMaxHeartbeatInterval currentHeartbeatSuccessNum="+currentHeartbeatSuccessNum+" disableUpSearchingMaxInterval="+disableUpSearchingMaxInterval);
+                    if(currentHeartbeatSuccessNum > 3 && !disableUpSearchingMaxInterval){
+                        upSearchingMaxInterval = true;
                         long diffMaxHeartbeatTime = MAX_HEARTBEAT_INTERVAL - currentMaxHeartbeatInterval;
                         if(diffMaxHeartbeatTime >= 6 * 60 * 1000){
                             currentMaxHeartbeatInterval = currentMaxHeartbeatInterval + 30 * 1000;
@@ -118,9 +157,15 @@ public class HeartbeatManager {
                         }
                     }
                 }
+                if(!upSearchingMaxInterval && disableUpSearchingMaxInterval){
+                    if(currentMaxHeartbeatInterval < MIDDLE_HEARTBEAT_INTERVAL){
+                        logger.i("enable disableUpSearchingMaxInterval");
+                        disableUpSearchingMaxInterval = false;
+                    }
+                }
             }
 
-            logger.i("recalculateMaxHeartbeatInterval interval "+interval+" current heart interval "+currentHeartbeatInterval+" max interval "+currentMaxHeartbeatInterval);
+            logger.i("recalculateMaxHeartbeatInterval interval="+interval+" currentHeartbeatInterval="+currentHeartbeatInterval+" currentMaxHeartbeatInterval="+currentMaxHeartbeatInterval);
         }
     }
 

@@ -55,6 +55,7 @@ import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfire.chat.kit.widget.ViewPagerFixed;
 import cn.wildfirechat.chat.R;
+import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.UserInfo;
 import q.rorbin.badgeview.QBadgeView;
@@ -118,6 +119,24 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
             } else if (unreadMessageUnreadBadgeView != null) {
                 unreadMessageUnreadBadgeView.hide(true);
             }
+        });
+
+        conversationListViewModel.connectionStatusLiveData().observe(this,status ->{
+            String statusText =UIUtils.getString(R.string.app_name);
+            switch (status) {
+                case ConnectionStatus.ConnectionStatusConnecting:
+                    statusText = "(正在连接...)";
+                    break;
+                case ConnectionStatus.ConnectionStatusConnected:
+                    statusText = "";
+                    break;
+                case ConnectionStatus.ConnectionStatusUnconnected:
+                    statusText = "(未连接)";
+                    break;
+                default:
+                    break;
+            }
+            setTitle(UIUtils.getString(R.string.app_name)+statusText);
         });
 
         ContactViewModel contactViewModel = ViewModelProviders.of(this).get(ContactViewModel.class);

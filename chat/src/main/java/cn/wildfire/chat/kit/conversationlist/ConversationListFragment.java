@@ -138,24 +138,24 @@ public class ConversationListFragment extends Fragment {
                 adapter.updateStatusNotification(statusNotificationViewModel.getNotificationItems());
             }
         });
-        conversationListViewModel.connectionStatusLiveData().observe(this, status -> {
-            ConnectionStatusNotification connectionStatusNotification = new ConnectionStatusNotification();
-            switch (status) {
-                case ConnectionStatus.ConnectionStatusConnecting:
-                    connectionStatusNotification.setValue("正在连接...");
-                    statusNotificationViewModel.showStatusNotification(connectionStatusNotification);
-                    break;
-                case ConnectionStatus.ConnectionStatusConnected:
-                    statusNotificationViewModel.removeStatusNotification(connectionStatusNotification);
-                    break;
-                case ConnectionStatus.ConnectionStatusUnconnected:
-                    connectionStatusNotification.setValue("连接失败");
-                    statusNotificationViewModel.showStatusNotification(connectionStatusNotification);
-                    break;
-                default:
-                    break;
-            }
-        });
+//        conversationListViewModel.connectionStatusLiveData().observe(this, status -> {
+//            ConnectionStatusNotification connectionStatusNotification = new ConnectionStatusNotification();
+//            switch (status) {
+//                case ConnectionStatus.ConnectionStatusConnecting:
+//                    connectionStatusNotification.setValue("正在连接...");
+//                    statusNotificationViewModel.showStatusNotification(connectionStatusNotification);
+//                    break;
+//                case ConnectionStatus.ConnectionStatusConnected:
+//                    statusNotificationViewModel.removeStatusNotification(connectionStatusNotification);
+//                    break;
+//                case ConnectionStatus.ConnectionStatusUnconnected:
+//                    connectionStatusNotification.setValue("连接失败");
+//                    statusNotificationViewModel.showStatusNotification(connectionStatusNotification);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        });
     }
 
     public void reloadConversations() {
