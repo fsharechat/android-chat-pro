@@ -28,6 +28,7 @@ public class HeartbeatHandler extends AbstractMessageHandler{
     public void processMessage(Header header, ByteBufferList byteBufferList) {
         String pingResult = byteBufferList.readString();
         RequestInfo requestInfo = protoService.requestMap.remove(header.getMessageId());
+        logger.i("heartbeat result="+pingResult+" messageId="+header.getMessageId()+" requestInfo="+requestInfo);
         if(requestInfo != null){
             JavaProtoLogic.IGeneralCallback iGeneralCallback = (JavaProtoLogic.IGeneralCallback) requestInfo.getCallback();
             if(!TextUtils.isEmpty(pingResult)){
