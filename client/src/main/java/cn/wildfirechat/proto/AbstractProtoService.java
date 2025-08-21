@@ -327,6 +327,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                             .action(new Runnable() {
                                 @Override
                                 public void run() {
+                                    log.i("send message result timeout messageId="+finalMessageId);
                                     RequestInfo requestInfo = requestMap.remove(finalMessageId);
                                     if(requestInfo != null && requestInfo.getCallback() != null && protoMessageId != 0){
                                         log.i("send message timeout");
@@ -345,6 +346,31 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                         requestMap.put(newMessageId,requestInfo);
                                         saveProtoMessageIds();
 
+                                        //如果发送失败，代表链接断开，需要重连
+                                        forceConnect();
+                                    }
+                                }
+                            }).build());
+                }
+
+                if(signal == Signal.PING){
+                    alarmWrapper.schedule(new Timer.Builder().period(5 * 1000)
+                            .wakeup(true)
+                            .action(new Runnable() {
+                                @Override
+                                public void run() {
+                                    log.i("send ping result timeout messageId="+finalMessageId);
+                                    RequestInfo requestInfo = requestMap.remove(finalMessageId);
+                                    if(requestInfo != null && requestInfo.getCallback() != null){
+                                        log.i("send heartbeat timeout");
+
+                                        //发送失败更新消息状态
+                                        try {
+                                            Method onFailure = requestInfo.getType().getMethod("onFailure",int.class);
+                                            onFailure.invoke(requestInfo.getCallback(),ErrorCode.SERVICE_DIED);
+                                        } catch (Exception e) {
+                                            log.e("send heartbeat error "+finalMessageId,e);
+                                        }
                                         //如果发送失败，代表链接断开，需要重连
                                         forceConnect();
                                     }
