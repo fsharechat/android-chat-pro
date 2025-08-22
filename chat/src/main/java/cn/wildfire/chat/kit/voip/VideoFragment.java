@@ -56,6 +56,9 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
     @Bind(R.id.durationTextView)
     TextView durationTextView;
 
+    @Bind(R.id.acceptImageView)
+    ImageView acceptImageView;
+
     SurfaceView localSurfaceView;
     SurfaceView remoteSurfaceView;
 
@@ -177,6 +180,7 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
     public void accept() {
         AVEngineKit.CallSession session = gEngineKit.getCurrentSession();
         if (session != null && session.getState() == AVEngineKit.CallState.Incoming) {
+            acceptImageView.setEnabled(false);
             session.answerCall(false);
         } else {
             getActivity().finish();

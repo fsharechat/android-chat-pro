@@ -49,6 +49,8 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
     TextView descTextView;
     @Bind(R.id.durationTextView)
     TextView durationTextView;
+    @Bind(R.id.acceptImageView)
+    ImageView acceptImageView;
 
     public static VideoFragment newInstance(String targetId, boolean isOutgoing) {
 
@@ -147,6 +149,7 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
     public void onCallConnect() {
         AVEngineKit.CallSession session = gEngineKit.getCurrentSession();
         if (session != null && session.getState() == AVEngineKit.CallState.Incoming) {
+            acceptImageView.setEnabled(false);
             session.answerCall(false);
         } else {
             getActivity().finish();
