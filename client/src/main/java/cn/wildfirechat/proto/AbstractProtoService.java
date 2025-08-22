@@ -132,6 +132,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     @Override
     public void receiveMessage(Header header, ByteBufferList byteBufferList) {
+        log.i("receiveMessage signal="+header.getSignal() +" subSignal="+header.getSubSignal()+" messsageId="+header.getMessageId());
         for(MessageHandler messageHandler : messageHandlers){
             if(messageHandler.match(header)){
                 messageHandler.processMessage(header,byteBufferList);
@@ -183,15 +184,10 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     switch (androidNIOClient.connectStatus){
                         case CONNECTING:
                         case CONNECTED:
-                            cancelReconnectTimer();
-                            cancelHeartTimer();
-                            androidNIOClient.close();
-                            JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
-                            androidNIOClient.connect();
-                            break;
                         case DISCONNECT:
                             cancelReconnectTimer();
                             cancelHeartTimer();
+                            androidNIOClient.close();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
                             androidNIOClient.connect();
                             break;
@@ -354,7 +350,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 }
 
                 if(signal == Signal.PING){
-                    alarmWrapper.schedule(new Timer.Builder().period(8 * 1000)
+                    alarmWrapper.schedule(new Timer.Builder().period(5 * 1000)
                             .wakeup(true)
                             .action(new Runnable() {
                                 @Override
