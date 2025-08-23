@@ -113,6 +113,7 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
             ringPlayer = new AsyncPlayer(null);
             AVEngineKit.init(application, this);
             ChatManagerHolder.gAVEngine = AVEngineKit.Instance();
+            ChatManagerHolder.gAVEngine.addIceServer(Config.ICE_SH_ADDRESS, Config.ICE_USERNAME, Config.ICE_PASSWORD);
             ChatManagerHolder.gAVEngine.addIceServer(Config.ICE_ADDRESS, Config.ICE_USERNAME, Config.ICE_PASSWORD);
 
             SharedPreferences sp = application.getSharedPreferences("config", Context.MODE_PRIVATE);

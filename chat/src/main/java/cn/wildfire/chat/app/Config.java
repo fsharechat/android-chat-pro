@@ -19,6 +19,7 @@ public class Config {
     public static int APP_SERVER_PORT = 443;
 
     public static String ICE_ADDRESS = "turn:turn.fsharechat.cn:3478";
+    public static String ICE_SH_ADDRESS = "turn:sh-turn.fsharechat.cn:3478";
     public static String ICE_USERNAME = "comsince";
     public static String ICE_PASSWORD = "comsince";
 

@@ -223,11 +223,11 @@ public class FileLog implements Log{
 
         public static Builder defaultBuilder(Context context) {
             Builder builder = new Builder(context);
-//            String dir = Package.processName(context);
-//            if (TextUtils.isEmpty(dir)) {
-//                dir = context.getPackageName();
-//            }
-            builder.mDir = getDirPrefix(context);
+            String dir = Package.processName(context);
+            if (TextUtils.isEmpty(dir)) {
+                dir = context.getPackageName();
+            }
+            builder.mDir = getDirPrefix(context) +dir;
             builder.mDebug = Package.debuggable(context);
             return builder;
         }

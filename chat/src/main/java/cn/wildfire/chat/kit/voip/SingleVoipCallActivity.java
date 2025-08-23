@@ -30,6 +30,9 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import butterknife.ButterKnife;
+
+import com.comsince.github.logger.Log;
+import com.comsince.github.logger.LoggerFactory;
 import com.comsince.github.p2penginekit.AVEngineKit;
 import com.comsince.github.p2penginekit.VideoProfile;
 
@@ -42,6 +45,8 @@ import cn.wildfirechat.client.NotInitializedExecption;
  */
 public class SingleVoipCallActivity extends FragmentActivity implements AVEngineKit.CallSessionCallback {
     private static final String TAG = "P2PVideoActivity";
+
+    public static Log log = LoggerFactory.getLogger(SingleVoipCallActivity.class);
 
     public static final String EXTRA_TARGET = "TARGET";
     public static final String EXTRA_MO = "ISMO";
@@ -224,6 +229,7 @@ public class SingleVoipCallActivity extends FragmentActivity implements AVEngine
 
     @Override
     public void didCallEndWithReason(AVEngineKit.CallEndReason reason) {
+        log.i("didCallEndWithReason="+(reason != null ? reason.name() : ""));
         finish();
     }
 

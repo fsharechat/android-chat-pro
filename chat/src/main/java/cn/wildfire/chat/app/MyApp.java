@@ -2,11 +2,15 @@ package cn.wildfire.chat.app;
 
 import android.app.ActivityManager;
 import android.content.Context;
+
+import com.comsince.github.logger.LoggerFactory;
+
 import java.io.File;
 
 import cn.wildfire.chat.app.third.location.viewholder.LocationMessageContentViewHolder;
 import cn.wildfire.chat.kit.WfcUIKit;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageViewHolderManager;
+import cn.wildfirechat.proto.AndroidLogger;
 
 
 public class MyApp extends BaseApp {
@@ -19,7 +23,7 @@ public class MyApp extends BaseApp {
 
         // 应用主题设置
         ThemeManager.getInstance(this).applyCurrentTheme();
-
+        LoggerFactory.initLogger(new AndroidLogger(this));
         // 只在主进程初始化
         if (getCurProcessName(this).equals("cn.comsince.fschat")) {
             wfcUIKit = new WfcUIKit();

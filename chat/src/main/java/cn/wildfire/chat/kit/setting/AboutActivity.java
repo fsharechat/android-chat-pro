@@ -30,7 +30,8 @@ public class AboutActivity extends WfcBaseActivity {
                     + packageInfo.versionCode + " " + packageInfo.versionName + "\n"
                     + Config.IM_SERVER_HOST + " " + Config.IM_SERVER_PORT + "\n"
                     + Config.APP_SERVER_HOST + " " + Config.APP_SERVER_PORT + "\n"
-                    + Config.ICE_ADDRESS + " " + Config.ICE_USERNAME + " " + Config.ICE_PASSWORD + "\n";
+                    + Config.ICE_ADDRESS + " " + Config.ICE_USERNAME + " " + Config.ICE_PASSWORD + "\n"
+                    + Config.ICE_SH_ADDRESS + " " + Config.ICE_USERNAME + " " + Config.ICE_PASSWORD + "\n";
 
             infoTextView.setText(info);
 
