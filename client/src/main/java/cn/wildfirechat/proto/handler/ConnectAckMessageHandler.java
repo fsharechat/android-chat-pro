@@ -52,7 +52,7 @@ public class ConnectAckMessageHandler extends AbstractMessageHandler {
 //                    protoService.getImMemoryStore().updateMessageSeq(connectAckPayload.getMsgHead());
 
                     //重新发送失败的消息
-                    protoService.resendMessage();
+//                    protoService.resendMessage();
                 }
             });
         } catch (InvalidProtocolBufferException e) {

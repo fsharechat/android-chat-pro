@@ -32,6 +32,8 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
     private AVEngineKit gEngineKit;
     private boolean micEnabled = true;
     private boolean isSpeakerOn = false;
+    // 添加标志位防止重复点击接听按钮
+    private boolean hasAcceptedCall = false;
 
     @Bind(R.id.portraitImageView)
     ImageView portraitImageView;
@@ -89,6 +91,15 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
                 outgoingActionContainer.setVisibility(View.VISIBLE);
                 descTextView.setVisibility(View.GONE);
                 durationTextView.setVisibility(View.VISIBLE);
+                // 通话接通后，确保接听按钮不可用
+                acceptImageView.setEnabled(false);
+                acceptImageView.setClickable(false);
+            } else if (state == AVEngineKit.CallState.Incoming) {
+                // 来电状态时，确保接听按钮可用
+                acceptImageView.setEnabled(true);
+                acceptImageView.setClickable(true);
+                // 重置接听标志位
+                hasAcceptedCall = false;
             } else {
                 // do nothing now
             }
@@ -147,11 +158,22 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
 
     @OnClick(R.id.acceptImageView)
     public void onCallConnect() {
+        // 防止重复点击
+        if (hasAcceptedCall) {
+            return;
+        }
+        
         AVEngineKit.CallSession session = gEngineKit.getCurrentSession();
         if (session != null && session.getState() == AVEngineKit.CallState.Incoming) {
+            // 设置标志位，防止重复点击
+            hasAcceptedCall = true;
+            // 立即禁用按钮，防止重复点击
             acceptImageView.setEnabled(false);
+            // 设置按钮为不可点击状态
+            acceptImageView.setClickable(false);
             session.answerCall(false);
         } else {
+            // 如果状态不正确，结束当前界面
             getActivity().finish();
         }
     }
@@ -182,6 +204,10 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
             descTextView.setVisibility(View.GONE);
             outgoingActionContainer.setVisibility(View.VISIBLE);
             durationTextView.setVisibility(View.VISIBLE);
+            // 已接通状态时，接听按钮不可用
+            acceptImageView.setEnabled(false);
+            acceptImageView.setClickable(false);
+            hasAcceptedCall = true;
         } else {
             if (((SingleVoipCallActivity) getActivity()).isOutgoing()) {
                 descTextView.setText(R.string.av_waiting);
@@ -191,6 +217,12 @@ public class AudioFragment extends Fragment implements AVEngineKit.CallSessionCa
                 descTextView.setText(R.string.av_audio_invite);
                 outgoingActionContainer.setVisibility(View.GONE);
                 incomingActionContainer.setVisibility(View.VISIBLE);
+                // 来电状态时，确保接听按钮可用
+                if (gEngineKit.getCurrentSession() != null && gEngineKit.getCurrentSession().getState() == AVEngineKit.CallState.Incoming) {
+                    acceptImageView.setEnabled(true);
+                    acceptImageView.setClickable(true);
+                    hasAcceptedCall = false;
+                }
             }
         }
         String targetId = ((SingleVoipCallActivity) getActivity()).getTargetId();

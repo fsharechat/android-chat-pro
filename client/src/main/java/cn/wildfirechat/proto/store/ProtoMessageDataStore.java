@@ -234,7 +234,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
                     Map<String,Object> objectMap = messageList.get(i);
                     long messageId = (long) objectMap.get(COLUMN_MESSAGE_ID);
                     ProtoMessage protoMessage = (ProtoMessage) objectMap.get(COLUMN_MESSAGE_DATA);
-                    logger.i("proto messageUId "+protoMessage.getMessageUid()+" db messageId->"+messageId+" message status "+protoMessage.getStatus()+" contentType "+protoMessage.getContent().getType());
+//                    logger.i("proto messageUId "+protoMessage.getMessageUid()+" db messageId->"+messageId+" message status "+protoMessage.getStatus()+" contentType "+protoMessage.getContent().getType());
                     protoMessages.add(protoMessage);
                 }
             } else {

@@ -68,7 +68,10 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
                         } else {
                             processNotifyPullMessage(pullMessageResult.getMessageList());
                         }
-                        protoService.getImMemoryStore().updateMessageSeq(head);
+                        //忽略通话transparent信令
+                        if(head > 0){
+                            protoService.getImMemoryStore().updateMessageSeq(head);
+                        }
                     }
                 });
             } catch (InvalidProtocolBufferException e) {

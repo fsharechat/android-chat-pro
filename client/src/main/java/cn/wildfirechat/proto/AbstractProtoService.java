@@ -95,6 +95,8 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     private HeartbeatManager heartbeatManager;
     volatile Timer heartbeatTimer;
     volatile Timer reconnectTimer;
+    volatile Timer heartbeatTimeoutTimer;
+    volatile long currentReceiveMessageTime = 0;
 
     public AbstractProtoService(Context context,AlarmWrapper alarmWrapper){
         this.alarmWrapper = alarmWrapper;
@@ -133,6 +135,9 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     @Override
     public void receiveMessage(Header header, ByteBufferList byteBufferList) {
         log.i("receiveMessage signal="+header.getSignal() +" subSignal="+header.getSubSignal()+" messsageId="+header.getMessageId());
+        if(Signal.PING != header.getSignal()){
+            currentReceiveMessageTime = System.currentTimeMillis();
+        }
         for(MessageHandler messageHandler : messageHandlers){
             if(messageHandler.match(header)){
                 messageHandler.processMessage(header,byteBufferList);
@@ -172,6 +177,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnected);
         cancelReconnectTimer();
         sendConnectMessage();
+        cancelHeartbeatTimeoutTimer();
         sendHeartbeat(heartbeatManager.currentHeartInterval());
     }
 
@@ -183,11 +189,17 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     log.i("reconnect status "+androidNIOClient.connectStatus);
                     switch (androidNIOClient.connectStatus){
                         case CONNECTING:
-                        case CONNECTED:
-                        case DISCONNECT:
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             androidNIOClient.close();
+                            JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
+                            androidNIOClient.connect();
+                            break;
+                        case CONNECTED:
+                            break;
+                        case DISCONNECT:
+                            cancelReconnectTimer();
+                            cancelHeartTimer();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
                             androidNIOClient.connect();
                             break;
@@ -231,6 +243,13 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     private void cancelHeartTimer(){
         if(heartbeatTimer != null){
             alarmWrapper.cancel(heartbeatTimer);
+        }
+        cancelHeartbeatTimeoutTimer();
+    }
+
+    private void cancelHeartbeatTimeoutTimer(){
+        if(heartbeatTimeoutTimer != null){
+            alarmWrapper.cancel(heartbeatTimeoutTimer);
         }
     }
 
@@ -304,6 +323,8 @@ public abstract class AbstractProtoService implements PushMessageCallback {
             public void run() {
                 //messageid最大不超过4898,以为私有协议messageId最大只支持65535
                 int messageId = PreferenceManager.getDefaultSharedPreferences(context).getInt("message_id",0);
+                PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("message_id",messageId + 1).apply();
+
                 if(messageId > 65535){
                     messageId = 0;
                 }
@@ -326,7 +347,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                     log.i("send message result timeout messageId="+finalMessageId);
                                     RequestInfo requestInfo = requestMap.remove(finalMessageId);
                                     if(requestInfo != null && requestInfo.getCallback() != null && protoMessageId != 0){
-                                        log.i("send message timeout");
+                                        log.i("send message "+finalMessageId+" timeout");
 
                                         //发送失败更新消息状态
                                         try {
@@ -338,27 +359,32 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                         }
 
                                         //重新加入到请求队列
-                                        int newMessageId = PreferenceManager.getDefaultSharedPreferences(context).getInt("message_id",0);
-                                        requestMap.put(newMessageId,requestInfo);
-                                        saveProtoMessageIds();
+//                                        requestMap.put(finalMessageId,requestInfo);
+//                                        saveProtoMessageIds();
 
                                         //如果发送失败，代表链接断开，需要重连
-                                        forceConnect();
+//                                        forceConnect();
                                     }
                                 }
                             }).build());
                 }
 
                 if(signal == Signal.PING){
-                    alarmWrapper.schedule(new Timer.Builder().period(5 * 1000)
+                    alarmWrapper.schedule(heartbeatTimeoutTimer = new Timer.Builder().period(10 * 1000)
                             .wakeup(true)
                             .action(new Runnable() {
                                 @Override
                                 public void run() {
                                     log.i("send ping result timeout messageId="+finalMessageId);
+                                    //只有当心跳间隔内没有发送任何数据，才进行超时处理
+                                    long diff = System.currentTimeMillis() - currentReceiveMessageTime;
+                                    log.i("current diff receive message time="+diff);
+                                    if(diff < heartbeatManager.currentHeartInterval()){
+                                        return;
+                                    }
                                     RequestInfo requestInfo = requestMap.remove(finalMessageId);
                                     if(requestInfo != null && requestInfo.getCallback() != null){
-                                        log.i("send heartbeat timeout");
+                                        log.i("send heartbeat "+finalMessageId+" timeout");
 
                                         //发送失败更新消息状态
                                         try {
@@ -369,14 +395,11 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                         }
                                         //如果发送失败，代表链接断开，需要重连
                                         forceConnect();
+
                                     }
                                 }
                             }).build());
                 }
-
-
-                PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("message_id",++messageId).apply();
-
             }
         });
     }
@@ -649,9 +672,9 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     public ProtoMessage convertProtoMessage(WFCMessage.Message message){
         ProtoMessage messageResponse = new ProtoMessage();
-        log.i("receive current user "+userName +" fromuser "+message.getFromUser()+" target "+message.getToUser() +"message "+message.getContent().getSearchableContent()
-        +"media type "+message.getContent().getMediaType()+" remote url "+message.getContent().getRemoteMediaUrl()
-        +" messageId "+message.getMessageId()+" contentType "+message.getContent().getType()+" content "+message.getContent().getContent());
+//        log.i("receive current user "+userName +" fromuser "+message.getFromUser()+" target "+message.getToUser() +"message "+message.getContent().getSearchableContent()
+//        +"media type "+message.getContent().getMediaType()+" remote url "+message.getContent().getRemoteMediaUrl()
+//        +" messageId "+message.getMessageId()+" contentType "+message.getContent().getType()+" content "+message.getContent().getContent());
         if(message.getFromUser().equals(userName)){
             messageResponse.setDirection(0);
             messageResponse.setStatus(MessageStatus.Sent.value());
@@ -684,7 +707,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         messageContentResponse.setType(messageContent.getType());
         messageContentResponse.setBinaryContent(messageContent.getData().toByteArray());
         if(messageContent.getData() != null){
-            log.i("bintray content "+new String(messageContent.getData().toByteArray()));
+//            log.i("bintray content "+new String(messageContent.getData().toByteArray()));
         }
         messageContentResponse.setContent(messageContent.getContent());
         messageContentResponse.setPushContent(messageContent.getPushContent());
@@ -720,7 +743,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
             messageContentBuilder.setPushContent(messageResponse.getContent().getPushContent());
         }
         if(messageResponse.getContent().getBinaryContent() != null){
-            log.i("bintray content "+new String(messageResponse.getContent().getBinaryContent()));
+//            log.i("bintray content "+new String(messageResponse.getContent().getBinaryContent()));
             messageContentBuilder.setData(ByteString.copyFrom(messageResponse.getContent().getBinaryContent()));
         }
         if(!TextUtils.isEmpty(messageResponse.getContent().getContent())){

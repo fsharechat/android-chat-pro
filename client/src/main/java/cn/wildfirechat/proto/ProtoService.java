@@ -112,7 +112,7 @@ public class ProtoService extends AbstractProtoService {
 
 
     public ProtoUserInfo getUserInfo(String userId, String groupId, boolean refresh){
-        log.i("getUserInfo userId "+userId+" groupId "+groupId+" refresh "+refresh);
+//        log.i("getUserInfo userId "+userId+" groupId "+groupId+" refresh "+refresh);
         if(imMemoryStore.getUserInfo(userId) == null || refresh){
             WFCMessage.PullUserRequest request = WFCMessage.PullUserRequest.newBuilder()
                     .addRequest(WFCMessage.UserRequest.newBuilder().setUid(userId).build())

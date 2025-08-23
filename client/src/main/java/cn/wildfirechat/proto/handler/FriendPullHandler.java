@@ -35,7 +35,7 @@ public class FriendPullHandler extends AbstractMessageHandler {
             for(int i = 0;i < getFriendsResult.getEntryCount(); i++){
                 friendList[i] = getFriendsResult.getEntry(i).getUid();
                 String friend = friendList[i];
-                log.i("friend list "+friend);
+//                log.i("friend list "+friend);
             }
 
             if(friendList.length != 0){

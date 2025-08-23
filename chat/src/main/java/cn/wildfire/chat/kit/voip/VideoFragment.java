@@ -67,6 +67,8 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
     private boolean isOutgoing;
     private String targetId;
     private AVEngineKit gEngineKit;
+    // 添加标志位防止重复点击接听按钮
+    private boolean hasAcceptedCall = false;
 
     private RendererCommon.ScalingType scalingType = RendererCommon.ScalingType.SCALE_ASPECT_BALANCED;
 
@@ -119,6 +121,15 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
             connectedActionContainer.setVisibility(View.VISIBLE);
             inviteeInfoContainer.setVisibility(View.GONE);
             minimizeImageView.setVisibility(View.VISIBLE);
+            // 通话接通后，确保接听按钮不可用
+            acceptImageView.setEnabled(false);
+            acceptImageView.setClickable(false);
+        } else if (state == AVEngineKit.CallState.Incoming) {
+            // 来电状态时，确保接听按钮可用
+            acceptImageView.setEnabled(true);
+            acceptImageView.setClickable(true);
+            // 重置接听标志位
+            hasAcceptedCall = false;
         } else {
             // do nothing now
         }
@@ -178,9 +189,19 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
 
     @OnClick(R.id.acceptImageView)
     public void accept() {
+        // 防止重复点击
+        if (hasAcceptedCall) {
+            return;
+        }
+        
         AVEngineKit.CallSession session = gEngineKit.getCurrentSession();
         if (session != null && session.getState() == AVEngineKit.CallState.Incoming) {
+            // 设置标志位，防止重复点击
+            hasAcceptedCall = true;
+            // 立即禁用按钮，防止重复点击
             acceptImageView.setEnabled(false);
+            // 设置按钮为不可点击状态
+            acceptImageView.setClickable(false);
             session.answerCall(false);
         } else {
             getActivity().finish();
@@ -286,6 +307,10 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
             connectedActionContainer.setVisibility(View.VISIBLE);
             inviteeInfoContainer.setVisibility(View.GONE);
             minimizeImageView.setVisibility(View.VISIBLE);
+            // 已接通状态时，接听按钮不可用
+            acceptImageView.setEnabled(false);
+            acceptImageView.setClickable(false);
+            hasAcceptedCall = true;
 
             session.startVideoSource();
             didCreateLocalVideoTrack();
@@ -301,6 +326,12 @@ public class VideoFragment extends Fragment implements AVEngineKit.CallSessionCa
                 outgoingActionContainer.setVisibility(View.GONE);
                 connectedActionContainer.setVisibility(View.GONE);
                 descTextView.setText(R.string.av_video_invite);
+                // 来电状态时，确保接听按钮可用
+                if (session.getState() == AVEngineKit.CallState.Incoming) {
+                    acceptImageView.setEnabled(true);
+                    acceptImageView.setClickable(true);
+                    hasAcceptedCall = false;
+                }
             }
         }
         UserViewModel userViewModel = WfcUIKit.getAppScopeViewModel(UserViewModel.class);

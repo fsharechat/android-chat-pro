@@ -375,7 +375,7 @@ public class JavaProtoLogic {
             @Override
             public int compare(ProtoConversationInfo o1, ProtoConversationInfo o2) {
                 int result =  o2.getTimestamp() - o1.getTimestamp() >= 0  ? 1 : -1;
-                logger.i("getConversations top ",o1.getTarget() +" :"+o2.getTarget()+" result "+result);
+//                logger.i("getConversations top ",o1.getTarget() +" :"+o2.getTarget()+" result "+result);
                 return result;
             }
         });
@@ -385,14 +385,14 @@ public class JavaProtoLogic {
             public int compare(ProtoConversationInfo o1, ProtoConversationInfo o2) {
                 //long转换int可能导致精度丢失,导致排序结果混乱
                 int result =  o2.getTimestamp() - o1.getTimestamp() >= 0  ? 1 : -1;
-                logger.i("getConversations",o1.getTarget() +" :"+o2.getTarget()+" result "+result);
+//                logger.i("getConversations",o1.getTarget() +" :"+o2.getTarget()+" result "+result);
                 return result;
             }
         });
 
         protoConversationInfos.addAll(protoConversationInfoList);
         for(ProtoConversationInfo protoConversationInfo: protoConversationInfos){
-            logger.i("getConversations","timestamp:"+protoConversationInfo.getTimestamp()+ " target:"+protoConversationInfo.getTarget() + " type:"+protoConversationInfo.getConversationType() +" lastMessage: "+protoConversationInfo.getLastMessage().getContent().getSearchableContent());
+//            logger.i("getConversations","timestamp:"+protoConversationInfo.getTimestamp()+ " target:"+protoConversationInfo.getTarget() + " type:"+protoConversationInfo.getConversationType() +" lastMessage: "+protoConversationInfo.getLastMessage().getContent().getSearchableContent());
         }
         ProtoConversationInfo[] protoConversationInfosArr = new ProtoConversationInfo[protoConversationInfos.size()];
         protoConversationInfos.toArray(protoConversationInfosArr);
