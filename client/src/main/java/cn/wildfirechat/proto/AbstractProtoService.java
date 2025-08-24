@@ -85,6 +85,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     public ConcurrentHashMap<Integer, RequestInfo> requestMap = new ConcurrentHashMap<>();
     public ConcurrentHashMap<Long,Timer> timerMap = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Long,Timer> sendMessageTimerMap = new ConcurrentHashMap<>();
     public ConcurrentHashMap<Integer, SimpleFuture> futureMap = new ConcurrentHashMap<>();
     protected List<MessageHandler> messageHandlers = new ArrayList<>();
     public ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -189,6 +190,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     log.i("reconnect status "+androidNIOClient.connectStatus);
                     switch (androidNIOClient.connectStatus){
                         case CONNECTING:
+                            clearMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             androidNIOClient.close();
@@ -198,6 +200,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                         case CONNECTED:
                             break;
                         case DISCONNECT:
+                            clearMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
@@ -216,6 +219,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
             androidNIOClient.post(new Runnable() {
                 @Override
                 public void run() {
+                    clearMap();
                     cancelReconnectTimer();
                     cancelHeartTimer();
                     androidNIOClient.close();
@@ -257,6 +261,12 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         if(reconnectTimer != null){
             alarmWrapper.cancel(reconnectTimer);
         }
+    }
+
+    private void clearMap(){
+        requestMap.clear();
+        sendMessageTimerMap.clear();
+        futureMap.clear();
     }
 
     /**
@@ -339,7 +349,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 int finalMessageId = messageId;
                 //只有消息发送才需要重试
                 if(subSignal == SubSignal.MS){
-                    alarmWrapper.schedule(new Timer.Builder().period(5 * 1000)
+                    Timer sendMsTimer = new Timer.Builder().period(5 * 1000)
                             .wakeup(true)
                             .action(new Runnable() {
                                 @Override
@@ -366,11 +376,13 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 //                                        forceConnect();
                                     }
                                 }
-                            }).build());
+                            }).build();
+                    sendMessageTimerMap.put(Long.valueOf(finalMessageId),sendMsTimer);
+                    alarmWrapper.schedule(sendMsTimer);
                 }
 
                 if(signal == Signal.PING){
-                    alarmWrapper.schedule(heartbeatTimeoutTimer = new Timer.Builder().period(10 * 1000)
+                    alarmWrapper.schedule(heartbeatTimeoutTimer = new Timer.Builder().period(5 * 1000)
                             .wakeup(true)
                             .action(new Runnable() {
                                 @Override
@@ -402,6 +414,13 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 }
             }
         });
+    }
+
+    public void cancelSendMessageTimer(long messageId){
+        Timer timer = sendMessageTimerMap.remove(messageId);
+        if(timer != null){
+            alarmWrapper.cancel(timer);
+        }
     }
 
     protected void saveProtoMessageIds(){

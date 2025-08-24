@@ -38,6 +38,7 @@ public class SendMessageHandler extends AbstractMessageHandler {
                    protoService.getImMemoryStore().increaseMessageSeq();
                }
                sendMessageCallback.onSuccess(messageUid,timestamp);
+               protoService.cancelSendMessageTimer(header.getMessageId());
 //               protoService.removeProtoMessageId(String.valueOf(requestInfo.getProtoMessageId()));
            } else {
                sendMessageCallback.onFailure(errorCode);
