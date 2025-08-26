@@ -68,6 +68,7 @@ android {
     }
     lintOptions {
         abortOnError false
+        checkReleaseBuilds false
     }
     sourceSets {
         main {
