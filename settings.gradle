@@ -1,3 +1,4 @@
+include ':push-sdk'
 include ':client',
         ':push',
         ':chat',

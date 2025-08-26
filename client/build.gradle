@@ -53,6 +53,7 @@ android {
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     def lifecycle_version = '2.0.0-beta01'
+    api project(':push-sdk')
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation 'com.alibaba:fastjson:1.1.70.android'
     implementation 'com.google.protobuf:protobuf-java:2.5.0'
