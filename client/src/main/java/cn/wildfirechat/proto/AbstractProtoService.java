@@ -394,6 +394,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                     if(diff < heartbeatManager.currentHeartInterval()){
                                         return;
                                     }
+
                                     RequestInfo requestInfo = requestMap.remove(finalMessageId);
                                     if(requestInfo != null && requestInfo.getCallback() != null){
                                         log.i("send heartbeat "+finalMessageId+" timeout");
@@ -406,6 +407,10 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                             log.e("send heartbeat error "+finalMessageId,e);
                                         }
                                         //如果发送失败，代表链接断开，需要重连
+                                        // try to rebuild selector first to mitigate stuck select()
+                                        if(androidNIOClient != null){
+                                            androidNIOClient.rebuildSelector();
+                                        }
                                         forceConnect();
 
                                     }

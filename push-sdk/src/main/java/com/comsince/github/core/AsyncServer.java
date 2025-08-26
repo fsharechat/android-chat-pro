@@ -13,6 +13,7 @@ import com.comsince.github.logger.Log;
 import java.io.IOException;
 import java.net.*;
 import java.nio.channels.*;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -607,6 +608,64 @@ public class AsyncServer {
         run(this, selector, queue);
     }
 
+    /**
+     * Attempt to rebuild the Selector to mitigate epoll/select wakeup bugs.
+     * Existing channels will have their keys cancelled and must be re-registered
+     * by the next iteration of the event loop.
+     */
+    public void rebuildSelector() {
+        Runnable rebuildTask = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mSelector == null || !mSelector.isOpen()) {
+                        return;
+                    }
+                    log.i("rebuildSelector");
+                    // Collect existing keys' channels to re-register
+                    Set<SelectionKey> oldKeys = mSelector.keys();
+                    Selector oldSelector = mSelector.getSelector();
+                    Selector newSelector = SelectorProvider.provider().openSelector();
+
+                    // Replace selector wrapper to point to new selector
+                    mSelector.replaceSelector(newSelector);
+
+                    // Re-register channels with same interest ops and attachments
+                    for (SelectionKey key : oldKeys) {
+                        try {
+                            Object attachment = key.attachment();
+                            int interestOps = key.interestOps();
+                            SelectableChannel channel = key.channel();
+                            key.cancel();
+                            channel.configureBlocking(false);
+                            SelectionKey newKey = channel.register(newSelector, interestOps);
+                            newKey.attach(attachment);
+                            // If attachment is an AsyncNetworkSocket, update its key/server linkage
+                            if (attachment instanceof AsyncNetworkSocket) {
+                                ((AsyncNetworkSocket) attachment).setup(AsyncServer.this, newKey);
+                            }
+                        } catch (Exception ignore) {
+                        }
+                    }
+
+                    // Closing the old selector will unblock any ongoing select()
+                    try { oldSelector.close(); } catch (Exception ignore) {}
+                } catch (Exception e) {
+                    log.e(LOGTAG, "rebuildSelector error", e);
+                }
+            }
+        };
+
+        if (isAffinityThread()) {
+            rebuildTask.run();
+        } else {
+            // run off-thread to avoid relying on selector wakeups
+            synchronousWorkers.execute(rebuildTask);
+            // best-effort wakeup in case underlying selector still responds
+            if (mSelector != null) wakeup(mSelector);
+        }
+    }
+
     private static void run(final AsyncServer server, final SelectorWrapper selector, final PriorityQueue<Scheduled> queue) {
 //        Log.i(LOGTAG, "****AsyncServer is starting.****");
         // at this point, this local queue and selector are owned
@@ -719,7 +778,7 @@ public class AsyncServer {
 
         // run the queue to populate the selector with keys
         long wait = lockAndRunQueue(server, queue);
-        log.i("before select, queue=" + queue.size() + " keys=" + selector.keys().size() + " wait ="+wait);
+        log.i("before select, queue=" + queue.size() + " keys=" + selector.keys().size() + " wait ="+wait+" selector="+selector.getSelector());
         try {
 //            synchronized (server) {
 //                // select now to see if anything is ready immediately. this

@@ -95,4 +95,15 @@ public class SelectorWrapper {
             }
         }
     }
+
+    /**
+     * Replace the underlying selector with a new instance. Callers must ensure
+     * channels/keys are re-registered on the provided selector before calling this.
+     */
+    public synchronized void replaceSelector(Selector newSelector) {
+        this.selector = newSelector;
+        // reset waking state for the new selector lifecycle
+        isWaking = false;
+        semaphore.drainPermits();
+    }
 }

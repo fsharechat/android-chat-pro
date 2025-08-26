@@ -103,6 +103,15 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         receiveBuffer.recycle();
     }
 
+    /**
+     * Rebuild selector in case select() becomes unresponsive on some devices.
+     */
+    public void rebuildSelector() {
+        if (asyncServer != null) {
+            asyncServer.rebuildSelector();
+        }
+    }
+
 
 
     public void sub(){
