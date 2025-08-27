@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 
 import com.comsince.github.logger.LoggerFactory;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 
@@ -20,7 +21,7 @@ public class MyApp extends BaseApp {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        CrashReport.initCrashReport(getApplicationContext(), "93b1784ebf", true);
         // 应用主题设置
         ThemeManager.getInstance(this).applyCurrentTheme();
         LoggerFactory.initLogger(new AndroidLogger(this));
