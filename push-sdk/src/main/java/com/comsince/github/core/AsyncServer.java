@@ -224,12 +224,14 @@ public class AsyncServer {
      * 统计当前数据接收数
      * */
     protected void onDataReceived(int transmitted) {
+        log.i("onDataReceived="+transmitted);
     }
 
     /**
      * 统计当前数据发送数
      * */
     protected void onDataSent(int transmitted) {
+        log.i("onDataSent="+transmitted);
     }
 
     private static class ObjectHolder<T> {

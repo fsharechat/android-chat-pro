@@ -89,12 +89,14 @@ public class AsyncNetworkSocket implements AsyncSocket {
         try {
             int before = list.remaining();
             ByteBuffer[] arr = list.getAllArray();
-            mChannel.write(arr);
+            int writeLength = mChannel.write(arr);
+            log.i("total send count="+before+" write length result="+writeLength);
             list.addAll(arr);
             handleRemaining(list.remaining());
             mServer.onDataSent(before - list.remaining());
         }
         catch (IOException e) {
+            log.i("write message exception "+(e != null ? e.getMessage() : ""));
             closeInternal();
             reportEndPending(e);
             reportClose(e);
@@ -110,6 +112,7 @@ public class AsyncNetworkSocket implements AsyncSocket {
             // register for a write notification if a write fails
             // turn write on
             mKey.interestOps(SelectionKey.OP_WRITE | mKey.interestOps());
+            log.i("handleRemaining start set write interestOps="+mKey.interestOps());
         }
         else {
             // turn write off

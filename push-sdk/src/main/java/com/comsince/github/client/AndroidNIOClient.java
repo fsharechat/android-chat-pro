@@ -150,7 +150,7 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         header.setSignal(signal);
         header.setLength(body.getBytes().length);
 
-        ByteBuffer allBuffer = ByteBufferList.obtain(Header.LENGTH + header.getLength());
+        ByteBuffer allBuffer = ByteBuffer.allocate(Header.LENGTH + header.getLength());
         allBuffer.put(header.getContents());
         allBuffer.put(body.getBytes());
         allBuffer.flip();
@@ -165,12 +165,12 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         });
     }
 
-    public void sendMessage(final Signal signal, final SubSignal subSignal, final int messageId, byte[] body){
+    public void sendMessage(final Signal signal, final SubSignal subSignal, final int messageId, final byte[] body){
         sendMessage(signal, subSignal, messageId, body, new CompletedCallback() {
             @Override
             public void onCompleted(Exception ex) {
                 if(ex == null){
-                    log.i("signal "+signal+" subsignal "+subSignal+" messageId "+messageId+" send success");
+                    log.i("signal="+signal+" subsignal="+subSignal+" messageId="+messageId+" length="+body.length+" send success");
                 } else {
                     log.e("signal "+signal+" subsignal "+subSignal+" messageId "+messageId,ex);
                 }
@@ -190,7 +190,7 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         header.setSubSignal(subSignal);
         header.setLength(body.length);
 
-        ByteBuffer allBuffer = ByteBufferList.obtain(Header.LENGTH + header.getLength());
+        ByteBuffer allBuffer = ByteBuffer.allocate(Header.LENGTH + header.getLength());
         allBuffer.put(header.getContents());
         allBuffer.put(body);
         allBuffer.flip();
