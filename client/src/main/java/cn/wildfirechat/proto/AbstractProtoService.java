@@ -190,7 +190,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     log.i("reconnect status "+androidNIOClient.connectStatus);
                     switch (androidNIOClient.connectStatus){
                         case CONNECTING:
-                            clearMap();
+                            clearSendMessageTimerMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             androidNIOClient.close();
@@ -200,7 +200,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                         case CONNECTED:
                             break;
                         case DISCONNECT:
-                            clearMap();
+                            clearSendMessageTimerMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
@@ -219,7 +219,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
             androidNIOClient.post(new Runnable() {
                 @Override
                 public void run() {
-                    clearMap();
+                    clearSendMessageTimerMap();
                     cancelReconnectTimer();
                     cancelHeartTimer();
                     androidNIOClient.close();
@@ -263,10 +263,8 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         }
     }
 
-    private void clearMap(){
-        requestMap.clear();
+    private void clearSendMessageTimerMap(){
         sendMessageTimerMap.clear();
-        futureMap.clear();
     }
 
     /**
