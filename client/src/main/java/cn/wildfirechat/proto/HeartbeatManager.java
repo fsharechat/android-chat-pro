@@ -9,7 +9,6 @@ public class HeartbeatManager {
     private Log logger = LoggerFactory.getLogger(HeartbeatManager.class);
 
     private final long MIN_HEARTBEAT_INTERVAL =  30 * 1000;
-    private final long MAX_HEARTBEAT_INTERVAL = 6 * 60 * 1000;
     private final long MIDDLE_HEARTBEAT_INTERVAL = 1 * 60 * 1000;
     private volatile long currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
@@ -31,6 +30,23 @@ public class HeartbeatManager {
         }
         return currentHeartbeatInterval;
     }
+
+    /**
+     * 判断当前是否为夜间模式。
+     * 读取系统的夜间模式设置，如果用户没有设置夜间模式，或者一直设置为白天模式，则按照时间判断（22:00-6:00为夜间）。
+     * @return true 如果当前为夜间模式，否则false
+     */
+    private boolean isNightMode() {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int hour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
+        // 22:00-6:00 视为夜间
+        return (hour >= 22 || hour < 6);
+    }
+
+    private int maxHeartBeatInterval(){
+        return isNightMode() ? 6 * 60 * 1000 : 3 * 60 * 1000;
+    }
+
 
     /**
      * 这里不用考虑网络异常断开情况
@@ -73,8 +89,8 @@ public class HeartbeatManager {
         if(currentMaxHeartbeatInterval < 15 * 1000){
             currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
         }
-        if(currentMaxHeartbeatInterval > MAX_HEARTBEAT_INTERVAL){
-            currentMaxHeartbeatInterval = MAX_HEARTBEAT_INTERVAL;
+        if(currentMaxHeartbeatInterval > maxHeartBeatInterval()){
+            currentMaxHeartbeatInterval = maxHeartBeatInterval();
         }
         currentHeartbeatInterval = currentMaxHeartbeatInterval;
         logger.i("reportHeartbeatExceptionTime current heart interval "+currentHeartbeatInterval+" max interval "+currentMaxHeartbeatInterval +" upSearchingMaxInterval "+upSearchingMaxInterval);
@@ -117,9 +133,12 @@ public class HeartbeatManager {
             currentHeartbeatIntervalSuccessNum++;
             currentHeartbeatInterval = currentMaxHeartbeatInterval;
         }
-        if(currentHeartbeatInterval >= MAX_HEARTBEAT_INTERVAL){
-            int randomInt = heartBeatRandom.nextInt(12);
-            tempHeartbeatInterval = MAX_HEARTBEAT_INTERVAL - randomInt * 30 * 1000;
+        if(currentHeartbeatInterval >= maxHeartBeatInterval()){
+            int randomInt = heartBeatRandom.nextInt(maxHeartBeatInterval() / (30 * 1000));
+            tempHeartbeatInterval = maxHeartBeatInterval() - randomInt * 30 * 1000;
+            if(tempHeartbeatInterval < 0){
+                tempHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
+            }
             logger.i("nextHeartbeatInterval reach max interval so random interval="+tempHeartbeatInterval);
             return tempHeartbeatInterval;
         }
@@ -139,8 +158,8 @@ public class HeartbeatManager {
                 // 只有在合理间隔的增加值才算是有效的心跳间隔，心跳步进策略最大每次增加60s
                 if(upSearchingMaxInterval){
                     currentMaxHeartbeatInterval = interval;
-                    if(interval > MAX_HEARTBEAT_INTERVAL){
-                        currentMaxHeartbeatInterval = MAX_HEARTBEAT_INTERVAL;
+                    if(interval > maxHeartBeatInterval()){
+                        currentMaxHeartbeatInterval = maxHeartBeatInterval();
                     }
                 }
                 //防止tryheartbeat导致的无效次数
@@ -149,18 +168,13 @@ public class HeartbeatManager {
                     logger.i("recalculateMaxHeartbeatInterval currentHeartbeatSuccessNum="+currentHeartbeatSuccessNum+" disableUpSearchingMaxInterval="+disableUpSearchingMaxInterval);
                     if(currentHeartbeatSuccessNum > 3 && !disableUpSearchingMaxInterval){
                         upSearchingMaxInterval = true;
-                        long diffMaxHeartbeatTime = MAX_HEARTBEAT_INTERVAL - currentMaxHeartbeatInterval;
-                        if(diffMaxHeartbeatTime >= 6 * 60 * 1000){
-                            currentMaxHeartbeatInterval = currentMaxHeartbeatInterval + 30 * 1000;
-                            currentHeartbeatSuccessNum = 0;
-                            logger.i("recalculateMaxHeartbeatInterval add max Heartbeat interval currentMaxHeartbeatInterval "+currentMaxHeartbeatInterval);
-                        }
                     }
                 }
                 if(!upSearchingMaxInterval && disableUpSearchingMaxInterval){
-                    if(currentMaxHeartbeatInterval < MIDDLE_HEARTBEAT_INTERVAL){
-                        logger.i("enable disableUpSearchingMaxInterval");
+                    if(currentMaxHeartbeatInterval < MIDDLE_HEARTBEAT_INTERVAL || currentHeartbeatSuccessNum > 20){
+                        logger.i("disable disableUpSearchingMaxInterval");
                         disableUpSearchingMaxInterval = false;
+                        currentHeartbeatSuccessNum = 0;
                     }
                 }
             }
