@@ -381,7 +381,7 @@ public class AsyncServer {
         return connectSocket(InetSocketAddress.createUnresolved(host, port), callback);
     }
 
-    private static ExecutorService newSynchronousWorkers(String prefix) {
+    public static ExecutorService newSynchronousWorkers(String prefix) {
         ThreadFactory tf = new NamedThreadFactory(prefix);
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(1, 4, 10L,
             TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), tf);
@@ -689,6 +689,8 @@ public class AsyncServer {
                 }
                 catch (Exception ex) {
                 }
+                log.i("****AsyncServer thread has shut down.****");
+                break;
             }
             // see if we keep looping, this must be in a synchronized block since the queue is accessed.
 //            synchronized (server) {
@@ -780,8 +782,8 @@ public class AsyncServer {
 
         // run the queue to populate the selector with keys
         long wait = lockAndRunQueue(server, queue);
-        log.i("before select, queue=" + queue.size() + " keys=" + selector.keys().size() + " wait ="+wait+" selector="+selector.getSelector());
         try {
+            log.i("before select, queue=" + queue.size() + " keys=" + selector.keys().size() + " wait ="+wait+" selector="+selector.getSelector());
 //            synchronized (server) {
 //                // select now to see if anything is ready immediately. this
 //                // also clears the canceled key queue.

@@ -14,6 +14,7 @@ import com.comsince.github.push.SubSignal;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
 
@@ -31,6 +32,7 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
     private Object postTimoutScheduled;
     public volatile ConnectStatus connectStatus = ConnectStatus.DISCONNECT;
 
+    private static ExecutorService synchronousResolverWorkers = AsyncServer.newSynchronousWorkers("AndroidClient-resolver-");
     Header receiveHeader = null;
     ByteBufferList receiveBuffer = new ByteBufferList();
 
@@ -47,6 +49,10 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
     }
 
     public void connect(){
+        if(asyncServer == null){
+            log.i("recreate asyncServer");
+            asyncServer = new AsyncServer(host+"-"+port);
+        }
         asyncServer.post(new Runnable() {
             @Override
             public void run() {
@@ -69,8 +75,8 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         });
     }
 
-    public Object post(Runnable runnable,long delay){
-       return asyncServer.postDelayed(runnable,delay);
+    public void post(Runnable runnable){
+       synchronousResolverWorkers.execute(runnable);
     }
 
     public void removeScheduled(Object scheduled){
@@ -101,6 +107,10 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         }
         receiveHeader = null;
         receiveBuffer.recycle();
+        if(asyncServer != null){
+            asyncServer.stop();
+            asyncServer = null;
+        }
     }
 
     /**

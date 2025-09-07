@@ -209,7 +209,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     }
 
                 }
-            },0);
+            });
         }
     }
 
@@ -226,7 +226,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
                     androidNIOClient.connect();
                 }
-            },0);
+            });
         }
     }
 
@@ -406,9 +406,9 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                         }
                                         //如果发送失败，代表链接断开，需要重连
                                         // try to rebuild selector first to mitigate stuck select()
-                                        if(androidNIOClient != null){
-                                            androidNIOClient.rebuildSelector();
-                                        }
+//                                        if(androidNIOClient != null){
+//                                            androidNIOClient.rebuildSelector();
+//                                        }
                                         forceConnect();
 
                                     }
