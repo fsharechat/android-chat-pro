@@ -11,6 +11,7 @@ import com.comsince.github.logger.LoggerFactory;
 import com.comsince.github.push.Header;
 import com.comsince.github.push.Signal;
 import com.comsince.github.push.SubSignal;
+import com.comsince.github.util.RoundRobinHostSelector;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -26,11 +27,11 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
     Log log = LoggerFactory.getLogger(AndroidNIOClient.class);
     private AsyncServer asyncServer;
     private AsyncSocket asyncSocket;
-    private String host;
     private int port;
     private Cancellable cancellable;
     private Object postTimoutScheduled;
     public volatile ConnectStatus connectStatus = ConnectStatus.DISCONNECT;
+    private RoundRobinHostSelector roundRobinHostSelector;
 
     private static ExecutorService synchronousResolverWorkers = AsyncServer.newSynchronousWorkers("AndroidClient-resolver-");
     Header receiveHeader = null;
@@ -43,15 +44,15 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
     }
 
     public AndroidNIOClient(String host, int port) {
-        this.host = host;
+        this.roundRobinHostSelector = new RoundRobinHostSelector(host);
         this.port = port;
-        asyncServer = new AsyncServer(host+"-"+port);
+        asyncServer = new AsyncServer("AndroidNIOClient");
     }
 
     public void connect(){
         if(asyncServer == null){
             log.i("recreate asyncServer");
-            asyncServer = new AsyncServer(host+"-"+port);
+            asyncServer = new AsyncServer("AndroidNIOClient");
         }
         asyncServer.post(new Runnable() {
             @Override
@@ -59,7 +60,7 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
                 log.i("current connect status "+connectStatus);
                 if(connectStatus == ConnectStatus.DISCONNECT){
                     connectStatus = ConnectStatus.CONNECTING;
-                    cancellable = asyncServer.connectSocket(host,port,AndroidNIOClient.this);
+                    cancellable = asyncServer.connectSocket(roundRobinHostSelector.getNextHost(),port,AndroidNIOClient.this);
                     Runnable timeoutRunable = new Runnable() {
                         @Override
                         public void run() {

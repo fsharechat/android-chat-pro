@@ -203,6 +203,7 @@ public class AsyncNetworkSocket implements AsyncSocket {
         mKey.cancel();
         try {
             mChannel.close();
+            log.i("close channel "+mChannel);
         }
         catch (IOException e) {
         }

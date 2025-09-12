@@ -9,7 +9,7 @@ import android.os.Environment;
 public class Config {
 
 //    String IM_SERVER_HOST = "192.168.0.102";
-    public static String IM_SERVER_HOST = "backend-tcp.fsharechat.cn";
+    public static String IM_SERVER_HOST = "backend-tcp.fsharechat.cn:backend-tcp-s2.fsharechat.cn";
 //    String IM_SERVER_HOST = "172.16.46.201";
     public static int IM_SERVER_PORT = 6789;
 

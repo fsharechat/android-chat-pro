@@ -8,8 +8,8 @@ import java.util.Random;
 public class HeartbeatManager {
     private Log logger = LoggerFactory.getLogger(HeartbeatManager.class);
 
-    private final long MIN_HEARTBEAT_INTERVAL =  30 * 1000;
-    private final long MIDDLE_HEARTBEAT_INTERVAL = 1 * 60 * 1000;
+    public final static long MIN_HEARTBEAT_INTERVAL =  30 * 1000;
+    private final static long MIDDLE_HEARTBEAT_INTERVAL = 1 * 60 * 1000;
     private volatile long currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentScheduleTime = 0;
@@ -36,7 +36,7 @@ public class HeartbeatManager {
      * 读取系统的夜间模式设置，如果用户没有设置夜间模式，或者一直设置为白天模式，则按照时间判断（22:00-6:00为夜间）。
      * @return true 如果当前为夜间模式，否则false
      */
-    private boolean isNightMode() {
+    public boolean isNightMode() {
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         int hour = calendar.get(java.util.Calendar.HOUR_OF_DAY);
         // 22:00-6:00 视为夜间
@@ -44,7 +44,7 @@ public class HeartbeatManager {
     }
 
     private int maxHeartBeatInterval(){
-        return isNightMode() ? 6 * 60 * 1000 : 3 * 60 * 1000;
+        return isNightMode() ? 5 * 60 * 1000 : 3 * 60 * 1000;
     }
 
 
@@ -122,6 +122,9 @@ public class HeartbeatManager {
                 logger.i("nextHeartbeatInterval randomInt="+randomInt);
                 if(randomInt % 2 == 1){
                     tempHeartbeatInterval = currentHeartbeatInterval - randomInt * 30 * 1000;
+                    if(tempHeartbeatInterval > maxHeartBeatInterval()){
+                        tempHeartbeatInterval = MIDDLE_HEARTBEAT_INTERVAL;
+                    }
                     if(tempHeartbeatInterval < 0){
                         tempHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
                     }

@@ -86,6 +86,7 @@ import cn.wildfirechat.model.UnreadCount;
 import cn.wildfirechat.model.UserInfo;
 import cn.wildfirechat.proto.AndroidLogger;
 import cn.wildfirechat.proto.JavaProtoLogic;
+import cn.wildfirechat.proto.util.NetworkMonitor;
 import cn.wildfirechat.remote.RecoverReceiver;
 
 import static cn.wildfirechat.Constants.USER_SETTING_SPLIT_TAG;
@@ -137,36 +138,10 @@ public class ClientService extends Service implements
     private int clientVersion = 200;
     private static final String TAG = "ClientService";
 
-    private BroadcastReceiver mConnectionReceiver;
-
+    private NetworkMonitor networkMonitor;
     private AlarmWrapper alarmWrapper;
 
     private com.comsince.github.logger.Log logger = LoggerFactory.getLogger(ClientService.class);
-
-
-    public  class ConnectionReceiver extends BroadcastReceiver {
-        private com.comsince.github.logger.Log log = LoggerFactory.getLogger(ConnectionReceiver.class);
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (context == null || intent == null) {
-                return;
-            }
-
-            ConnectivityManager mgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = null;
-            try {
-                netInfo = mgr.getActiveNetworkInfo();
-            } catch (Exception e) {
-                log.i(TAG, "getActiveNetworkInfo failed.");
-            }
-
-            if(netInfo != null && netInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED){
-                log.i(TAG,"network changed reconnect");
-                JavaProtoLogic.reconnect();
-            }
-
-        }
-    }
 
     private String mHost;
     private int mPort;
@@ -1716,12 +1691,22 @@ public class ClientService extends Service implements
         alarmWrapper = new AlarmWrapper(this,"clientservice");
         alarmWrapper.start();
         JavaProtoLogic.init(this,alarmWrapper);
-        //Mars.init(getApplicationContext(), handler);
-        if (mConnectionReceiver == null) {
-            mConnectionReceiver = new ConnectionReceiver();
-            IntentFilter filter = new IntentFilter();
-            filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-            registerReceiver(mConnectionReceiver, filter);
+
+        if(networkMonitor == null){
+            networkMonitor = new NetworkMonitor(this);
+            networkMonitor.setNetworkStateListener(new NetworkMonitor.NetworkStateListener() {
+                @Override
+                public void onNetworkConnected(String networkType, String networkIdentifier, int networkId) {
+                    logger.i(TAG,"network changed reconnect networkType="+networkType+" networkIdentifier="+networkIdentifier);
+                    JavaProtoLogic.reconnect();
+                }
+
+                @Override
+                public void onNetworkDisconnected(String networkType, String networkIdentifier, int networkId) {
+                    logger.i(TAG,"network changed disconnect networkType="+networkType+" networkIdentifier="+networkIdentifier);
+                }
+            });
+            networkMonitor.startMonitoring();
         }
 
         try {
@@ -1762,9 +1747,10 @@ public class ClientService extends Service implements
         }
         resetProto();
         JavaProtoLogic.stopProtoService();
-        if (mConnectionReceiver != null) {
-            unregisterReceiver(mConnectionReceiver);
-            mConnectionReceiver = null;
+
+        if(networkMonitor != null){
+            networkMonitor.stopMonitoring();
+            networkMonitor = null;
         }
     }
 

@@ -190,14 +190,14 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     log.i("reconnect status "+androidNIOClient.connectStatus);
                     switch (androidNIOClient.connectStatus){
                         case CONNECTING:
+                            break;
+                        case CONNECTED:
                             clearSendMessageTimerMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             androidNIOClient.close();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
                             androidNIOClient.connect();
-                            break;
-                        case CONNECTED:
                             break;
                         case DISCONNECT:
                             clearSendMessageTimerMap();
@@ -222,6 +222,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     clearSendMessageTimerMap();
                     cancelReconnectTimer();
                     cancelHeartTimer();
+                    resetHeartBeatManager();
                     androidNIOClient.close();
                     JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
                     androidNIOClient.connect();
@@ -265,6 +266,10 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     private void clearSendMessageTimerMap(){
         sendMessageTimerMap.clear();
+    }
+
+    private void resetHeartBeatManager(){
+        this.heartbeatManager = new HeartbeatManager();
     }
 
     /**
@@ -371,7 +376,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 //                                        saveProtoMessageIds();
 
                                         //如果发送失败，代表链接断开，需要重连
-//                                        forceConnect();
+                                        forceConnect();
                                     }
                                 }
                             }).build();
@@ -389,7 +394,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                                     //只有当心跳间隔内没有发送任何数据，才进行超时处理
                                     long diff = System.currentTimeMillis() - currentReceiveMessageTime;
                                     log.i("current diff receive message time="+diff);
-                                    if(diff < heartbeatManager.currentHeartInterval()){
+                                    if(diff < HeartbeatManager.MIN_HEARTBEAT_INTERVAL){
                                         return;
                                     }
 
