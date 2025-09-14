@@ -709,7 +709,8 @@ public abstract class AbstractProtoService implements PushMessageCallback {
             messageResponse.setDirection(1);
             messageResponse.setStatus(MessageStatus.Unread.value());
         }
-        messageResponse.setMessageId(message.getMessageId());
+        //收到消息这里messageId设置服务端传来的localMessageId
+        messageResponse.setMessageId(message.getLocalMessageId());
         messageResponse.setMessageUid(message.getMessageId());
         messageResponse.setTimestamp(message.getServerTimestamp());
         WFCMessage.Conversation conversation  = message.getConversation();
@@ -752,6 +753,7 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 " content type "+messageResponse.getContent().getType()+" tos "+messageResponse.getTos()+"direct "+messageResponse.getDirection()
                 + "status "+messageResponse.getStatus()+" messageUid "+messageResponse.getMessageUid() +" messageId "+messageResponse.getMessageId());
         builder.setFromUser(messageResponse.getFrom());
+        builder.setLocalMessageId(messageResponse.getMessageId());
         if(messageResponse.getTos() != null){
             builder.addAllTo(Arrays.asList(messageResponse.getTos()));
         }

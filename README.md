@@ -10,6 +10,11 @@ git push && git push --tags
 
 ## 更新日志
 
+## 0.9.9-dev
+* 此版本需要服务端2.2.0之后版本支持
+* 发送消息增加local_messageId
+
+
 ## 0.9.9
 * 调整打开主界面发送心跳测试的超时时间间隔，避免长时间无法检测
 * 强制重联重置heartbeatManager

@@ -32,6 +32,7 @@ public interface ImMemoryStore {
     ProtoMessage[] searchMessage(int conversationType, String target, int line, String keyword);
     ProtoMessage[] getMessages(int conversationType, String target);
     ProtoMessage[] getMessages(int conversationType, String target, int line, long fromIndex, boolean before, int count, String withUser);
+    List<ProtoMessage> getSendFailedMessages(String target);
     ProtoMessage getMessage(long messageId);
     ProtoMessage getMessageByUid(long messageUid);
     boolean deleteMessage(long messageId);

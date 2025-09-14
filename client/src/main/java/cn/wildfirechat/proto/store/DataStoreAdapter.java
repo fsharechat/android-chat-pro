@@ -101,6 +101,11 @@ public class DataStoreAdapter implements ImMemoryStore{
     }
 
     @Override
+    public List<ProtoMessage> getSendFailedMessages(String target) {
+        return null;
+    }
+
+    @Override
     public ProtoMessage getMessage(long messageId) {
         return null;
     }

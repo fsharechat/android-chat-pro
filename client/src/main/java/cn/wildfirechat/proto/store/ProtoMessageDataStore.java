@@ -255,6 +255,23 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     }
 
     @Override
+    public List<ProtoMessage> getSendFailedMessages(String target) {
+        String query = COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'" + " and "+COLUMN_MESSAGE_UID +"= 0";
+        String orderBy = "message_id DESC LIMIT 20";
+        List<Map<String, Object>> messageList = queryMessageDatabase(query,orderBy);
+
+        List<ProtoMessage> protoMessages = new ArrayList<>();
+        logger.i("getSendFailedMessages target "+target+" size "+messageList.size());
+        if(!messageList.isEmpty()){
+            for(Map<String,Object> protoMessageMap : messageList){
+                ProtoMessage protoMessage = (ProtoMessage) protoMessageMap.get(COLUMN_MESSAGE_DATA);
+                protoMessages.add(protoMessage);
+            }
+        }
+        return protoMessages;
+    }
+
+    @Override
     public ProtoMessage getMessage(long messageId) {
         List<Map<String, Object>> res = queryMessageDatabase(COLUMN_MESSAGE_ID + "=" + messageId, null);
         logger.i("getMessage messageId "+messageId+" res "+res);

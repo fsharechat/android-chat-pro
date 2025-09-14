@@ -172,6 +172,11 @@ public class DataStoreFactory implements ImMemoryStore{
     }
 
     @Override
+    public List<ProtoMessage> getSendFailedMessages(String target) {
+        return protoMessageDataStore.getSendFailedMessages(target);
+    }
+
+    @Override
     public ProtoMessage getMessage(long messageId) {
         return protoMessageDataStore.getMessage(messageId);
     }
