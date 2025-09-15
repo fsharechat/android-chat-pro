@@ -710,7 +710,11 @@ public abstract class AbstractProtoService implements PushMessageCallback {
             messageResponse.setStatus(MessageStatus.Unread.value());
         }
         //收到消息这里messageId设置服务端传来的localMessageId
-        messageResponse.setMessageId(message.getLocalMessageId());
+        if(message.getLocalMessageId() > 0){
+            messageResponse.setMessageId(message.getLocalMessageId());
+        } else {
+            messageResponse.setMessageId(message.getMessageId());
+        }
         messageResponse.setMessageUid(message.getMessageId());
         messageResponse.setTimestamp(message.getServerTimestamp());
         WFCMessage.Conversation conversation  = message.getConversation();
