@@ -39,6 +39,10 @@ public class JavaProtoLogic {
         void onRecallMessage(long messageUid);
     }
 
+    public interface ISendMessageStatusUpdateCallback{
+        void onSendMessage(long messageId, int status);
+    }
+
     public interface ILoadRemoteMessagesCallback {
         void onSuccess(ProtoMessage[] messages);
         void onFailure(int errorCode);
@@ -131,12 +135,17 @@ public class JavaProtoLogic {
     private static JavaProtoLogic.IReceiveMessageCallback receiveMessageCallback = null;
     private static JavaProtoLogic.IGroupInfoUpdateCallback groupInfoUpdateCallback = null;
     private static JavaProtoLogic.IGroupMembersUpdateCallback groupMembersUpdateCallback = null;
+    private static JavaProtoLogic.ISendMessageStatusUpdateCallback sendMessageStatusUpdateCallback = null;
 
     private static JavaProtoLogic.IUserInfoUpdateCallback userInfoUpdateCallback = null;
     private static JavaProtoLogic.IFriendListUpdateCallback friendListUpdateCallback = null;
     private static JavaProtoLogic.IFriendRequestListUpdateCallback friendRequestListUpdateCallback = null;
     private static JavaProtoLogic.ISettingUpdateCallback settingUpdateCallback = null;
     private static JavaProtoLogic.IChannelInfoUpdateCallback channelInfoUpdateCallback = null;
+
+    public static void setSendMessageStatusUpdateCallback(ISendMessageStatusUpdateCallback sendMessageStatusUpdateCallback) {
+        JavaProtoLogic.sendMessageStatusUpdateCallback = sendMessageStatusUpdateCallback;
+    }
 
     public static void setConnectionStatusCallback(JavaProtoLogic.IConnectionStatusCallback connectionStatusCallback) {
         JavaProtoLogic.connectionStatusCallback = connectionStatusCallback;
@@ -191,6 +200,12 @@ public class JavaProtoLogic {
             }
 
             receiveMessageCallback.onReceiveMessage(list, hasMore);
+        }
+    }
+
+    public static void onSendMessageStatusUpdate(long messageId, int status){
+        if(sendMessageStatusUpdateCallback != null){
+            sendMessageStatusUpdateCallback.onSendMessage(messageId,status);
         }
     }
 

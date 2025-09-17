@@ -265,6 +265,20 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     }
 
     private void clearSendMessageTimerMap(){
+        for(Timer sendMessageTimer : sendMessageTimerMap.values()){
+            if(sendMessageTimer != null){
+                alarmWrapper.cancel(sendMessageTimer);
+            }
+        }
+        //更新发送消息失败
+        for(RequestInfo requestInfo : requestMap.values()){
+            if(requestInfo != null && requestInfo.getProtoMessageId() > 0){
+                boolean updateStatus = imMemoryStore.updateMessageStatus(requestInfo.getProtoMessageId(), MessageStatus.Send_Failure.ordinal());
+                log.i("set messageId="+requestInfo.getProtoMessageId()+" send failed result="+updateStatus);
+                JavaProtoLogic.onSendMessageStatusUpdate(requestInfo.getProtoMessageId(),MessageStatus.Send_Failure.ordinal());
+            }
+        }
+        requestMap.clear();
         sendMessageTimerMap.clear();
     }
 

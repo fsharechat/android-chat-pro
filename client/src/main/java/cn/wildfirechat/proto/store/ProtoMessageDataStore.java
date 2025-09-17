@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import cn.wildfirechat.message.core.MessageContentType;
+import cn.wildfirechat.message.core.MessageStatus;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ProtoConversationInfo;
 import cn.wildfirechat.model.ProtoMessage;
@@ -265,7 +266,10 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         if(!messageList.isEmpty()){
             for(Map<String,Object> protoMessageMap : messageList){
                 ProtoMessage protoMessage = (ProtoMessage) protoMessageMap.get(COLUMN_MESSAGE_DATA);
-                protoMessages.add(protoMessage);
+                if(protoMessage.getStatus() != MessageStatus.Sent.ordinal()){
+                    logger.i("send failed message id="+protoMessage.getMessageId()+" messageUid="+protoMessage.getMessageUid());
+                    protoMessages.add(protoMessage);
+                }
             }
         }
         return protoMessages;

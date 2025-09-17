@@ -23,6 +23,7 @@ import cn.wildfirechat.client.IOnSettingUpdateListener;
 import cn.wildfirechat.client.IGetGroupsCallback;
 import cn.wildfirechat.client.IOnUserInfoUpdateListener;
 import cn.wildfirechat.client.IOnChannelInfoUpdateListener;
+import cn.wildfirechat.client.ISendMessageStatusUpdateListener;
 
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.core.MessagePayload;
@@ -57,7 +58,7 @@ interface IRemoteClient {
 
     oneway void setOnReceiveMessageListener(in IOnReceiveMessageListener listener);
     oneway void setOnConnectionStatusChangeListener(in IOnConnectionStatusChangeListener listener);
-
+    oneway void setOnSendMessageStatusUpdateListener(in ISendMessageStatusUpdateListener listener);
     oneway void setOnUserInfoUpdateListener(in IOnUserInfoUpdateListener listener);
     oneway void setOnGroupInfoUpdateListener(in IOnGroupInfoUpdateListener listener);
     oneway void setOnGroupMembersUpdateListener(in IOnGroupMembersUpdateListener listener);

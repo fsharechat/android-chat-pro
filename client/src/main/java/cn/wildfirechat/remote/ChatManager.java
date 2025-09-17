@@ -46,6 +46,7 @@ import cn.wildfirechat.client.IOnReceiveMessageListener;
 import cn.wildfirechat.client.IOnSettingUpdateListener;
 import cn.wildfirechat.client.IOnUserInfoUpdateListener;
 import cn.wildfirechat.client.IRemoteClient;
+import cn.wildfirechat.client.ISendMessageStatusUpdateListener;
 import cn.wildfirechat.client.IUploadMediaCallback;
 import cn.wildfirechat.client.NotInitializedExecption;
 import cn.wildfirechat.message.MediaMessageContent;
@@ -327,6 +328,24 @@ public class ChatManager {
             while (iterator.hasNext()) {
                 listener = iterator.next();
                 listener.onReceiveMessage(messages, hasMore);
+            }
+        });
+    }
+
+
+    /**
+     * 更新消息发送状态
+     * */
+    private void onSendMessageStatusUpdate(long messageId, int status){
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Message message = getMessage(messageId);
+                if(message != null){
+                    for (OnSendMessageListener listener : sendMessageListeners) {
+                        listener.onSendSuccess(message);
+                    }
+                }
             }
         });
     }
@@ -3199,6 +3218,12 @@ public class ChatManager {
                 }
 
                 mClient.setForeground(1);
+                mClient.setOnSendMessageStatusUpdateListener(new ISendMessageStatusUpdateListener.Stub() {
+                    @Override
+                    public void onSendMessage(long messageId, int status) throws RemoteException {
+                        onSendMessageStatusUpdate(messageId,status);
+                    }
+                });
                 mClient.setOnReceiveMessageListener(new IOnReceiveMessageListener.Stub() {
                     @Override
                     public void onReceive(List<Message> messages, boolean hasMore) throws RemoteException {

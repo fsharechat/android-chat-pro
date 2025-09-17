@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import cn.wildfirechat.message.core.MessageStatus;
 import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.proto.ProtoConstants;
@@ -133,10 +134,28 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
             //这里的消息最好在一个线程里面进行，不然插入数据还没生效，可能出现幻读，否则会出现信令重复，可能出现意想不到的结果
             ProtoMessage existProtoMessage = protoService.getImMemoryStore().getMessageByUid(protoMessage.getMessageUid());
             if(existProtoMessage == null) {
-                resultProtoMessageList.add(protoMessage);
-                //所有透传的消息都要发送给目标，只是存储的时候需要过滤,这里透传消息功能没有完成，还是需要存储
-                if(protoService.getImMemoryStore().canPersistent(protoMessage.getContent().getType())){
-                    protoService.getImMemoryStore().addProtoMessageByTarget(protoMessage.getTarget(),protoMessage,true);
+                List<ProtoMessage> sendFailedMessages = protoService.getImMemoryStore().getSendFailedMessages(protoMessage.getTarget());
+                boolean isSendFailMessage = false;
+                for(ProtoMessage failedMessage : sendFailedMessages){
+                    if(failedMessage.getMessageId() == protoMessage.getMessageId()){
+                        logger.i("failed message id ="+failedMessage.getMessageId()+" has send successful");
+                        boolean updateUid = protoService.getImMemoryStore().updateMessageUid(protoMessage.getMessageId(),protoMessage.getMessageUid());
+                        boolean updateStatus = protoService.getImMemoryStore().updateMessageStatus(protoMessage.getMessageId(), MessageStatus.Sent.ordinal());
+                        logger.i("messageUid "+protoMessage.getMessageUid()+"updateUid "+updateUid+" updateStatus "+updateStatus);
+                        isSendFailMessage = true;
+
+                        //TODO 通知上层界面消息已经发送成功
+                        JavaProtoLogic.onSendMessageStatusUpdate(protoMessage.getMessageId(),MessageStatus.Sent.ordinal());
+                        break;
+                    }
+                }
+
+                if(!isSendFailMessage){
+                    resultProtoMessageList.add(protoMessage);
+                    //所有透传的消息都要发送给目标，只是存储的时候需要过滤,这里透传消息功能没有完成，还是需要存储
+                    if(protoService.getImMemoryStore().canPersistent(protoMessage.getContent().getType())){
+                        protoService.getImMemoryStore().addProtoMessageByTarget(protoMessage.getTarget(),protoMessage,true);
+                    }
                 }
             }
 

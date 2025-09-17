@@ -110,7 +110,9 @@ public class ClientService extends Service implements
         JavaProtoLogic.IFriendRequestListUpdateCallback,
         JavaProtoLogic.IFriendListUpdateCallback,
         JavaProtoLogic.IGroupInfoUpdateCallback,
-        JavaProtoLogic.IChannelInfoUpdateCallback, JavaProtoLogic.IGroupMembersUpdateCallback {
+        JavaProtoLogic.IChannelInfoUpdateCallback,
+        JavaProtoLogic.IGroupMembersUpdateCallback,
+        JavaProtoLogic.ISendMessageStatusUpdateCallback{
     private Map<Integer, Class<? extends MessageContent>> contentMapper = new HashMap<>();
 
     private int mConnectionStatus;
@@ -129,6 +131,7 @@ public class ClientService extends Service implements
     private RemoteCallbackList<IOnSettingUpdateListener> onSettingUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
     private RemoteCallbackList<IOnChannelInfoUpdateListener> onChannelInfoUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
     private RemoteCallbackList<IOnGroupMembersUpdateListener> onGroupMembersUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
+    private RemoteCallbackList<ISendMessageStatusUpdateListener> onSendMessageStatusUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
 
     private AppLogic.AccountInfo accountInfo = new AppLogic.AccountInfo();
     //        public final String DEVICE_NAME = android.os.Build.MANUFACTURER + "-" + android.os.Build.MODEL;
@@ -178,6 +181,10 @@ public class ClientService extends Service implements
             onConnectionStatusChangeListenes.register(listener);
         }
 
+        @Override
+        public void setOnSendMessageStatusUpdateListener(ISendMessageStatusUpdateListener listener) throws RemoteException {
+            onSendMessageStatusUpdateListenerRemoteCallbackList.register(listener);
+        }
 
         @Override
         public void setOnUserInfoUpdateListener(IOnUserInfoUpdateListener listener) throws RemoteException {
@@ -1787,6 +1794,7 @@ public class ClientService extends Service implements
 
         JavaProtoLogic.setConnectionStatusCallback(ClientService.this);
         JavaProtoLogic.setReceiveMessageCallback(ClientService.this);
+        JavaProtoLogic.setSendMessageStatusUpdateCallback(ClientService.this);
         JavaProtoLogic.setAuthInfo(userName, userPwd);
         JavaProtoLogic.connect(mHost, mPort);
     }
@@ -1816,6 +1824,7 @@ public class ClientService extends Service implements
 
         JavaProtoLogic.setConnectionStatusCallback(null);
         JavaProtoLogic.setReceiveMessageCallback(null);
+        JavaProtoLogic.setSendMessageStatusUpdateCallback(null);
     }
 
 //    public void openXlog() {
@@ -2155,6 +2164,25 @@ public class ClientService extends Service implements
                 }
             }
             onUserInfoUpdateListenerRemoteCallbackList.finishBroadcast();
+        });
+    }
+
+
+    @Override
+    public void onSendMessage(long messageId, int status) {
+        handler.post(() -> {
+            int i = onSendMessageStatusUpdateListenerRemoteCallbackList.beginBroadcast();
+            ISendMessageStatusUpdateListener listener;
+            while (i > 0) {
+                i--;
+                listener = onSendMessageStatusUpdateListenerRemoteCallbackList.getBroadcastItem(i);
+                try {
+                    listener.onSendMessage(messageId,status);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            onSendMessageStatusUpdateListenerRemoteCallbackList.finishBroadcast();
         });
     }
 }
