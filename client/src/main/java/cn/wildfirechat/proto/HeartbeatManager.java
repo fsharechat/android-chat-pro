@@ -8,6 +8,7 @@ import java.util.Random;
 public class HeartbeatManager {
     private Log logger = LoggerFactory.getLogger(HeartbeatManager.class);
 
+    public final static int ONE_STEP_INTERVAL = 5 * 1000;
     public final static long MIN_HEARTBEAT_INTERVAL =  30 * 1000;
     private final static long MIDDLE_HEARTBEAT_INTERVAL = 1 * 60 * 1000;
     private volatile long currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
@@ -67,17 +68,17 @@ public class HeartbeatManager {
                 currentHeartbeatSuccessNum = 0;
                 tempHeartbeatInterval = 0;
                 upSearchingMaxInterval = false;
-                if(absDiff < 60 * 1000){
+                if(absDiff < 2 * ONE_STEP_INTERVAL){
                     //等值试探失败
-                    currentMaxHeartbeatInterval = interval - 30 * 1000;
-                } else if (absDiff < 120 * 1000){
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - ONE_STEP_INTERVAL;
+                } else if (absDiff < 4 * ONE_STEP_INTERVAL){
                     //步进试探失败
-                    currentMaxHeartbeatInterval = interval - absDiff / 2;
-                } else if( absDiff < 6 * 60 * 1000){
-                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 1 * 60 * 1000;
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - absDiff / 2;
+                } else if( absDiff < 12 * ONE_STEP_INTERVAL){
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval -  2 * ONE_STEP_INTERVAL;
                 } else {
                     disableUpSearchingMaxInterval = true;
-                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 2 * 60 * 1000;
+                    currentMaxHeartbeatInterval = currentMaxHeartbeatInterval - 4 * ONE_STEP_INTERVAL;
                     logger.i("disable UpSearchingMaxInterval currentMaxHeartbeatInterval=" + currentMaxHeartbeatInterval);
 
                 }
@@ -110,10 +111,10 @@ public class HeartbeatManager {
     }
 
     public synchronized long nextHeartbeatInterval(){
-        long maxSuccessTime = currentHeartbeatInterval / (30 * 1000);
+        long maxSuccessTime = currentHeartbeatInterval / ONE_STEP_INTERVAL;
         logger.i("nextHeartbeatInterval currentHeartbeatInterval= "+currentHeartbeatInterval+" maxSuccessTime="+maxSuccessTime +" currentHeartbeatIntervalSuccessNum="+currentHeartbeatIntervalSuccessNum);
         if(upSearchingMaxInterval && currentHeartbeatIntervalSuccessNum > maxSuccessTime){
-            currentHeartbeatInterval += 30 * 1000;
+            currentHeartbeatInterval += ONE_STEP_INTERVAL;
             currentHeartbeatIntervalSuccessNum = 0;
             tempHeartbeatInterval = 0;
         } else {
@@ -121,7 +122,7 @@ public class HeartbeatManager {
                 int randomInt = heartBeatRandom.nextInt((int)maxSuccessTime);
                 logger.i("nextHeartbeatInterval randomInt="+randomInt);
                 if(randomInt % 2 == 1){
-                    tempHeartbeatInterval = currentHeartbeatInterval - randomInt * 30 * 1000;
+                    tempHeartbeatInterval = currentHeartbeatInterval - randomInt * ONE_STEP_INTERVAL;
                     if(tempHeartbeatInterval > maxHeartBeatInterval()){
                         tempHeartbeatInterval = MIDDLE_HEARTBEAT_INTERVAL;
                     }
@@ -137,8 +138,8 @@ public class HeartbeatManager {
             currentHeartbeatInterval = currentMaxHeartbeatInterval;
         }
         if(currentHeartbeatInterval >= maxHeartBeatInterval()){
-            int randomInt = heartBeatRandom.nextInt(maxHeartBeatInterval() / (30 * 1000));
-            tempHeartbeatInterval = maxHeartBeatInterval() - randomInt * 30 * 1000;
+            int randomInt = heartBeatRandom.nextInt(maxHeartBeatInterval() / ONE_STEP_INTERVAL);
+            tempHeartbeatInterval = maxHeartBeatInterval() - randomInt * ONE_STEP_INTERVAL;
             if(tempHeartbeatInterval < 0){
                 tempHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
             }
