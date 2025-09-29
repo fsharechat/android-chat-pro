@@ -10,7 +10,7 @@ public class HeartbeatManager {
 
     public final static int ONE_STEP_INTERVAL = 5 * 1000;
     public final static long MIN_HEARTBEAT_INTERVAL =  30 * 1000;
-    private final static long MIDDLE_HEARTBEAT_INTERVAL = 1 * 60 * 1000;
+    private final static long MIDDLE_HEARTBEAT_INTERVAL = 1 * 45 * 1000;
     private volatile long currentMaxHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentHeartbeatInterval = MIN_HEARTBEAT_INTERVAL;
     private volatile long currentScheduleTime = 0;
@@ -45,7 +45,7 @@ public class HeartbeatManager {
     }
 
     private int maxHeartBeatInterval(){
-        return isNightMode() ? 5 * 60 * 1000 : 3 * 60 * 1000;
+        return isNightMode() ? 2 * 60 * 1000 : 1 * 60 * 1000;
     }
 
 
