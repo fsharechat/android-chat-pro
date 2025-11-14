@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import cn.wildfire.chat.app.Config;
 import cn.wildfirechat.chat.R;
 
+import static com.cjt2325.cameralibrary.JCameraView.MEDIA_QUALITY_HIGH;
+
 public class TakePhotoActivity extends AppCompatActivity {
     private JCameraView mJCameraView;
 
@@ -45,7 +47,7 @@ public class TakePhotoActivity extends AppCompatActivity {
         if(!file.exists()){
             file.mkdirs();
         }
-
+        mJCameraView.setMediaQuality(30 * 100000);
         mJCameraView.setSaveVideoPath(Config.VIDEO_SAVE_DIR);
         mJCameraView.setJCameraLisenter(new JCameraListener() {
 

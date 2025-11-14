@@ -16,7 +16,7 @@ android {
         applicationId "cn.comsince.fschat"
         minSdkVersion 21
         targetSdkVersion 29 //当targetversion大于23时，需要使用fileprovider
-        versionCode 998
+        versionCode 999
         versionName "0.9.9-hyperOS"
         multiDexEnabled true
         javaCompileOptions {
