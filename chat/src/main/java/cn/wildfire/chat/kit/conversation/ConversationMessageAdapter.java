@@ -132,6 +132,16 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
+    public boolean replaceMessage(UiMessage oldMsg, UiMessage newMsg) {
+        int pos = messages.indexOf(oldMsg);
+        if (pos >= 0) {
+            messages.set(pos, newMsg);
+            notifyItemChanged(pos);
+            return true;
+        }
+        return false;
+    }
+
     public void removeMessage(UiMessage message) {
         if (message == null || messages == null || messages.isEmpty()) {
             return;

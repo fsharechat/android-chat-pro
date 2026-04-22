@@ -16,8 +16,8 @@ android {
         applicationId "cn.comsince.fschat"
         minSdkVersion 21
         targetSdkVersion 29 //当targetversion大于23时，需要使用fileprovider
-        versionCode 999
-        versionName "0.9.9-hyperOS"
+        versionCode 10001
+        versionName "1.0.0"
         multiDexEnabled true
         javaCompileOptions {
             annotationProcessorOptions {
@@ -39,7 +39,7 @@ android {
 
 
         ndk {
-            abiFilters 'armeabi',"armeabi-v7a", 'x86', 'x86_64' // ，'armeabi', 'arm64-v8a', 'x86', 'x86_64'
+            abiFilters 'armeabi',"armeabi-v7a", 'x86', 'x86_64','arm64-v8a' // ，'armeabi', 'arm64-v8a', 'x86', 'x86_64'
         }
 
     }

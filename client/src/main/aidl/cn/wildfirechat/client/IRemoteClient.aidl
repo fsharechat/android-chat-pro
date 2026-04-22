@@ -24,6 +24,7 @@ import cn.wildfirechat.client.IGetGroupsCallback;
 import cn.wildfirechat.client.IOnUserInfoUpdateListener;
 import cn.wildfirechat.client.IOnChannelInfoUpdateListener;
 import cn.wildfirechat.client.ISendMessageStatusUpdateListener;
+import cn.wildfirechat.client.IOnSaiTokenListener;
 
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.core.MessagePayload;
@@ -160,4 +161,5 @@ interface IRemoteClient {
     List<String> getMyChannels();
     List<String> getListenedChannels();
     oneway void uploadReport(in int reportType,in String target, in int conversationType,in List<String> tos,in IGeneralCallback callback);
+    oneway void setSaiTokenListener(in IOnSaiTokenListener listener);
 }

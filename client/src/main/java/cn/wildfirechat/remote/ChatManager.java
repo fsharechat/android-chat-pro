@@ -43,6 +43,7 @@ import cn.wildfirechat.client.IOnFriendUpdateListener;
 import cn.wildfirechat.client.IOnGroupInfoUpdateListener;
 import cn.wildfirechat.client.IOnGroupMembersUpdateListener;
 import cn.wildfirechat.client.IOnReceiveMessageListener;
+import cn.wildfirechat.client.IOnSaiTokenListener;
 import cn.wildfirechat.client.IOnSettingUpdateListener;
 import cn.wildfirechat.client.IOnUserInfoUpdateListener;
 import cn.wildfirechat.client.IRemoteClient;
@@ -125,6 +126,23 @@ public class ChatManager {
     private List<OnClearMessageListener> clearMessageListeners = new ArrayList<>();
 
     private List<IMServiceStatusListener> imServiceStatusListeners = new ArrayList<>();
+
+    public interface OnSaiTokenListener {
+        void onSaiToken(String streamId, String delta, boolean done, String target);
+    }
+    private OnSaiTokenListener saiTokenListener;
+
+    public void setOnSaiTokenListener(OnSaiTokenListener listener) {
+        this.saiTokenListener = listener;
+    }
+
+    private void onSaiToken(String streamId, String delta, boolean done, String target) {
+        mainHandler.post(() -> {
+            if (saiTokenListener != null) {
+                saiTokenListener.onSaiToken(streamId, delta, done, target);
+            }
+        });
+    }
 
     // key = userId
     private LruCache<String, UserInfo> userInfoCache;
@@ -3281,6 +3299,12 @@ public class ChatManager {
                     @Override
                     public void onChannelInfoUpdated(List<ChannelInfo> channelInfos) throws RemoteException {
                         ChatManager.this.onChannelInfoUpdate(channelInfos);
+                    }
+                });
+                mClient.setSaiTokenListener(new IOnSaiTokenListener.Stub() {
+                    @Override
+                    public void onSaiToken(String streamId, String delta, boolean done, String target) throws RemoteException {
+                        ChatManager.this.onSaiToken(streamId, delta, done, target);
                     }
                 });
 

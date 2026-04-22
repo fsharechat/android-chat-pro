@@ -46,9 +46,12 @@ import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfire.chat.kit.widget.InputAwareLayout;
 import cn.wildfire.chat.kit.widget.KeyboardAwareLinearLayout;
 import cn.wildfirechat.chat.R;
+import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.MessageContent;
+import cn.wildfirechat.message.TextMessageContent;
 import cn.wildfirechat.message.TypingMessageContent;
 import cn.wildfirechat.message.core.MessageDirection;
+import cn.wildfirechat.message.core.MessageStatus;
 import cn.wildfirechat.message.core.PersistFlag;
 import cn.wildfirechat.message.notification.TipNotificationContent;
 import cn.wildfirechat.model.ChannelInfo;
@@ -99,19 +102,30 @@ public class ConversationActivity extends WfcBaseActivity implements
     private SharedPreferences sharedPreferences;
     private boolean showGroupMemberAlias = false;
     private LinearLayoutManager layoutManager;
+    private UiMessage streamingPlaceholder;
+    private String streamingId;
 
     private Observer<UiMessage> messageLiveDataObserver = new Observer<UiMessage>() {
         @Override
         public void onChanged(@Nullable UiMessage uiMessage) {
             MessageContent content = uiMessage.message.content;
             if (isDisplayableMessage(uiMessage)) {
-                // 消息定位时，如果收到新消息、或者发送消息，需要重新加载消息列表
-                if (shouldContinueLoadNewMessage) {
-                    shouldContinueLoadNewMessage = false;
-                    reloadMessage();
-                    return;
+                boolean replacedPlaceholder = false;
+                if (streamingPlaceholder != null &&
+                        uiMessage.message.sender.equals(streamingPlaceholder.message.sender)) {
+                    replacedPlaceholder = adapter.replaceMessage(streamingPlaceholder, uiMessage);
+                    streamingPlaceholder = null;
+                    streamingId = null;
                 }
-                adapter.addNewMessage(uiMessage);
+                if (!replacedPlaceholder) {
+                    // 消息定位时，如果收到新消息、或者发送消息，需要重新加载消息列表
+                    if (shouldContinueLoadNewMessage) {
+                        shouldContinueLoadNewMessage = false;
+                        reloadMessage();
+                        return;
+                    }
+                    adapter.addNewMessage(uiMessage);
+                }
                 if (moveToBottom || uiMessage.message.sender.equals(ChatManager.Instance().getUserId())) {
                     UIUtils.postTaskDelay(() -> {
 
@@ -305,6 +319,48 @@ public class ConversationActivity extends WfcBaseActivity implements
     }
 
     private void setupConversation(Conversation conversation) {
+        ChatManagerHolder.gChatManager.setOnSaiTokenListener((streamId, delta, done, target) -> {
+            if (conversation.type != Conversation.ConversationType.Single ||
+                    !target.equals(conversation.target)) {
+                return;
+            }
+            if (!done && delta.isEmpty() && streamingPlaceholder == null) {
+                Message placeholder = new Message();
+                placeholder.messageId = -System.currentTimeMillis();
+                placeholder.conversation = conversation;
+                placeholder.sender = target;
+                placeholder.direction = MessageDirection.Receive;
+                placeholder.status = MessageStatus.Unread;
+                placeholder.serverTime = System.currentTimeMillis();
+                placeholder.content = new TextMessageContent("");
+                UiMessage uiMsg = new UiMessage(placeholder);
+                uiMsg.isStreaming = true;
+                uiMsg.streamId = streamId;
+                streamingPlaceholder = uiMsg;
+                streamingId = streamId;
+                adapter.addNewMessage(uiMsg);
+                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+            } else if (!done && !delta.isEmpty() && streamingPlaceholder != null
+                    && streamId.equals(streamingId)) {
+                TextMessageContent content = (TextMessageContent) streamingPlaceholder.message.content;
+                content.setContent(content.getContent() + delta);
+                int pos = adapter.getMessages().indexOf(streamingPlaceholder);
+                if (pos >= 0) {
+                    adapter.notifyItemChanged(pos);
+                    if (moveToBottom) {
+                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    }
+                }
+            } else if (done && streamingPlaceholder != null && streamId.equals(streamingId)) {
+                streamingPlaceholder.isStreaming = false;
+                int pos = adapter.getMessages().indexOf(streamingPlaceholder);
+                if (pos >= 0) {
+                    adapter.notifyItemChanged(pos);
+                }
+                // 不清空 streamingPlaceholder，等真实消息通过 MN 到达后再移除占位气泡
+            }
+        });
+
         if (conversationViewModel == null) {
             conversationViewModel = ViewModelProviders.of(this, new ConversationViewModelFactory(conversation, channelPrivateChatUser)).get(ConversationViewModel.class);
 
@@ -552,6 +608,7 @@ public class ConversationActivity extends WfcBaseActivity implements
     @Override
     protected void onDestroy() {
         isResume = false;
+        ChatManagerHolder.gChatManager.setOnSaiTokenListener(null);
         if (conversation.type == Conversation.ConversationType.ChatRoom) {
             quitChatRoom();
         }

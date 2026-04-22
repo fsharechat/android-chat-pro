@@ -12,6 +12,8 @@ public class UiMessage {
      */
     public int progress;
     public Message message;
+    public boolean isStreaming;
+    public String streamId;
 
     public UiMessage(Message message) {
         this.message = message;

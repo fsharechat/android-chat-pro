@@ -23,6 +23,7 @@ import cn.wildfirechat.model.ProtoGroupMember;
 import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoMessageContent;
 import cn.wildfirechat.model.ProtoUserInfo;
+import cn.wildfirechat.proto.handler.StreamingAiHandler;
 import cn.wildfirechat.proto.handler.AddFriendRequestHandler;
 import cn.wildfirechat.proto.handler.AddGroupMemberHandler;
 import cn.wildfirechat.proto.handler.ConnectAckMessageHandler;
@@ -99,6 +100,30 @@ public class ProtoService extends AbstractProtoService {
         messageHandlers.add(new GetMinioUploadUrlHandler(this));
         messageHandlers.add(new DeliveryReportHandler(this));
         messageHandlers.add(new ReadReportHandler(this));
+        messageHandlers.add(new StreamingAiHandler(this));
+    }
+
+    // ---- 流式 AI 回调 ----
+
+    public interface SaiTokenCallback {
+        /** @param streamId  本次流会话 ID
+         *  @param delta     本次 token 内容（首尾两次为空字符串，分别对应开始/结束）
+         *  @param done      true 表示流结束
+         *  @param target    AI 机器人 IM 用户 ID（用于定位会话） */
+        void onToken(String streamId, String delta, boolean done, String target);
+    }
+
+    private SaiTokenCallback saiTokenCallback;
+
+    public void setSaiTokenCallback(SaiTokenCallback callback) {
+        this.saiTokenCallback = callback;
+    }
+
+    public void onSaiToken(String streamId, String delta, boolean done, String target) {
+        if (saiTokenCallback != null) {
+            saiTokenCallback.onToken(streamId, delta, done, target);
+        }
+        JavaProtoLogic.onSaiToken(streamId, delta, done, target);
     }
 
     public void searchUser(String keyword, JavaProtoLogic.ISearchUserCallback callback){

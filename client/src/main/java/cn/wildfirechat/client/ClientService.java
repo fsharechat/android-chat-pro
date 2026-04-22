@@ -86,6 +86,7 @@ import cn.wildfirechat.model.UnreadCount;
 import cn.wildfirechat.model.UserInfo;
 import cn.wildfirechat.proto.AndroidLogger;
 import cn.wildfirechat.proto.JavaProtoLogic;
+import cn.wildfirechat.client.IOnSaiTokenListener;
 import cn.wildfirechat.proto.util.NetworkMonitor;
 import cn.wildfirechat.remote.RecoverReceiver;
 
@@ -112,7 +113,8 @@ public class ClientService extends Service implements
         JavaProtoLogic.IGroupInfoUpdateCallback,
         JavaProtoLogic.IChannelInfoUpdateCallback,
         JavaProtoLogic.IGroupMembersUpdateCallback,
-        JavaProtoLogic.ISendMessageStatusUpdateCallback{
+        JavaProtoLogic.ISendMessageStatusUpdateCallback,
+        JavaProtoLogic.ISaiTokenCallback {
     private Map<Integer, Class<? extends MessageContent>> contentMapper = new HashMap<>();
 
     private int mConnectionStatus;
@@ -132,6 +134,7 @@ public class ClientService extends Service implements
     private RemoteCallbackList<IOnChannelInfoUpdateListener> onChannelInfoUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
     private RemoteCallbackList<IOnGroupMembersUpdateListener> onGroupMembersUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
     private RemoteCallbackList<ISendMessageStatusUpdateListener> onSendMessageStatusUpdateListenerRemoteCallbackList = new WfcRemoteCallbackList<>();
+    private RemoteCallbackList<IOnSaiTokenListener> onSaiTokenListeners = new WfcRemoteCallbackList<>();
 
     private AppLogic.AccountInfo accountInfo = new AppLogic.AccountInfo();
     //        public final String DEVICE_NAME = android.os.Build.MANUFACTURER + "-" + android.os.Build.MODEL;
@@ -214,6 +217,11 @@ public class ClientService extends Service implements
         @Override
         public void setOnGroupMembersUpdateListener(IOnGroupMembersUpdateListener listener) throws RemoteException {
             onGroupMembersUpdateListenerRemoteCallbackList.register(listener);
+        }
+
+        @Override
+        public void setSaiTokenListener(IOnSaiTokenListener listener) throws RemoteException {
+            onSaiTokenListeners.register(listener);
         }
 
         @Override
@@ -1795,6 +1803,7 @@ public class ClientService extends Service implements
         JavaProtoLogic.setConnectionStatusCallback(ClientService.this);
         JavaProtoLogic.setReceiveMessageCallback(ClientService.this);
         JavaProtoLogic.setSendMessageStatusUpdateCallback(ClientService.this);
+        JavaProtoLogic.setSaiTokenCallback(ClientService.this);
         JavaProtoLogic.setAuthInfo(userName, userPwd);
         JavaProtoLogic.connect(mHost, mPort);
     }
@@ -1825,6 +1834,7 @@ public class ClientService extends Service implements
         JavaProtoLogic.setConnectionStatusCallback(null);
         JavaProtoLogic.setReceiveMessageCallback(null);
         JavaProtoLogic.setSendMessageStatusUpdateCallback(null);
+        JavaProtoLogic.setSaiTokenCallback(null);
     }
 
 //    public void openXlog() {
@@ -2183,6 +2193,24 @@ public class ClientService extends Service implements
                 }
             }
             onSendMessageStatusUpdateListenerRemoteCallbackList.finishBroadcast();
+        });
+    }
+
+    @Override
+    public void onSaiToken(String streamId, String delta, boolean done, String target) {
+        handler.post(() -> {
+            int i = onSaiTokenListeners.beginBroadcast();
+            IOnSaiTokenListener listener;
+            while (i > 0) {
+                i--;
+                listener = onSaiTokenListeners.getBroadcastItem(i);
+                try {
+                    listener.onSaiToken(streamId, delta, done, target);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+            onSaiTokenListeners.finishBroadcast();
         });
     }
 }

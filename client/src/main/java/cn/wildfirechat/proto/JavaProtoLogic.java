@@ -76,6 +76,10 @@ public class JavaProtoLogic {
         void onSettingUpdated();
     }
 
+    public interface ISaiTokenCallback {
+        void onSaiToken(String streamId, String delta, boolean done, String target);
+    }
+
     public interface IGeneralCallback {
         void onSuccess();
         void onFailure(int errorCode);
@@ -142,6 +146,7 @@ public class JavaProtoLogic {
     private static JavaProtoLogic.IFriendRequestListUpdateCallback friendRequestListUpdateCallback = null;
     private static JavaProtoLogic.ISettingUpdateCallback settingUpdateCallback = null;
     private static JavaProtoLogic.IChannelInfoUpdateCallback channelInfoUpdateCallback = null;
+    private static JavaProtoLogic.ISaiTokenCallback saiTokenCallback = null;
 
     public static void setSendMessageStatusUpdateCallback(ISendMessageStatusUpdateCallback sendMessageStatusUpdateCallback) {
         JavaProtoLogic.sendMessageStatusUpdateCallback = sendMessageStatusUpdateCallback;
@@ -181,6 +186,16 @@ public class JavaProtoLogic {
 
     public static void setSettingUpdateCallback(JavaProtoLogic.ISettingUpdateCallback settingUpdateCallback) {
         JavaProtoLogic.settingUpdateCallback = settingUpdateCallback;
+    }
+
+    public static void setSaiTokenCallback(JavaProtoLogic.ISaiTokenCallback callback) {
+        JavaProtoLogic.saiTokenCallback = callback;
+    }
+
+    public static void onSaiToken(String streamId, String delta, boolean done, String target) {
+        if (saiTokenCallback != null) {
+            saiTokenCallback.onSaiToken(streamId, delta, done, target);
+        }
     }
 
     public static final String TAG = "mars.StnLogic";

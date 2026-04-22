@@ -47,7 +47,11 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
 
     @Override
     public void onBind(UiMessage message) {
-        MoonUtils.identifyFaceExpression(context, contentTextView, ((TextMessageContent) message.message.content).getContent(), ImageSpan.ALIGN_BOTTOM);
+        String text = ((TextMessageContent) message.message.content).getContent();
+        if (message.isStreaming) {
+            text = text + "▌";
+        }
+        MoonUtils.identifyFaceExpression(context, contentTextView, text, ImageSpan.ALIGN_BOTTOM);
         if (message.message.direction == MessageDirection.Receive) {
             progressBar.setVisibility(View.GONE);
         } else {

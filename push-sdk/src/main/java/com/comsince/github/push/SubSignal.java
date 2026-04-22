@@ -47,7 +47,8 @@ public enum SubSignal {
     MRN,
     MRP,
     MRR,
-    MDR
+    MDR,
+    SAI
     ;
 
 
