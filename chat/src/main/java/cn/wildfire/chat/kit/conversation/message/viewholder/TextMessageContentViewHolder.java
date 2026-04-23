@@ -1,8 +1,12 @@
 package cn.wildfire.chat.kit.conversation.message.viewholder;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.text.style.ImageSpan;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -41,17 +45,45 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
     @Bind(R.id.progressBar)
     ProgressBar progressBar;
 
+    private ValueAnimator blinkAnimator;
+
     public TextMessageContentViewHolder(FragmentActivity activity, RecyclerView.Adapter adapter, View itemView) {
         super(activity, adapter, itemView);
     }
 
     @Override
     public void onBind(UiMessage message) {
-        String text = ((TextMessageContent) message.message.content).getContent();
-        if (message.isStreaming) {
-            text = text + "▌";
+        if (blinkAnimator != null) {
+            blinkAnimator.cancel();
+            blinkAnimator = null;
         }
-        MoonUtils.identifyFaceExpression(context, contentTextView, text, ImageSpan.ALIGN_BOTTOM);
+        String text = ((TextMessageContent) message.message.content).getContent();
+        if (message.isStreaming && text.isEmpty()) {
+            // 占位符状态：只让光标字符的颜色 alpha 闪烁，不影响背景气泡
+            contentTextView.setText("▌");
+            final int baseColor = contentTextView.getCurrentTextColor();
+            final int r = Color.red(baseColor), g = Color.green(baseColor), b = Color.blue(baseColor);
+            blinkAnimator = ValueAnimator.ofFloat(1f, 0.1f);
+            blinkAnimator.setDuration(600);
+            blinkAnimator.setRepeatMode(ValueAnimator.REVERSE);
+            blinkAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            blinkAnimator.addUpdateListener(anim -> {
+                float alpha = (float) anim.getAnimatedValue();
+                contentTextView.setTextColor(Color.argb((int) (alpha * 255), r, g, b));
+            });
+            blinkAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    contentTextView.setTextColor(baseColor);
+                }
+            });
+            blinkAnimator.start();
+        } else {
+            if (message.isStreaming) {
+                text = text + "▌";
+            }
+            MoonUtils.identifyFaceExpression(context, contentTextView, text, ImageSpan.ALIGN_BOTTOM);
+        }
         if (message.message.direction == MessageDirection.Receive) {
             progressBar.setVisibility(View.GONE);
         } else {
