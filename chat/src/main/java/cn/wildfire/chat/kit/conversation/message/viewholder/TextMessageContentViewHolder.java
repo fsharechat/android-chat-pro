@@ -13,6 +13,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import io.noties.markwon.Markwon;
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
+import io.noties.markwon.ext.tables.TablePlugin;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,9 +50,14 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
     ProgressBar progressBar;
 
     private ValueAnimator blinkAnimator;
+    private final Markwon markwon;
 
     public TextMessageContentViewHolder(FragmentActivity activity, RecyclerView.Adapter adapter, View itemView) {
         super(activity, adapter, itemView);
+        markwon = Markwon.builder(activity)
+                .usePlugin(TablePlugin.create(activity))
+                .usePlugin(StrikethroughPlugin.create())
+                .build();
     }
 
     @Override
@@ -58,8 +67,10 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
             blinkAnimator = null;
         }
         String text = ((TextMessageContent) message.message.content).getContent();
+        boolean isReceived = message.message.direction == MessageDirection.Receive;
+
         if (message.isStreaming && text.isEmpty()) {
-            // 占位符状态：只让光标字符的颜色 alpha 闪烁，不影响背景气泡
+            // 占位符：文字未到达，光标闪烁提示 AI 正在思考
             contentTextView.setText("▌");
             final int baseColor = contentTextView.getCurrentTextColor();
             final int r = Color.red(baseColor), g = Color.green(baseColor), b = Color.blue(baseColor);
@@ -78,13 +89,16 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
                 }
             });
             blinkAnimator.start();
+        } else if (isReceived) {
+            // 接收消息（含 AI 流式输出）：以 Markdown 格式渲染
+            String displayText = message.isStreaming ? text + "▌" : text;
+            markwon.setMarkdown(contentTextView, displayText);
         } else {
-            if (message.isStreaming) {
-                text = text + "▌";
-            }
-            MoonUtils.identifyFaceExpression(context, contentTextView, text, ImageSpan.ALIGN_BOTTOM);
+            // 自己发出的消息：Markdown 渲染
+            markwon.setMarkdown(contentTextView, text);
         }
-        if (message.message.direction == MessageDirection.Receive) {
+
+        if (isReceived) {
             progressBar.setVisibility(View.GONE);
         } else {
             // todo

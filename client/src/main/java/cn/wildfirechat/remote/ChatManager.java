@@ -136,8 +136,40 @@ public class ChatManager {
         this.saiTokenListener = listener;
     }
 
+    public static class StreamingState {
+        public final String streamId;
+        public final String target;
+        public final String accumulatedText;
+        public final boolean done;
+
+        StreamingState(String streamId, String target, String text, boolean done) {
+            this.streamId = streamId;
+            this.target = target;
+            this.accumulatedText = text;
+            this.done = done;
+        }
+    }
+
+    private StreamingState activeStream;
+
+    public StreamingState getActiveStream() {
+        return activeStream;
+    }
+
+    public void clearActiveStream() {
+        activeStream = null;
+    }
+
     private void onSaiToken(String streamId, String delta, boolean done, String target) {
         mainHandler.post(() -> {
+            // 在单例层积累全量文本，Activity 销毁重建后可恢复
+            if (!done && delta.isEmpty() && activeStream == null) {
+                activeStream = new StreamingState(streamId, target, "", false);
+            } else if (!done && !delta.isEmpty() && activeStream != null && streamId.equals(activeStream.streamId)) {
+                activeStream = new StreamingState(streamId, target, activeStream.accumulatedText + delta, false);
+            } else if (done && activeStream != null && streamId.equals(activeStream.streamId)) {
+                activeStream = new StreamingState(streamId, target, activeStream.accumulatedText, true);
+            }
             if (saiTokenListener != null) {
                 saiTokenListener.onSaiToken(streamId, delta, done, target);
             }

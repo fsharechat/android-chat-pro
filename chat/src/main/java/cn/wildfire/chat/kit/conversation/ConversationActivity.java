@@ -116,6 +116,7 @@ public class ConversationActivity extends WfcBaseActivity implements
                     replacedPlaceholder = adapter.replaceMessage(streamingPlaceholder, uiMessage);
                     streamingPlaceholder = null;
                     streamingId = null;
+                    ChatManagerHolder.gChatManager.clearActiveStream();
                 }
                 if (!replacedPlaceholder) {
                     // 消息定位时，如果收到新消息、或者发送消息，需要重新加载消息列表
@@ -296,7 +297,11 @@ public class ConversationActivity extends WfcBaseActivity implements
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                // 向上滑动，不在底部，收到消息时，不滑动到底部, 发送消息时，可以强制置为true
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    // 用户主动拖动时立即停止自动跟底，避免流式输出时列表上下跳动
+                    moveToBottom = false;
+                    return;
+                }
                 if (newState != RecyclerView.SCROLL_STATE_IDLE) {
                     return;
                 }
@@ -408,6 +413,30 @@ public class ConversationActivity extends WfcBaseActivity implements
                     }
                 } else {
                     moveToBottom = true;
+                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                }
+            }
+
+            // 消息加载完成后，恢复被中断的流式占位消息
+            if (streamingPlaceholder == null &&
+                    conversation.type == Conversation.ConversationType.Single) {
+                ChatManager.StreamingState activeStream = ChatManagerHolder.gChatManager.getActiveStream();
+                if (activeStream != null && !activeStream.done &&
+                        activeStream.target.equals(conversation.target)) {
+                    Message placeholder = new Message();
+                    placeholder.messageId = -System.currentTimeMillis();
+                    placeholder.conversation = conversation;
+                    placeholder.sender = activeStream.target;
+                    placeholder.direction = MessageDirection.Receive;
+                    placeholder.status = MessageStatus.Unread;
+                    placeholder.serverTime = System.currentTimeMillis();
+                    placeholder.content = new TextMessageContent(activeStream.accumulatedText);
+                    UiMessage uiMsg = new UiMessage(placeholder);
+                    uiMsg.isStreaming = true;
+                    uiMsg.streamId = activeStream.streamId;
+                    streamingPlaceholder = uiMsg;
+                    streamingId = activeStream.streamId;
+                    adapter.addNewMessage(uiMsg);
                     recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                 }
             }
