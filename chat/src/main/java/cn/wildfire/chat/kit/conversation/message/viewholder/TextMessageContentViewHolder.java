@@ -7,20 +7,17 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
-import android.text.style.ImageSpan;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import android.text.Spanned;
 import io.noties.markwon.Markwon;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.lqr.emoji.MoonUtils;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -31,7 +28,6 @@ import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfirechat.chat.R;
-import cn.wildfirechat.message.MediaMessageContent;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.MessageContent;
 import cn.wildfirechat.message.TextMessageContent;
@@ -92,10 +88,11 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
         } else if (isReceived) {
             // 接收消息（含 AI 流式输出）：以 Markdown 格式渲染
             String displayText = message.isStreaming ? text + "▌" : text;
-            markwon.setMarkdown(contentTextView, displayText);
+            // 流式输出中内容实时变化，不缓存；非流式时缓存 Spanned 防止 rebind 高度变化导致列表跳动
+            setMarkdownCached(message, displayText, !message.isStreaming);
         } else {
-            // 自己发出的消息：Markdown 渲染
-            markwon.setMarkdown(contentTextView, text);
+            // 自己发出的消息：Markdown 渲染，缓存防跳动
+            setMarkdownCached(message, text, true);
         }
 
         if (isReceived) {
@@ -105,11 +102,27 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
         }
     }
 
-    @OnClick(R.id.contentTextView)
-    public void onClickTest(View view) {
-        Toast.makeText(context, "onTextMessage click: " + ((TextMessageContent) message.message.content).getContent(), Toast.LENGTH_SHORT).show();
+    /**
+     * 使用缓存的 Spanned 渲染 Markdown，避免每次 rebind 重新解析导致 TextView 高度变化引起 RecyclerView 列表跳动。
+     * useCache=false 时（流式输出中）跳过缓存，每次重新解析以展示最新内容。
+     */
+    private void setMarkdownCached(UiMessage message, String text, boolean useCache) {
+        if (useCache && message.cachedMarkdown != null && text.equals(message.cachedMarkdownSource)) {
+            markwon.setParsedMarkdown(contentTextView, message.cachedMarkdown);
+        } else {
+            Spanned spanned = markwon.toMarkdown(text);
+            if (useCache) {
+                message.cachedMarkdown = spanned;
+                message.cachedMarkdownSource = text;
+            }
+            markwon.setParsedMarkdown(contentTextView, spanned);
+        }
     }
 
+    @OnClick(R.id.contentTextView)
+    public void onClickTest(View view) {
+//        Toast.makeText(context, "onTextMessage click: " + ((TextMessageContent) message.message.content).getContent(), Toast.LENGTH_SHORT).show();
+    }
 
     @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_CLIP, title = "复制", confirm = false, priority = 12)
     public void clip(View itemView, UiMessage message) {

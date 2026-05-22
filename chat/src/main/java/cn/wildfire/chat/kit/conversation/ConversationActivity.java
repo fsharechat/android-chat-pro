@@ -279,6 +279,22 @@ public class ConversationActivity extends WfcBaseActivity implements
         setupConversation(conversation);
     }
 
+    // 滚动到最后一条消息的底部，用 post 确保在布局完成后执行
+    private void scrollToStreamingBottom() {
+        int lastPos = adapter.getItemCount() - 1;
+        recyclerView.post(() -> {
+            View lastView = layoutManager.findViewByPosition(lastPos);
+            if (lastView != null) {
+                int overflow = lastView.getBottom() - (recyclerView.getHeight() - recyclerView.getPaddingBottom());
+                if (overflow > 0) {
+                    recyclerView.scrollBy(0, overflow);
+                }
+            } else {
+                recyclerView.scrollToPosition(lastPos);
+            }
+        });
+    }
+
     private void initView() {
         handler = new Handler();
         rootLinearLayout.addOnKeyboardShownListener(this);
@@ -344,7 +360,7 @@ public class ConversationActivity extends WfcBaseActivity implements
                 streamingPlaceholder = uiMsg;
                 streamingId = streamId;
                 adapter.addNewMessage(uiMsg);
-                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                scrollToStreamingBottom();
             } else if (!done && !delta.isEmpty() && streamingPlaceholder != null
                     && streamId.equals(streamingId)) {
                 TextMessageContent content = (TextMessageContent) streamingPlaceholder.message.content;
@@ -353,7 +369,7 @@ public class ConversationActivity extends WfcBaseActivity implements
                 if (pos >= 0) {
                     adapter.notifyItemChanged(pos);
                     if (moveToBottom) {
-                        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                        scrollToStreamingBottom();
                     }
                 }
             } else if (done && streamingPlaceholder != null && streamId.equals(streamingId)) {
@@ -437,7 +453,7 @@ public class ConversationActivity extends WfcBaseActivity implements
                     streamingPlaceholder = uiMsg;
                     streamingId = activeStream.streamId;
                     adapter.addNewMessage(uiMsg);
-                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    scrollToStreamingBottom();
                 }
             }
         });
@@ -692,7 +708,6 @@ public class ConversationActivity extends WfcBaseActivity implements
         conversationViewModel.loadOldMessages(fromMessageId, fromMessageUid, MESSAGE_LOAD_COUNT_PER_TIME)
                 .observe(this, uiMessages -> {
                     adapter.addMessagesAtHead(uiMessages);
-
                     swipeRefreshLayout.setRefreshing(false);
                 });
     }

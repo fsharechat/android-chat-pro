@@ -1,5 +1,7 @@
 package cn.wildfire.chat.kit.conversation.message.model;
 
+import android.text.Spanned;
+
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.model.Conversation;
 
@@ -14,6 +16,10 @@ public class UiMessage {
     public Message message;
     public boolean isStreaming;
     public String streamId;
+
+    // 缓存 Markwon 渲染结果，避免 rebind 时重新解析导致高度变化引起列表跳动
+    public transient Spanned cachedMarkdown;
+    public transient String cachedMarkdownSource;
 
     public UiMessage(Message message) {
         this.message = message;
