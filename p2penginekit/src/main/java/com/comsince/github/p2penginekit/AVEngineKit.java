@@ -207,11 +207,22 @@ public class AVEngineKit implements OnReceiveMessageListener {
 
     }
 
+    // 信令消息经服务器可能重复投递(pull 窗口重叠、通知与拉取双通道):
+    // 重复的 offer 会被 Plan B 当成重协商并二次应答,随后 setSDP 报错
+    // → reportError → endCall(MediaError) 发 Bye,视频通话建立期直接断线。
+    // 按 messageUid 去重;remoteOfferHandled 兜底挡掉换了 messageUid 的重复 offer。
+    private final java.util.LinkedHashSet<Long> handledSignalMessageUids = new java.util.LinkedHashSet<>();
+    private boolean remoteOfferHandled;
+    private boolean remoteAnswerHandled;
+
     private AVEngineKit.CallSession newSession(String clientId, boolean audioOnly, String callId) {
         AVEngineKit.CallSession session = new AVEngineKit.CallSession();
         session.clientId = clientId;
         session.callId = callId;
         session.audioOnly = audioOnly;
+        this.remoteOfferHandled = false;
+        this.remoteAnswerHandled = false;
+        this.handledSignalMessageUids.clear();
         return session;
     }
 
@@ -364,6 +375,18 @@ public class AVEngineKit implements OnReceiveMessageListener {
             if (System.currentTimeMillis() - (message.serverTime - deltaTime) < 90000L && (message.direction == MessageDirection.Receive || message.content instanceof AnswerMessage)) {
                 this.executor.submit(() -> {
                     if (message.content instanceof SignalMessage) {
+                        if (message.messageUid > 0) {
+                            if (this.handledSignalMessageUids.contains(message.messageUid)) {
+                                Log.d("CallRTCClient", "duplicate signal messageUid=" + message.messageUid + " ignored");
+                                return;
+                            }
+                            this.handledSignalMessageUids.add(message.messageUid);
+                            if (this.handledSignalMessageUids.size() > 256) {
+                                java.util.Iterator<Long> eldest = this.handledSignalMessageUids.iterator();
+                                eldest.next();
+                                eldest.remove();
+                            }
+                        }
                         if (this.currentSession != null && this.currentSession.state != AVEngineKit.CallState.Idle) {
                             SignalMessage signal = (SignalMessage)message.content;
                             if (message.sender.equals(this.currentSession.clientId) && signal.getCallId().equals(this.currentSession.callId)) {
@@ -484,10 +507,20 @@ public class AVEngineKit implements OnReceiveMessageListener {
             SessionDescription sdp;
             if (type.equals("answer")) {
                 if (this.isInitiator) {
+                    if (this.remoteAnswerHandled) {
+                        Log.d("CallRTCClient", "duplicate remote answer ignored");
+                        return;
+                    }
+                    this.remoteAnswerHandled = true;
                     sdp = new SessionDescription(Type.fromCanonicalForm(type), json.getString("sdp"));
                     this.onRemoteDescription(sdp);
                 }
             } else if (type.equals("offer") && !this.isInitiator) {
+                if (this.remoteOfferHandled) {
+                    Log.d("CallRTCClient", "duplicate remote offer ignored");
+                    return;
+                }
+                this.remoteOfferHandled = true;
                 sdp = new SessionDescription(Type.fromCanonicalForm(type), json.getString("sdp"));
                 this.onRemoteDescription(sdp);
             }
