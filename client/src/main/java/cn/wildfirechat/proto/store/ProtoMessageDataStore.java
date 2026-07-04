@@ -216,13 +216,16 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     @Override
     public ProtoMessage[] getMessages(int conversationType, String target, int line, long fromIndex, boolean before, int count, String withUser) {
         String query = COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'";
-        String orderBy = "message_id DESC LIMIT " + count;
+        // Secondary sort by message_uid (server-assigned, monotonically increasing)
+        // guards against the rare case where two devices generate the same message_id
+        // within the same millisecond after iOS adopted the same Snowflake formula.
+        String orderBy = "message_id DESC, message_uid DESC LIMIT " + count;
         if(fromIndex != 0){
             if(before){
-                orderBy = "message_id DESC LIMIT " + count;
+                orderBy = "message_id DESC, message_uid DESC LIMIT " + count;
                 query = query +" and "+COLUMN_MESSAGE_ID +" < "+fromIndex;
             } else {
-                orderBy = "message_id ASC LIMIT " + count;
+                orderBy = "message_id ASC, message_uid ASC LIMIT " + count;
                 query = query +" and "+COLUMN_MESSAGE_ID +" > "+fromIndex;
             }
         }
@@ -258,7 +261,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     @Override
     public List<ProtoMessage> getSendFailedMessages(String target) {
         String query = COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'" + " and "+COLUMN_MESSAGE_UID +"= 0";
-        String orderBy = "message_id DESC LIMIT 20";
+        String orderBy = "message_id DESC, message_uid DESC LIMIT 20";
         List<Map<String, Object>> messageList = queryMessageDatabase(query,orderBy);
 
         List<ProtoMessage> protoMessages = new ArrayList<>();
@@ -364,7 +367,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
 
     @Override
     public ProtoMessage getLastMessage(String target) {
-        List<Map<String, Object>> res = queryMessageDatabase(COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'", "message_id DESC LIMIT 1");
+        List<Map<String, Object>> res = queryMessageDatabase(COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'", "message_id DESC, message_uid DESC LIMIT 1");
         if (!res.isEmpty()) {
             Map<String,Object> protoMessageMap = res.get(0);
             ProtoMessage protoMessage = (ProtoMessage) protoMessageMap.get(COLUMN_MESSAGE_DATA);
