@@ -132,7 +132,7 @@
 
         <activity
             android:name="cn.wildfire.chat.kit.preview.MMPreviewActivity"
-            android:theme="@style/AppTheme.FullScreen" />
+            android:theme="@style/AppTheme.FullScreen.Translucent" />
         <activity
             android:name="cn.wildfire.chat.kit.voip.SingleVoipCallActivity"
             android:exported="true">

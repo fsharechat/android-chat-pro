@@ -44,6 +44,12 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <!-- 媒体预览：半透明窗口，下滑关闭时可透出下层聊天页 -->
+    <style name="AppTheme.FullScreen.Translucent">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <!--自定义CheckBox样式-->
     <style name="CustomCheckboxTheme" parent="@android:style/Widget.CompoundButton.CheckBox">
         <item name="android:button">@drawable/checkbox_style</item>

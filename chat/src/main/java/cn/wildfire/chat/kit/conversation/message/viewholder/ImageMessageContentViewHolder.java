@@ -24,7 +24,6 @@ import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.ConversationMessageAdapter;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.preview.MMPreviewActivity;
-import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfire.chat.kit.utils.SaveMediaUtils;
 import cn.wildfire.chat.kit.widget.BubbleImageView;
 import cn.wildfirechat.chat.R;
@@ -52,10 +51,9 @@ public class ImageMessageContentViewHolder extends MediaMessageContentViewHolder
         progressBar.setVisibility(View.GONE);
         ImageMessageContent imageMessage = (ImageMessageContent) message.message.content;
         Bitmap thumbnail = imageMessage.getThumbnail();
-        int width = thumbnail != null ? thumbnail.getWidth() : 200;
-        int height = thumbnail != null ? thumbnail.getHeight() : 200;
-        imageView.getLayoutParams().width = UIUtils.dip2Px(width > 200 ? 200 : width);
-        imageView.getLayoutParams().height = UIUtils.dip2Px(height > 200 ? 200 : height);
+        int width = thumbnail != null ? thumbnail.getWidth() : 0;
+        int height = thumbnail != null ? thumbnail.getHeight() : 0;
+        fitMediaSize(imageView, width, height);
 
         if (!TextUtils.isEmpty(imageMessage.localPath)) {
             GlideApp.with(context)

@@ -40,9 +40,11 @@ public class VideoMessageContentViewHolder extends MediaMessageContentViewHolder
     public void onBind(UiMessage message) {
         VideoMessageContent fileMessage = (VideoMessageContent) message.message.content;
         if (fileMessage.getThumbnail() != null && fileMessage.getThumbnail().getWidth() > 0) {
+            fitMediaSize(imageView, fileMessage.getThumbnail().getWidth(), fileMessage.getThumbnail().getHeight());
             imageView.setImageBitmap(fileMessage.getThumbnail());
             playImageView.setVisibility(View.VISIBLE);
         } else {
+            fitMediaSize(imageView, 0, 0);
             imageView.setImageResource(R.mipmap.img_video_default);
             playImageView.setVisibility(View.GONE);
         }

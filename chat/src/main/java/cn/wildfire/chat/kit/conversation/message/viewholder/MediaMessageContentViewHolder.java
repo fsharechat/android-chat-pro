@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.Bind;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
+import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.MediaMessageContent;
 import cn.wildfirechat.message.Message;
@@ -34,6 +35,23 @@ public class MediaMessageContentViewHolder extends NormalMessageContentViewHolde
         } else {
             // todo
         }
+    }
+
+    /**
+     * 参考 iOS 的做法，按原图宽高比缩放到最大限制框内，避免各边独立截断导致比例失真
+     */
+    protected void fitMediaSize(View view, int mediaWidth, int mediaHeight) {
+        int maxWidth = UIUtils.dip2Px(180);
+        int maxHeight = UIUtils.dip2Px(240);
+        int minSize = UIUtils.dip2Px(80);
+        if (mediaWidth <= 0 || mediaHeight <= 0) {
+            mediaWidth = maxWidth;
+            mediaHeight = maxWidth;
+        }
+        float scale = Math.min(maxWidth / (float) mediaWidth, maxHeight / (float) mediaHeight);
+        view.getLayoutParams().width = Math.max(Math.round(mediaWidth * scale), minSize);
+        view.getLayoutParams().height = Math.max(Math.round(mediaHeight * scale), minSize);
+        view.requestLayout();
     }
 
     @Override

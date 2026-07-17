@@ -3,6 +3,7 @@ package cn.wildfire.chat.kit.preview;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -31,6 +32,7 @@ import cn.wildfire.chat.kit.GlideApp;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfire.chat.kit.utils.DownloadManager;
+import cn.wildfire.chat.kit.widget.SwipeDismissLayout;
 import cn.wildfire.chat.kit.widget.ViewPagerFixed;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.ImageMessageContent;
@@ -43,6 +45,7 @@ import cn.wildfirechat.message.core.MessageContentType;
 public class MMPreviewActivity extends Activity {
     private SparseArray<View> views;
     private View currentVideoView;
+    private View rootLayout;
 
     private static int currentPosition = -1;
     private static List<UiMessage> messages;
@@ -114,10 +117,50 @@ public class MMPreviewActivity extends Activity {
     };
 
     private void preview(View view, UiMessage message) {
+        setupSwipeDismiss(view);
         if (message.message.content.getType() == MessageContentType.ContentType_Image) {
             previewImage(view, message);
         } else {
             previewVideo(view, message);
+        }
+    }
+
+    private void setupSwipeDismiss(View view) {
+        if (!(view instanceof SwipeDismissLayout)) {
+            return;
+        }
+        SwipeDismissLayout swipeDismissLayout = (SwipeDismissLayout) view;
+        swipeDismissLayout.reset();
+        setBackgroundAlpha(255);
+        PhotoView photoView = view.findViewById(R.id.photoView);
+        swipeDismissLayout.setCallback(new SwipeDismissLayout.Callback() {
+            @Override
+            public boolean canSwipeDismiss() {
+                // 图片放大时交给 PhotoView 平移，不触发下滑关闭
+                return photoView.getVisibility() != View.VISIBLE || photoView.getScale() <= 1.05f;
+            }
+
+            @Override
+            public void onSwipeProgress(float progress) {
+                setBackgroundAlpha((int) (255 * (1 - progress * 0.9f)));
+            }
+
+            @Override
+            public void onDismiss() {
+                finish();
+                overridePendingTransition(0, 0);
+            }
+
+            @Override
+            public void onSwipeCancel() {
+                setBackgroundAlpha(255);
+            }
+        });
+    }
+
+    private void setBackgroundAlpha(int alpha) {
+        if (rootLayout != null) {
+            rootLayout.setBackgroundColor(Color.argb(alpha, 0, 0, 0));
         }
     }
 
@@ -238,6 +281,7 @@ public class MMPreviewActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mm_preview);
+        rootLayout = findViewById(R.id.rootLayout);
         views = new SparseArray<>(3);
         final ViewPagerFixed viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(pagerAdapter);

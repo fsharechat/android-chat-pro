@@ -7,20 +7,14 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <!-- 图片 -->
+    <!-- 视频封面 -->
     <cn.wildfire.chat.kit.widget.BubbleImageView
         android:id="@+id/imageView"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:adjustViewBounds="true"
-        android:minWidth="80dp"
-        android:scaleType="fitCenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
         app:bubble_angle="10dp"
-        app:bubble_arrowHeight="10dp"
-        app:bubble_arrowLocation="right"
-        app:bubble_arrowOffset="-5dp"
-        app:bubble_arrowTop="20dp"
-        app:bubble_arrowWidth="8dp"
+        app:bubble_showArrow="false"
         app:bubble_showShadow="false"
         app:bubble_showText="false"
         tools:background="@color/gray" />
@@ -30,7 +24,6 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="41dp"
         android:visibility="gone" />
 
     <ImageView
@@ -38,7 +31,6 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_centerInParent="true"
-        android:layout_marginLeft="41dp"
         android:src="@mipmap/img_video_play_session"
         android:visibility="gone" />
 
