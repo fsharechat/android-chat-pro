@@ -26,7 +26,11 @@ jobs:
 
     # 预装项目所需的旧版 SDK 组件，避免 AGP 3.4 自带的旧 sdklib
     # 去解析新版 Google 仓库元数据时报错（'35x' is not a valid integer）
+    # sdkmanager 需要 Java 17，这一步单独用 runner 预装的 JDK 17，
+    # 不影响后面 Gradle 用 JDK 11 构建
     - name: Install Android SDK components
+      env:
+        JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
       run: |
         yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
         "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
