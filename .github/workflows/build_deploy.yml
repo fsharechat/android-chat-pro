@@ -30,6 +30,11 @@ jobs:
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
+    # chat/build.gradle 会把产物改名为 Fsharechat-{版本}-{日期}.apk，
+    # 后续部署/上传步骤写死了 chat-release.apk，这里统一命名
+    - name: Normalize APK name
+      run: cp chat/build/outputs/apk/release/Fsharechat-*.apk chat/build/outputs/apk/release/chat-release.apk
+
 #    - name: Deploy to File server
 #      uses: appleboy/scp-action@master
 #      with:
