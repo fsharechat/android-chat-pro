@@ -1,100 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3e64e4</color>
-    <color name="colorPrimaryDark">#3e64e4</color>
-    <color name="colorAccent">#7e7e7e</color>
+    <!-- ============ 核心视觉 Token（浅色） ============ -->
+    <!-- ink: 主文字 -->
+    <color name="ink">#171A21</color>
+    <!-- paper: 页面背景（冷调微蓝近白） -->
+    <color name="paper">#F5F7FC</color>
+    <!-- surface: 列表行/顶栏/底栏/卡片 -->
+    <color name="surface">#FFFFFF</color>
+    <!-- cobalt: 品牌蓝（选中态/徽标/发送气泡） -->
+    <color name="cobalt">#3E64E4</color>
+    <color name="cobalt_pressed">#2D4FD8</color>
+    <!-- mist: 次要文字（冷灰） -->
+    <color name="mist">#8B93A7</color>
+    <!-- fog: 发丝线/分组底/接收气泡底 -->
+    <color name="fog">#E9EDF6</color>
+    <!-- leaf: 在线/成功 -->
+    <color name="leaf">#34C759</color>
+    <!-- coral: 错误/红点 -->
+    <color name="coral">#FA5151</color>
 
-    <color name="white">#ffffff</color>
+    <color name="colorPrimary">@color/cobalt</color>
+    <color name="colorPrimaryDark">@color/paper</color>
+    <color name="colorAccent">@color/cobalt</color>
+
+    <!-- ============ 兼容旧命名（值已重映射到新色板） ============ -->
+    <color name="white">@color/surface</color>
     <color name="badge_text_color">#FFFFFF</color>
     <color name="text_color_white">#FFFFFF</color>
-    <color name="line">#D2D2D2</color>
+    <color name="line">@color/fog</color>
 
-    <color name="gray0">#464646</color>
-    <color name="gray1">#7e7e7e</color>
-    <color name="gray2">#969696</color>
-    <color name="gray3">#c8969696</color>
-    <color name="gray4">#F5F5F5</color>
-    <color name="gray5">#EBEBEB</color>
-    <color name="gray7">#999999</color>
-    <color name="gray8">#D9D9D9</color>
-    <color name="gray10">#EBEFEF</color>
-    <color name="gray">#D9D9D9</color>
+    <color name="gray0">@color/ink</color>
+    <color name="gray1">@color/mist</color>
+    <color name="gray2">#A3ABBD</color>
+    <color name="gray3">#C88B93A7</color>
+    <color name="gray4">@color/paper</color>
+    <color name="gray5">@color/paper</color>
+    <color name="gray7">#7C8598</color>
+    <color name="gray8">#DDE3EF</color>
+    <color name="gray10">@color/fog</color>
+    <color name="gray">#DDE3EF</color>
 
-    <color name="red6">#D54A47</color>
-    <color name="red7">#E64340</color>
-    <color name="red8">#FF3E3E</color>
+    <color name="red6">#E04846</color>
+    <color name="red7">@color/coral</color>
+    <color name="red8">@color/coral</color>
 
-    <color name="green1">#45C01A</color>
-    <color name="green2">#A3DEA3</color>
-    <color name="green3">#1AAD19</color>
+    <color name="green1">@color/leaf</color>
+    <color name="green2">#B9E8C5</color>
+    <color name="green3">@color/leaf</color>
 
-    <color name="blue0">#576B95</color>
+    <color name="blue0">@color/cobalt</color>
 
-    <color name="black0">#000000</color>
-    <color name="black">#000000</color>
-
-
-    <!--遮盖层颜色-->
+    <color name="black0">@color/ink</color>
+    <color name="black">@color/ink</color>
 
     <!--快速索引bar颜色-->
-    <color name="side_bar">#919091</color>
-    <color name="side_bar_pressed">#BFBFBF</color>
-    
-    <!--底部导航栏背景色-->
-    <color name="bottom_nav_background">#FFFFFF</color>
-    <!--底部导航栏选中颜色-->
-    <color name="bottom_nav_selected_color">#3e64e4</color>
-    <!--底部导航栏选中填充颜色-->
-    <color name="bottom_nav_selected_color_filled">#2d4fd8</color>
-    
-    <!--联系人列表字母分组头颜色-->
-    <color name="contact_section_header_bg">#E5E5E5</color>
-    <color name="contact_section_header_text">#989898</color>
-    
-    <!--聊天消息文字颜色（白天模式保持原有样式）-->
-    <color name="message_text_receive_dark">#444444</color>
-    <color name="message_text_send_dark">#444444</color>
-    <color name="message_text_link_receive_dark">#666666</color>
-    <color name="message_text_link_send_dark">#3655bf</color>
-    
-    <!--位置消息文字颜色（白天模式）-->
-    <color name="location_text_send">#444444</color>
-    <color name="location_text_link_send">#3655bf</color>
-    <color name="location_text_receive">#444444</color>
-    <color name="location_text_link_receive">#3655bf</color>
-    
-    <!--用户信息页面文字颜色（白天模式）-->
-    <color name="user_info_name_text">#464646</color>
-    <color name="user_info_nickname_text">#969696</color>
-    <color name="user_info_option_text">#000000</color>
+    <color name="side_bar">@color/mist</color>
+    <color name="side_bar_pressed">#6B7488</color>
+
+    <!--底部导航栏-->
+    <color name="bottom_nav_background">@color/surface</color>
+    <color name="bottom_nav_selected_color">@color/cobalt</color>
+    <color name="bottom_nav_selected_color_filled">@color/cobalt_pressed</color>
+    <color name="bottom_nav_unselected_color">@color/mist</color>
+
+    <!--联系人列表字母分组标签（透明底，仅文字）-->
+    <color name="contact_section_header_bg">#00000000</color>
+    <color name="contact_section_header_text">@color/mist</color>
+
+    <!--聊天消息文字-->
+    <color name="message_text_receive_dark">@color/ink</color>
+    <color name="message_text_send_dark">#FFFFFF</color>
+    <color name="message_text_link_receive_dark">@color/cobalt</color>
+    <color name="message_text_link_send_dark">#DCE4FF</color>
+
+    <!--消息气泡-->
+    <color name="message_bubble_receive_bg">@color/fog</color>
+    <color name="message_bubble_send_bg">@color/cobalt</color>
+
+    <!--未读消息胶囊徽标-->
+    <color name="unread_badge_bg">@color/coral</color>
+
+    <!--位置消息文字-->
+    <color name="location_text_send">#FFFFFF</color>
+    <color name="location_text_link_send">#DCE4FF</color>
+    <color name="location_text_receive">@color/ink</color>
+    <color name="location_text_link_receive">@color/cobalt</color>
+
+    <!--用户信息页面文字-->
+    <color name="user_info_name_text">@color/ink</color>
+    <color name="user_info_nickname_text">@color/mist</color>
+    <color name="user_info_option_text">@color/ink</color>
     <color name="user_info_button_text">#FFFFFF</color>
-    <color name="user_info_voip_button_text">#464646</color>
-    
-    <!--群聊列表标题头颜色（白天模式）-->
-    <color name="group_list_header_bg">#E5E5E5</color>
-    <color name="group_list_header_text">#989898</color>
-    
-    <!--位置信息页面toolbar颜色（白天模式）-->
-    <color name="location_toolbar_background">#3e64e4</color>
-    <color name="location_toolbar_text_color">#FFFFFF</color>
-    <color name="location_toolbar_icon_color">#FFFFFF</color>
-    <color name="location_toolbar_hint_color">#7e7e7e</color>
-    
-    <!--聊天界面辅助文字颜色（白天模式）-->
-    <color name="conversation_time_text">#FFFFFF</color>
-    <color name="conversation_name_text">#666666</color>
-    
-    <!--搜索界面表头颜色（白天模式）-->
-    <color name="search_category_header_bg">#E5E5E5</color>
-    <color name="search_category_header_text">#989898</color>
-    
-    <!--搜索栏颜色（白天模式）-->
-    <color name="search_bar_bg">#FFFFFF</color>
-    <color name="search_bar_bg_transparent">#80ffffff</color>
-    <color name="search_text_color">#000000</color>
-    <color name="search_hint_color">#969696</color>
-    
-    <!--消息气泡颜色（白天模式）-->
-    <color name="message_bubble_receive_bg">#F0F0F0</color>
-    <color name="message_bubble_send_bg">#07C160</color>
+    <color name="user_info_voip_button_text">@color/ink</color>
+
+    <!--群聊列表标题头-->
+    <color name="group_list_header_bg">@color/paper</color>
+    <color name="group_list_header_text">@color/mist</color>
+
+    <!--位置信息页面toolbar-->
+    <color name="location_toolbar_background">@color/surface</color>
+    <color name="location_toolbar_text_color">@color/ink</color>
+    <color name="location_toolbar_icon_color">@color/ink</color>
+    <color name="location_toolbar_hint_color">@color/mist</color>
+
+    <!--聊天界面辅助文字-->
+    <color name="conversation_time_text">@color/mist</color>
+    <color name="conversation_name_text">@color/mist</color>
+
+    <!--搜索界面表头-->
+    <color name="search_category_header_bg">@color/paper</color>
+    <color name="search_category_header_text">@color/mist</color>
+
+    <!--搜索栏-->
+    <color name="search_bar_bg">@color/surface</color>
+    <color name="search_bar_bg_transparent">#80FFFFFF</color>
+    <color name="search_text_color">@color/ink</color>
+    <color name="search_hint_color">@color/mist</color>
 </resources>

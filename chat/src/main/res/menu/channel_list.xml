@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/more"
-        android:icon="@mipmap/ic_add"
+        android:icon="@drawable/ic_menu_add"
         android:title="更多"
+        app:iconTint="@color/ink"
         app:showAsAction="always">
         <menu>
             <item xmlns:app="http://schemas.android.com/apk/res-auto"

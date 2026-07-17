@@ -4,20 +4,16 @@
 
     <item
         android:id="@+id/conversation_list"
-        android:icon="@drawable/bottom_nav_message_selector"
+        android:icon="@drawable/ic_nav_chat"
         android:title="会话"
         app:showAsAction="never" />
     <item
         android:id="@+id/contact"
-        android:icon="@drawable/bottom_nav_contacts_selector"
+        android:icon="@drawable/ic_nav_contacts"
         android:title="联系人" />
     <item
-        android:id="@+id/discovery"
-        android:icon="@drawable/bottom_nav_discovery_selector"
-        android:title="发现" />
-    <item
         android:id="@+id/me"
-        android:icon="@drawable/bottom_nav_me_selector"
+        android:icon="@drawable/ic_nav_me"
         android:title="我" />
 
 </menu>

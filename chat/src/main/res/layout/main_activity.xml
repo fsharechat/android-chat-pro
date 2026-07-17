@@ -3,10 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray5"
+    android:background="@color/paper"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar" />
+    <!-- 主页面顶栏：大标题（参考图 Messages 的重量感） -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        app:elevation="0dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/surface"
+            app:titleTextAppearance="@style/ToolbarTitle.Main"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:theme="@style/AppTheme.Appbar" />
+    </com.google.android.material.appbar.AppBarLayout>
 
     <cn.wildfire.chat.kit.widget.ViewPagerFixed
         android:id="@+id/vpContent"
@@ -14,18 +30,14 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!--底部-->
-    <!-- 移除分割线 -->
-    <!-- <View style="@style/Line" /> -->
-
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bottom_nav_background"
         app:labelVisibilityMode="labeled"
+        app:elevation="0dp"
         app:itemIconTint="@color/bottom_nav_color"
         app:itemTextColor="@color/bottom_nav_color"
         app:menu="@menu/main_bottom_navigation" />
-    <!--app:labelVisibilityMode="labeled"-->
 </LinearLayout>

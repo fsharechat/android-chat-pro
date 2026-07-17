@@ -1,205 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#1A1A1A</color>
-    <color name="colorPrimaryDark">#1A1A1A</color>
-    <color name="colorAccent">#7e7e7e</color>
+    <!-- ============ 核心视觉 Token（深色：蓝黑基调，非纯黑反转） ============ -->
+    <color name="ink">#ECEEF4</color>
+    <color name="paper">#0F1218</color>
+    <color name="surface">#171B23</color>
+    <color name="cobalt">#6E8BFF</color>
+    <color name="cobalt_pressed">#5A78F0</color>
+    <color name="mist">#9AA3B5</color>
+    <color name="fog">#232936</color>
+    <color name="leaf">#30D158</color>
+    <color name="coral">#FF6961</color>
 
-    <color name="white">#1A1A1A</color>
+    <color name="colorPrimary">#3D5BD6</color>
+    <color name="colorPrimaryDark">@color/paper</color>
+    <color name="colorAccent">@color/cobalt</color>
+
+    <!-- ============ 兼容旧命名 ============ -->
+    <color name="white">@color/surface</color>
     <color name="badge_text_color">#FFFFFF</color>
     <color name="text_color_white">#FFFFFF</color>
-    <color name="line">#2D2D2D</color>
+    <color name="line">@color/fog</color>
 
-    <color name="gray0">#E0E0E0</color>
-    <color name="gray1">#B0B0B0</color>
-    <color name="gray2">#969696</color>
-    <color name="gray3">#696969</color>
-    <color name="gray4">#2D2D2D</color>
-    <color name="gray5">#1A1A1A</color>
-    <color name="gray7">#666666</color>
-    <color name="gray8">#404040</color>
-    <color name="gray10">#2A2A2A</color>
-    <color name="gray">#404040</color>
+    <color name="gray0">@color/ink</color>
+    <color name="gray1">@color/mist</color>
+    <color name="gray2">#7A8296</color>
+    <color name="gray3">#C89AA3B5</color>
+    <color name="gray4">@color/paper</color>
+    <color name="gray5">@color/paper</color>
+    <color name="gray7">#6E7787</color>
+    <color name="gray8">#2A3140</color>
+    <color name="gray10">@color/fog</color>
+    <color name="gray">#2A3140</color>
 
-    <color name="red6">#D54A47</color>
-    <color name="red7">#E64340</color>
-    <color name="red8">#FF3E3E</color>
+    <color name="red6">#E04846</color>
+    <color name="red7">@color/coral</color>
+    <color name="red8">@color/coral</color>
 
-    <color name="green1">#45C01A</color>
-    <color name="green2">#A3DEA3</color>
-    <color name="green3">#1AAD19</color>
+    <color name="green1">@color/leaf</color>
+    <color name="green2">#2E5540</color>
+    <color name="green3">@color/leaf</color>
 
-    <color name="blue0">#576B95</color>
+    <color name="blue0">@color/cobalt</color>
 
-    <color name="black0">#FFFFFF</color>
-    <color name="black">#FFFFFF</color>
-
-    <!--遮盖层颜色-->
+    <color name="black0">@color/ink</color>
+    <color name="black">@color/ink</color>
 
     <!--快速索引bar颜色-->
-    <color name="side_bar">#919091</color>
-    <color name="side_bar_pressed">#BFBFBF</color>
-    
-    <!--底部导航栏背景色-->
-    <color name="bottom_nav_background">#1A1A1A</color>
-    <!--底部导航栏选中颜色-->
-    <color name="bottom_nav_selected_color">#5a7cff</color>
-    <!--底部导航栏选中填充颜色-->
-    <color name="bottom_nav_selected_color_filled">#5a7cff</color>
-    
-    <!--联系人列表字母分组头颜色-->
-    <color name="contact_section_header_bg">#2D2D2D</color>
-    <color name="contact_section_header_text">#B0B0B0</color>
-    
-    <!--聊天消息气泡颜色（重新设计黑暗模式）-->
-    <color name="message_bubble_receive_bg_dark">#3A3A3A</color>
-    <color name="message_bubble_send_bg_dark">#07C160</color>
-    <color name="message_text_receive_dark">#FFFFFF</color>
+    <color name="side_bar">@color/mist</color>
+    <color name="side_bar_pressed">#B8C0D2</color>
+
+    <!--底部导航栏-->
+    <color name="bottom_nav_background">@color/surface</color>
+    <color name="bottom_nav_selected_color">@color/cobalt</color>
+    <color name="bottom_nav_selected_color_filled">@color/cobalt_pressed</color>
+    <color name="bottom_nav_unselected_color">@color/mist</color>
+
+    <!--联系人列表字母分组标签-->
+    <color name="contact_section_header_bg">#00000000</color>
+    <color name="contact_section_header_text">@color/mist</color>
+
+    <!--聊天消息文字-->
+    <color name="message_text_receive_dark">@color/ink</color>
     <color name="message_text_send_dark">#FFFFFF</color>
-    <color name="message_text_link_receive_dark">#E0E0E0</color>
-    <color name="message_text_link_send_dark">#E0E0E0</color>
-    
-    <!--位置消息文字颜色（黑暗模式）-->
+    <color name="message_text_link_receive_dark">@color/cobalt</color>
+    <color name="message_text_link_send_dark">#DCE4FF</color>
+
+    <!--消息气泡-->
+    <color name="message_bubble_receive_bg">@color/fog</color>
+    <color name="message_bubble_send_bg">#3D5BD6</color>
+
+    <!--未读消息胶囊徽标-->
+    <color name="unread_badge_bg">@color/coral</color>
+
+    <!--位置消息文字-->
     <color name="location_text_send">#FFFFFF</color>
-    <color name="location_text_link_send">#E0E0E0</color>
-    
-    <!--用户信息页面文字颜色（黑暗模式）-->
-    <color name="user_info_name_text">#FFFFFF</color>
-    <color name="user_info_nickname_text">#B0B0B0</color>
-    <color name="user_info_option_text">#FFFFFF</color>
+    <color name="location_text_link_send">#DCE4FF</color>
+    <color name="location_text_receive">@color/ink</color>
+    <color name="location_text_link_receive">@color/cobalt</color>
+
+    <!--用户信息页面文字-->
+    <color name="user_info_name_text">@color/ink</color>
+    <color name="user_info_nickname_text">@color/mist</color>
+    <color name="user_info_option_text">@color/ink</color>
     <color name="user_info_button_text">#FFFFFF</color>
-    <color name="user_info_voip_button_text">#FFFFFF</color>
-    
+    <color name="user_info_voip_button_text">@color/ink</color>
 
-    
-    <!--位置信息页面toolbar颜色（黑暗模式，与应用背景一致）-->
-    <color name="location_toolbar_background">@color/colorPrimary</color>
-    <color name="location_toolbar_text_color">#FFFFFF</color>
-    <color name="location_toolbar_icon_color">#FFFFFF</color>
-    <color name="location_toolbar_hint_color">#B0B0B0</color>
-    
-    <!--聊天界面辅助文字颜色（黑暗模式）-->
-    <color name="conversation_time_text">#E0E0E0</color>
-    <color name="conversation_name_text">#B0B0B0</color>
-    
-    <!--搜索界面表头颜色（黑暗模式）-->
-    <color name="search_category_header_bg">#2D2D2D</color>
-    <color name="search_category_header_text">#B0B0B0</color>
-    
-    <!--搜索栏颜色（黑暗模式）-->
-    <color name="search_bar_bg">#404040</color>
-    <color name="search_bar_bg_transparent">#80000000</color>
-    <color name="search_text_color">#FFFFFF</color>
-    <color name="search_hint_color">#B0B0B0</color>
-    
-    <!--会话列表专用颜色（黑暗模式）-->
-    <color name="conversation_list_bg">#1A1A1A</color>
-    <color name="conversation_item_bg">#1A1A1A</color>
-    <color name="conversation_item_name_text">#FFFFFF</color>
-    <color name="conversation_item_time_text">#E0E0E0</color>
-    <color name="conversation_item_content_text">#B0B0B0</color>
-    
-    <!--联系人列表专用颜色（黑暗模式）-->
-    <color name="contact_list_bg">#1A1A1A</color>
-    <color name="contact_item_bg">#1A1A1A</color>
-    <color name="contact_item_name_text">#FFFFFF</color>
-    <color name="contact_item_section_header_bg">#1E1E1E</color>
-    <color name="contact_item_section_header_text">#B0B0B0</color>
-    
-    <!--发现页面专用颜色（黑暗模式）-->
-    <color name="discovery_page_bg">#1A1A1A</color>
-    <color name="discovery_item_text">#FFFFFF</color>
-    <color name="discovery_item_bg">#2D2D2D</color>
-    
-    <!--"我"页面专用颜色（黑暗模式）-->
-    <color name="me_page_bg">#1A1A1A</color>
-    <color name="me_item_bg">#2D2D2D</color>
-    <color name="me_item_text">#FFFFFF</color>
-    <color name="me_user_name_text">#FFFFFF</color>
-    <color name="me_user_account_text">#B0B0B0</color>
-    
-    <!--设置页面专用颜色（黑暗模式）-->
-    <color name="setting_page_bg">#1A1A1A</color>
-    <color name="setting_section_bg">#2D2D2D</color>
-    <color name="setting_item_text">#FFFFFF</color>
-    
-    <!--主题设置页面专用颜色（黑暗模式）-->
-    <color name="theme_setting_page_bg">#1A1A1A</color>
-    <color name="theme_setting_section_bg">#2D2D2D</color>
-    <color name="theme_setting_item_text">#FFFFFF</color>
-    
-    <!--关于页面专用颜色（黑暗模式）-->
-    <color name="about_page_bg">#1A1A1A</color>
-    <color name="about_section_bg">#2D2D2D</color>
-    <color name="about_item_text">#FFFFFF</color>
-    <color name="about_app_name_text">#B0B0B0</color>
-    
-    <!--用户信息页面专用颜色（黑暗模式）-->
-    <color name="user_info_page_bg">#1A1A1A</color>
-    <color name="user_info_item_bg">#2D2D2D</color>
-    
-    <!--修改用户名页面专用颜色（黑暗模式）-->
-    <color name="change_name_page_bg">#1A1A1A</color>
-    <color name="change_name_edit_text_color">#FFFFFF</color>
-    <color name="change_name_tip_text_color">#B0B0B0</color>
-    
-    <!--Fragment容器页面专用颜色（黑暗模式）-->
-    <color name="fragment_container_bg">#1A1A1A</color>
-    
-    <!--会话详情页面专用颜色（黑暗模式）-->
-    <color name="conversation_info_page_bg">#1A1A1A</color>
-    <color name="conversation_info_section_bg">#2D2D2D</color>
-    <color name="conversation_info_item_text">#FFFFFF</color>
-    <color name="conversation_info_option_text">#FFFFFF</color>
-    <color name="conversation_info_hint_text">#B0B0B0</color>
-    
-    <!--创建会话页面专用颜色（黑暗模式）-->
-    <color name="create_conversation_page_bg">#1A1A1A</color>
-    <color name="create_conversation_search_bg">#1A1A1A</color>
-    <color name="create_conversation_search_text">#FFFFFF</color>
-    <color name="create_conversation_search_hint">#B0B0B0</color>
+    <!--群聊列表标题头-->
+    <color name="group_list_header_bg">@color/paper</color>
+    <color name="group_list_header_text">@color/mist</color>
 
-    <!--搜索结果页面专用颜色（黑暗模式）-->
-    <color name="search_result_page_bg">#1A1A1A</color>
-    <color name="search_result_item_bg">#2D2D2D</color>
-    <color name="search_result_item_text">#FFFFFF</color>
-    <color name="search_result_item_desc_text">#B0B0B0</color>
-    <color name="search_result_category_header_bg">#1E1E1E</color>
-    <color name="search_result_category_header_text">#B0B0B0</color>
-    <color name="search_result_empty_text">#B0B0B0</color>
+    <!--位置信息页面toolbar-->
+    <color name="location_toolbar_background">@color/surface</color>
+    <color name="location_toolbar_text_color">@color/ink</color>
+    <color name="location_toolbar_icon_color">@color/ink</color>
+    <color name="location_toolbar_hint_color">@color/mist</color>
 
-    <!--创建会话搜索结果专用颜色（黑暗模式）-->
-    <color name="contact_search_page_bg">#1A1A1A</color>
-    <color name="contact_search_item_bg">#2D2D2D</color>
-    <color name="contact_search_item_text">#FFFFFF</color>
-    <color name="contact_search_section_header_bg">#1E1E1E</color>
-    <color name="contact_search_section_header_text">#B0B0B0</color>
+    <!--聊天界面辅助文字-->
+    <color name="conversation_time_text">@color/mist</color>
+    <color name="conversation_name_text">@color/mist</color>
 
-    <!--群列表页面专用颜色（黑暗模式）-->
-    <color name="group_list_page_bg">#1A1A1A</color>
-    <color name="group_list_header_bg">#1E1E1E</color>
-    <color name="group_list_header_text">#B0B0B0</color>
-    <color name="group_list_item_bg">#2D2D2D</color>
-    <color name="group_list_item_text">#FFFFFF</color>
-    <color name="group_list_item_desc_text">#B0B0B0</color>
-    <color name="group_list_tip_text">#B0B0B0</color>
+    <!--搜索界面表头-->
+    <color name="search_category_header_bg">@color/paper</color>
+    <color name="search_category_header_text">@color/mist</color>
 
-    <!--添加到通讯录页面专用颜色（黑暗模式）-->
-    <color name="add_contact_page_bg">#1A1A1A</color>
-    <color name="add_contact_tip_text">#B0B0B0</color>
-    <color name="add_contact_edit_text_color">#FFFFFF</color>
-    <color name="add_contact_edit_hint_color">#B0B0B0</color>
-    <color name="add_contact_search_bg">#2D2D2D</color>
-    <color name="add_contact_search_text">#FFFFFF</color>
-    <color name="add_contact_search_keyword_text">#4CAF50</color>
-    <color name="add_contact_no_user_text">#B0B0B0</color>
-    <color name="add_contact_new_friend_bg">#1A1A1A</color>
-    <color name="add_contact_new_friend_text">#B0B0B0</color>
-    <color name="add_contact_new_friend_header_text">#B0B0B0</color>
-
-    <!--用户信息页面按钮颜色（黑暗模式）-->
-    <color name="user_info_add_button_bg">#2196F3</color>
-
-    <!--位置消息文字颜色（黑暗模式）-->
-    <color name="location_text_receive">#FFFFFF</color>
-    <color name="location_text_link_receive">#E0E0E0</color>
-</resources> 
+    <!--搜索栏-->
+    <color name="search_bar_bg">@color/fog</color>
+    <color name="search_bar_bg_transparent">#80171B23</color>
+    <color name="search_text_color">@color/ink</color>
+    <color name="search_hint_color">@color/mist</color>
+</resources>

@@ -10,6 +10,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -62,7 +63,7 @@ import q.rorbin.badgeview.QBadgeView;
 
 public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageChangeListener {
 
-    private List<Fragment> mFragmentList = new ArrayList<>(4);
+    private List<Fragment> mFragmentList = new ArrayList<>(3);
 
     @Bind(R.id.bottomNavigationView)
     BottomNavigationView bottomNavigationView;
@@ -77,7 +78,6 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
 
     private ConversationListFragment conversationListFragment;
     private ContactFragment contactFragment;
-    private DiscoveryFragment discoveryFragment;
     private MeFragment meFragment;
 
     @Override
@@ -114,6 +114,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
                     View view = bottomNavigationMenuView.getChildAt(0);
                     unreadMessageUnreadBadgeView = new QBadgeView(MainActivity.this);
                     unreadMessageUnreadBadgeView.bindTarget(view);
+                    styleTabBadge(unreadMessageUnreadBadgeView);
                 }
                 unreadMessageUnreadBadgeView.setBadgeNumber(unreadCount.unread);
             } else if (unreadMessageUnreadBadgeView != null) {
@@ -151,6 +152,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
                     View view = bottomNavigationMenuView.getChildAt(1);
                     unreadFriendRequestBadgeView = new QBadgeView(MainActivity.this);
                     unreadFriendRequestBadgeView.bindTarget(view);
+                    styleTabBadge(unreadFriendRequestBadgeView);
                 }
                 unreadFriendRequestBadgeView.setBadgeNumber(count);
             }
@@ -158,6 +160,18 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
         if (checkDisplayName()) {
             ignoreBatteryOption();
         }
+    }
+
+    /**
+     * 让底部导航角标紧贴 tab 图标右上角（iOS 风格）
+     */
+    private void styleTabBadge(QBadgeView badgeView) {
+        float density = getResources().getDisplayMetrics().density;
+        float itemWidthDp = getResources().getDisplayMetrics().widthPixels / 3f / density;
+        badgeView.setBadgeGravity(Gravity.TOP | Gravity.END);
+        badgeView.setGravityOffset(itemWidthDp / 2f - 22, 2, true);
+        badgeView.setBadgeTextSize(10, true);
+        badgeView.setBadgeBackgroundColor(getResources().getColor(R.color.coral));
     }
 
     public void hideUnreadFriendRequestBadgeView() {
@@ -186,15 +200,13 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
         setTitle(UIUtils.getString(R.string.app_name));
 
         //设置ViewPager的最大缓存页面
-        mVpContent.setOffscreenPageLimit(3);
+        mVpContent.setOffscreenPageLimit(2);
 
         conversationListFragment = new ConversationListFragment();
         contactFragment = new ContactFragment();
-        discoveryFragment = new DiscoveryFragment();
         meFragment = new MeFragment();
         mFragmentList.add(conversationListFragment);
         mFragmentList.add(contactFragment);
-        mFragmentList.add(discoveryFragment);
         mFragmentList.add(meFragment);
         mVpContent.setAdapter(new HomeFragmentPagerAdapter(getSupportFragmentManager(), mFragmentList));
         mVpContent.setOnPageChangeListener(this);
@@ -207,11 +219,8 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
                 case R.id.contact:
                     mVpContent.setCurrentItem(1);
                     break;
-                case R.id.discovery:
-                    mVpContent.setCurrentItem(2);
-                    break;
                 case R.id.me:
-                    mVpContent.setCurrentItem(3);
+                    mVpContent.setCurrentItem(2);
                     break;
                 default:
                     break;
@@ -269,9 +278,6 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
                 bottomNavigationView.setSelectedItemId(R.id.contact);
                 break;
             case 2:
-                bottomNavigationView.setSelectedItemId(R.id.discovery);
-                break;
-            case 3:
                 bottomNavigationView.setSelectedItemId(R.id.me);
                 break;
             default:

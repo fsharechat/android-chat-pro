@@ -2,32 +2,47 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <!-- 设置activity切换动画 -->
-        <!--<item name="android:windowAnimationStyle">@style/activityAnimation</item>-->
-        <!-- Customize color of navigation drawer icon and back arrow -->
-        <item name="colorBackgroundFloating">@color/white</item>
+        <item name="colorBackgroundFloating">@color/surface</item>
+        <item name="android:windowBackground">@color/paper</item>
+        <item name="android:colorBackground">@color/paper</item>
+        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/mist</item>
     </style>
 
+    <!-- 平面浅色顶栏：深色文字与图标 -->
     <style name="AppTheme.Appbar">
         <item name="actionMenuTextColor">@color/menu_text_color</item>
         <item name="overlapAnchor">false</item>
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="colorControlNormal">@color/white</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="colorControlNormal">@color/ink</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- 主页面大标题（参考图 Messages 的重量感） -->
+    <style name="ToolbarTitle.Main" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <!-- 二级页 Toolbar 标题 -->
+    <style name="ToolbarTitle" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
 
     <!--全屏样式-->
     <style name="AppTheme.FullScreen">
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowFullscreen">true</item>
     </style>
-
-    <!--圆角Dialog-->
 
     <!--自定义CheckBox样式-->
     <style name="CustomCheckboxTheme" parent="@android:style/Widget.CompoundButton.CheckBox">
@@ -45,7 +60,7 @@
     <style name="OptionItem">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">50dp</item>
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@color/surface</item>
     </style>
 
 </resources>

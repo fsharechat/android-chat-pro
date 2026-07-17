@@ -7,54 +7,48 @@
     android:background="@color/white"
     android:orientation="vertical">
 
+    <!--字母分组标签：透明底，仅文字（参考 Pinned/Other 样式）-->
     <TextView
         android:id="@+id/categoryTextView"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_height="wrap_content"
         android:background="@color/contact_section_header_bg"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical"
-        android:paddingLeft="@dimen/item_margin_left_and_right"
+        android:paddingLeft="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="4dp"
         android:text="A"
         android:textColor="@color/contact_section_header_text"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/contactLinearLayout"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="56dp"
         android:background="@drawable/selector_common_item"
         android:gravity="center_vertical"
-        android:paddingLeft="@dimen/item_margin_left_and_right"
-        android:paddingTop="@dimen/item_margin_top_and_bottom"
-        android:paddingRight="@dimen/item_margin_left_and_right"
-        android:paddingBottom="@dimen/item_margin_top_and_bottom">
-
-<!--        <ImageView-->
-<!--            android:id="@+id/portraitImageView"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:scaleType="centerCrop"-->
-<!--            android:src="@mipmap/default_header" />-->
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/portraitImageView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:scaleType="centerCrop"
-            android:src="@mipmap/default_header"
-            app:civ_border_width="1dp"
-            app:civ_border_color="@color/gray"/>
+            android:src="@mipmap/default_header" />
 
         <TextView
             android:id="@+id/nameTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/item_margin_left_and_right"
+            android:layout_marginLeft="12dp"
             android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
             android:singleLine="true"
             android:text="wfc"
-            android:textColor="@color/gray0"
+            android:textColor="@color/ink"
             android:textSize="16sp" />
 
         <CheckBox
@@ -62,18 +56,10 @@
             style="@style/CustomCheckboxTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/item_margin_left_and_right"
+            android:layout_marginRight="4dp"
             android:clickable="false"
             android:visibility="gone" />
 
     </LinearLayout>
-
-    <!-- 移除分割线 -->
-    <!-- <View
-        android:id="@+id/dividerLine"
-        style="@style/Line"
-        android:layout_marginLeft="@dimen/item_margin_left_and_right"
-        android:layout_marginRight="@dimen/item_margin_left_and_right"
-        android:visibility="visible" /> -->
 
 </LinearLayout>

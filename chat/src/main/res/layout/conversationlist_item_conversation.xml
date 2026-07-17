@@ -1,99 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/selector_common_item"
-    android:gravity="center"
-    android:orientation="horizontal"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp">
-
-    <RelativeLayout
-        android:layout_width="60dp"
-        android:layout_height="60dp">
-
-        <!--头像-->
-<!--        <ImageView-->
-<!--            android:id="@+id/portraitImageView"-->
-<!--            android:layout_width="48dp"-->
-<!--            android:layout_height="48dp"-->
-<!--            android:layout_marginTop="6dp"-->
-<!--            android:src="@mipmap/ic_launcher" />-->
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/portraitImageView"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="6dp"
-            android:src="@mipmap/ic_launcher"
-            app:civ_border_width="1dp"
-            app:civ_border_color="@color/gray"/>
-
-        <!--未读消息数-->
-        <TextView
-            android:id="@+id/unreadCountTextView"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/shape_red_dot"
-            android:gravity="center"
-            android:text="99"
-            android:textColor="@color/text_color_white"
-            android:textSize="10sp"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-    </RelativeLayout>
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginLeft="1dp"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="8dp">
+
+        <!--头像-->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/portraitImageView"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:src="@mipmap/ic_launcher" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical">
-            <!--昵称或群名-->
-            <TextView
-                android:id="@+id/nameTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="wfc"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+            android:layout_marginLeft="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/timeTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="12:01"
-                android:textColor="@color/gray3"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!--消息-->
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
+            <!--第一行：昵称/群名 + 时间（iOS 样式同行顶对齐）-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="5dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/nameTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:text="wfc"
+                    android:textColor="@color/ink"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/timeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:maxLines="1"
+                    android:text="12:01"
+                    android:textColor="@color/mist"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!--第二行：草稿/状态 + 消息预览 + 未读角标（在时间正下方）-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -101,20 +73,20 @@
                     android:id="@+id/promptTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginRight="4dp"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@string/draft"
-                    android:textColor="@color/red7"
+                    android:textColor="@color/coral"
                     android:textSize="14sp"
                     android:visibility="gone"
                     tools:visibility="visible" />
 
                 <ImageView
                     android:id="@+id/statusImageView"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginRight="4dp"
                     android:scaleType="centerCrop"
                     android:visibility="gone"
                     tools:src="@mipmap/img_error"
@@ -122,26 +94,48 @@
 
                 <TextView
                     android:id="@+id/contentTextView"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:ellipsize="marquee"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
                     android:singleLine="true"
-                    android:textColor="@color/gray1"
+                    android:textColor="@color/mist"
                     android:textSize="14sp"
                     tools:text="content" />
 
-            </LinearLayout>
+                <ImageView
+                    android:id="@+id/slient"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginLeft="6dp"
+                    android:src="@mipmap/block_notification"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
-            <ImageView
-                android:id="@+id/slient"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:src="@mipmap/block_notification"
-                android:visibility="gone"
-                tools:visibility="visible" />
-        </RelativeLayout>
+                <TextView
+                    android:id="@+id/unreadCountTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="18dp"
+                    android:layout_marginLeft="6dp"
+                    android:background="@drawable/shape_unread_pill"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:minWidth="18dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="2"
+                    android:textColor="@color/badge_text_color"
+                    android:textSize="11sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
+
+    <!--发丝分割线（与文字对齐缩进）-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginLeft="80dp"
+        android:background="@color/fog" />
 </LinearLayout>

@@ -14,6 +14,6 @@
         android:gravity="center"
         android:padding="5dp"
         android:text="你邀请了xx加入"
-        android:textColor="#fff" />
+        android:textColor="@color/conversation_time_text" />
 
 </LinearLayout>

@@ -13,14 +13,14 @@
         android:layout_toLeftOf="@id/audioContentLayout"
         android:layout_marginRight="8dp"
         android:text="6''"
-        android:textColor="@color/message_text_send_dark" />
+        android:textColor="@color/mist" />
 
     <RelativeLayout
         android:id="@+id/audioContentLayout"
         android:layout_width="100dp"
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
-        android:background="@drawable/img_bubble_send"
+        android:background="@drawable/shape_bubble_send"
         android:padding="12dp">
 
         <ImageView

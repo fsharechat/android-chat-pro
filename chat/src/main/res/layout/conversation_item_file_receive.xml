@@ -26,7 +26,7 @@ xmlns:tools="http://schemas.android.com/tools"  xmlns:app="http://schemas.androi
     android:minWidth="250dp"
     android:adjustViewBounds="true"
     android:padding="2dp"
-    android:background="@drawable/img_bubble_receive"
+    android:background="@drawable/shape_bubble_receive"
     android:scaleType="fitCenter">
 
     <cn.wildfire.chat.kit.widget.BubbleImageView

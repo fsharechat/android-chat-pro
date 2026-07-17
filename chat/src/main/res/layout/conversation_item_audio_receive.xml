@@ -9,7 +9,7 @@
         android:id="@+id/audioContentLayout"
         android:layout_width="65dp"
         android:layout_height="50dp"
-        android:background="@drawable/img_bubble_receive"
+        android:background="@drawable/shape_bubble_receive"
         android:padding="12dp">
 
         <ImageView
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="6''"
-        android:textColor="@color/message_text_receive_dark" />
+        android:textColor="@color/mist" />
 
     <View
         android:id="@+id/playStatusIndicator"

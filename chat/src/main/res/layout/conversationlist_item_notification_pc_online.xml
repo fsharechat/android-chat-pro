@@ -6,6 +6,8 @@
     android:background="@drawable/selector_common_item"
     android:gravity="center"
     android:orientation="vertical"
-    android:text="pc online">
+    android:text="pc online"
+    android:textColor="@color/mist"
+    android:textSize="13sp">
 
 </TextView>
