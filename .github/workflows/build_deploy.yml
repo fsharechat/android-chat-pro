@@ -61,7 +61,7 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          cp -f /data/temp-release/chat-release.apk /data0/minio/miniodata/minio-bucket-file-name/chat-release.apk
+          cp -f /data/temp-release/chat-release.apk /data/minio/miniodata/minio-bucket-file-name/chat-release.apk
 
     - name: Create Release
       id: create_release
