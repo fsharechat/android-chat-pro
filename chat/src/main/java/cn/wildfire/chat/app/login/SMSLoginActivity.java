@@ -3,8 +3,9 @@ package cn.wildfire.chat.app.login;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
+import android.os.CountDownTimer;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -38,28 +39,35 @@ public class SMSLoginActivity extends WfcBaseActivity {
     Button requestAuthCodeButton;
 
     private String phoneNumber;
+    private CountDownTimer authCodeCountDownTimer;
 
     @Override
     protected int contentLayout() {
         return R.layout.login_activity_sms;
     }
 
+    private boolean isAccountValid() {
+        String account = phoneNumberEditText.getText().toString().trim();
+        return account.length() == 11 || account.contains("@");
+    }
+
+    private void updateButtonState() {
+        // 倒计时期间发送按钮保持禁用，由 onFinish 恢复
+        if (authCodeCountDownTimer == null) {
+            requestAuthCodeButton.setEnabled(isAccountValid());
+        }
+        String authCode = authCodeEditText.getText().toString().trim();
+        loginButton.setEnabled(isAccountValid() && !TextUtils.isEmpty(authCode));
+    }
+
     @OnTextChanged(value = R.id.phoneNumberEditText, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     void inputPhoneNumber(Editable editable) {
-        String phone = editable.toString().trim();
-        if (phone.length() == 11 || phone.contains("@")) {
-            requestAuthCodeButton.setEnabled(true);
-        } else {
-            requestAuthCodeButton.setEnabled(false);
-            loginButton.setEnabled(false);
-        }
+        updateButtonState();
     }
 
     @OnTextChanged(value = R.id.authCodeEditText, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     void inputAuthCode(Editable editable) {
-        if (editable.toString().length() > 2) {
-            loginButton.setEnabled(true);
-        }
+        updateButtonState();
     }
 
     @Override
@@ -120,19 +128,10 @@ public class SMSLoginActivity extends WfcBaseActivity {
         });
     }
 
-    private Handler handler = new Handler();
-
     @OnClick(R.id.requestAuthCodeButton)
     void requestAuthCode() {
+        // 请求期间先禁用防止重复点击，接口成功才进入倒计时，失败则立即恢复
         requestAuthCodeButton.setEnabled(false);
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isFinishing()) {
-                    requestAuthCodeButton.setEnabled(true);
-                }
-            }
-        }, 60 * 1000);
 
         Toast.makeText(this, "请求验证码...", Toast.LENGTH_SHORT).show();
         String phoneNumber = phoneNumberEditText.getText().toString().trim();
@@ -142,18 +141,52 @@ public class SMSLoginActivity extends WfcBaseActivity {
         OKHttpHelper.post(url, params, new SimpleCallback<StatusResult>() {
             @Override
             public void onUiSuccess(StatusResult statusResult) {
+                if (isFinishing()) {
+                    return;
+                }
                 if (statusResult.getCode() == 0) {
                     Toast.makeText(SMSLoginActivity.this, "发送验证码成功", Toast.LENGTH_SHORT).show();
+                    startAuthCodeCountDown();
                 } else {
                     Toast.makeText(SMSLoginActivity.this, "发送验证码失败: " + statusResult.getCode(), Toast.LENGTH_SHORT).show();
+                    updateButtonState();
                 }
             }
 
             @Override
             public void onUiFailure(int code, String msg) {
+                if (isFinishing()) {
+                    return;
+                }
                 Toast.makeText(SMSLoginActivity.this, "发送验证码失败: " + msg, Toast.LENGTH_SHORT).show();
+                updateButtonState();
             }
         });
+    }
 
+    private void startAuthCodeCountDown() {
+        authCodeCountDownTimer = new CountDownTimer(60 * 1000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                requestAuthCodeButton.setText((millisUntilFinished / 1000) + "s后重发");
+            }
+
+            @Override
+            public void onFinish() {
+                authCodeCountDownTimer = null;
+                requestAuthCodeButton.setText("发送验证码");
+                updateButtonState();
+            }
+        };
+        authCodeCountDownTimer.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (authCodeCountDownTimer != null) {
+            authCodeCountDownTimer.cancel();
+            authCodeCountDownTimer = null;
+        }
+        super.onDestroy();
     }
 }

@@ -8,9 +8,12 @@
     <RelativeLayout
         android:id="@+id/audioContentLayout"
         android:layout_width="65dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:background="@drawable/shape_bubble_receive"
-        android:padding="12dp">
+        android:paddingLeft="12dp"
+        android:paddingTop="8dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="8dp">
 
         <ImageView
             android:id="@+id/audioImageView"

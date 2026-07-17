@@ -27,6 +27,7 @@ import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
+import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.MessageContent;
@@ -50,6 +51,10 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
 
     public TextMessageContentViewHolder(FragmentActivity activity, RecyclerView.Adapter adapter, View itemView) {
         super(activity, adapter, itemView);
+        // 布局里 maxWidth=340dp 在窄屏上会超过可用宽度，导致长消息越过对面头像；
+        // 两侧各预留 51dp（行内边距 5 + 头像 40 + 头像左右边距 3+3），保证气泡止于对面头像位置
+        int reservedWidth = UIUtils.dip2Px(102);
+        contentTextView.setMaxWidth(Math.min(UIUtils.dip2Px(340), UIUtils.getDisplayWidth() - reservedWidth));
         markwon = Markwon.builder(activity)
                 .usePlugin(TablePlugin.create(activity))
                 .usePlugin(StrikethroughPlugin.create())

@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="80dp"
-            android:text="手机验证码登录"
+            android:text="验证码登录"
             android:textColor="@color/black"
             android:textSize="25sp" />
 
@@ -70,6 +70,7 @@
                 android:enabled="false"
                 android:gravity="center_vertical"
                 android:text="发送验证码"
+                android:textColor="@color/selector_send_code_text"
                 android:textSize="15sp" />
         </LinearLayout>
 
@@ -81,10 +82,12 @@
         <Button
             android:id="@+id/loginButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="40dp"
+            android:background="@drawable/selector_sms_login_button"
             android:enabled="false"
             android:text="登录"
+            android:textColor="@color/selector_sms_login_button_text"
             android:textSize="20sp" />
 
     </LinearLayout>
