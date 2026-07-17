@@ -2,6 +2,9 @@ package cn.wildfire.chat.kit.conversation.message.viewholder;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +40,10 @@ public class FileMessageContentViewHolder extends MediaMessageContentViewHolder 
 
     @Bind(R.id.fileIconImageView)
     BubbleImageView imageView;
+    @Bind(R.id.fileTypeTextView)
+    TextView fileTypeTextView;
+    @Bind(R.id.fileDownloadWaveView)
+    cn.wildfire.chat.kit.widget.WaveProgressView fileDownloadWaveView;
     @Bind(R.id.fileNameTextView)
     TextView fileNameTextView;
     @Bind(R.id.fileSizeTextView)
@@ -51,18 +58,84 @@ public class FileMessageContentViewHolder extends MediaMessageContentViewHolder 
     public void onBind(UiMessage message) {
         super.onBind(message);
         fileMessageContent = (FileMessageContent) message.message.content;
+        imageView.setProgressVisible(false);
+        imageView.showShadow(false);
         if (message.message.status == MessageStatus.Sending || message.isDownloading) {
-            imageView.setPercent(message.progress);
-            imageView.setProgressVisible(true);
-            imageView.showShadow(false);
+            fileDownloadWaveView.setVisibility(View.VISIBLE);
+            fileDownloadWaveView.setProgress(message.progress);
         } else {
-            imageView.setProgressVisible(false);
-            imageView.showShadow(false);
+            fileDownloadWaveView.setVisibility(View.GONE);
+            fileDownloadWaveView.setProgress(0);
         }
 //        Glide.with(context).load(R.mipmap.ic_file)
 //                .apply(new RequestOptions().override(UIUtils.dip2Px(150), UIUtils.dip2Px(150)).centerCrop()).into(imageView);
         fileNameTextView.setText(fileMessageContent.getName());
         fileSizeTextView.setText(FileUtils.getReadableFileSize(fileMessageContent.getSize()));
+
+        String extension = fileExtension(fileMessageContent.getName());
+        fileTypeTextView.setText(TextUtils.isEmpty(extension) ? "FILE" : extension);
+        ((GradientDrawable) fileTypeTextView.getBackground().mutate()).setColor(fileTypeColor(extension));
+    }
+
+    private static String fileExtension(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        int dot = fileName.lastIndexOf('.');
+        if (dot < 0 || dot >= fileName.length() - 1) {
+            return "";
+        }
+        String extension = fileName.substring(dot + 1).toUpperCase();
+        return extension.length() > 4 ? extension.substring(0, 4) : extension;
+    }
+
+    private static int fileTypeColor(String extension) {
+        switch (extension) {
+            case "PNG":
+            case "JPG":
+            case "JPEG":
+            case "GIF":
+            case "WEBP":
+            case "BMP":
+            case "HEIC":
+                return Color.parseColor("#E4638E");
+            case "PDF":
+                return Color.parseColor("#F0524C");
+            case "DOC":
+            case "DOCX":
+                return Color.parseColor("#3E7BFA");
+            case "XLS":
+            case "XLSX":
+            case "CSV":
+                return Color.parseColor("#34A853");
+            case "PPT":
+            case "PPTX":
+                return Color.parseColor("#FF8A3C");
+            case "ZIP":
+            case "RAR":
+            case "7Z":
+            case "TAR":
+            case "GZ":
+                return Color.parseColor("#9B59D0");
+            case "MP3":
+            case "WAV":
+            case "FLAC":
+            case "M4A":
+            case "AAC":
+            case "OGG":
+                return Color.parseColor("#21B5A0");
+            case "MP4":
+            case "MOV":
+            case "AVI":
+            case "MKV":
+            case "FLV":
+            case "WMV":
+                return Color.parseColor("#6A5AE0");
+            case "APK":
+                return Color.parseColor("#3DDC84");
+            default:
+                return Color.parseColor("#64748B");
+        }
     }
 
     @OnClick(R.id.fileNameTextView)

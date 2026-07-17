@@ -29,30 +29,57 @@
     android:background="@drawable/shape_bubble_send"
     android:scaleType="fitCenter">
 
-    <cn.wildfire.chat.kit.widget.BubbleImageView
-        android:id="@+id/fileIconImageView"
+    <!--文件类型图标：按类型着色的圆角块 + 类型文字，上层保留 BubbleImageView 承载下载进度与点击-->
+    <FrameLayout
+        android:id="@+id/fileIconFrameLayout"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:padding="5dp"
-        android:scaleType="fitCenter"
-        android:src="@mipmap/ic_file"
-        app:bubble_angle="5dp"
-        app:bubble_arrowHeight="0dp"
-        app:bubble_arrowLocation="right"
-        app:bubble_arrowOffset="0dp"
-        app:bubble_arrowTop="0dp"
-        app:bubble_arrowWidth="2dp"
-        />
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:id="@+id/fileTypeTextView"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_gravity="center"
+            android:background="@drawable/shape_file_type_bg"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            tools:text="PDF" />
+
+        <cn.wildfire.chat.kit.widget.WaveProgressView
+            android:id="@+id/fileDownloadWaveView"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <cn.wildfire.chat.kit.widget.BubbleImageView
+            android:id="@+id/fileIconImageView"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="5dp"
+            android:scaleType="fitCenter"
+            android:src="@android:color/transparent"
+            app:bubble_angle="5dp"
+            app:bubble_arrowHeight="0dp"
+            app:bubble_arrowLocation="right"
+            app:bubble_arrowOffset="0dp"
+            app:bubble_arrowTop="0dp"
+            app:bubble_arrowWidth="2dp" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/fileNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/fileIconImageView"
+        android:layout_alignTop="@id/fileIconFrameLayout"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="9dp"
         android:layout_marginRight="10dp"
-        android:layout_toRightOf="@id/fileIconImageView"
+        android:layout_toRightOf="@id/fileIconFrameLayout"
         android:maxWidth="200dp"
         android:textSize="14sp"
         android:singleLine="true"
@@ -68,10 +95,10 @@
         android:id="@+id/fileSizeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/fileIconImageView"
+        android:layout_alignBottom="@id/fileIconFrameLayout"
         android:layout_marginLeft="0dp"
         android:layout_marginBottom="10dp"
-        android:layout_toRightOf="@id/fileIconImageView"
+        android:layout_toRightOf="@id/fileIconFrameLayout"
         android:maxLines="1"
         android:text="20.15M"
         android:textSize="12sp"
