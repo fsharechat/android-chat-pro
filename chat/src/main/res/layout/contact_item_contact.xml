@@ -62,4 +62,11 @@
 
     </LinearLayout>
 
+    <!--发丝分割线（与文字对齐缩进，同会话列表）-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginLeft="70dp"
+        android:background="@color/fog" />
+
 </LinearLayout>
