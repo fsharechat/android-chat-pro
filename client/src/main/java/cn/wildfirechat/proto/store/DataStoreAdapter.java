@@ -15,6 +15,13 @@ import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoUserInfo;
 
 public class DataStoreAdapter implements ImMemoryStore{
+    protected String userName;
+
+    @Override
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public List<String> getFriendList() {
         return null;

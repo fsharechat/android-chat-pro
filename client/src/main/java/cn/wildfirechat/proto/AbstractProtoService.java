@@ -122,6 +122,10 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     public void setUserName(String userName){
         this.userName = userName;
+        //存储层需要当前用户id来判断群消息中@的是不是自己
+        if(imMemoryStore != null){
+            imMemoryStore.setUserName(userName);
+        }
     }
 
     public String getUserName(){
@@ -760,6 +764,9 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         messageContentResponse.setSearchableContent(messageContent.getSearchableContent());
         messageContentResponse.setMediaType(messageContent.getMediaType());
         messageContentResponse.setMentionedType(messageContent.getMentionedType());
+        if(messageContent.getMentionedTargetCount() > 0){
+            messageContentResponse.setMentionedTargets(messageContent.getMentionedTargetList().toArray(new String[0]));
+        }
         messageContentResponse.setRemoteMediaUrl(messageContent.getRemoteMediaUrl());
         messageResponse.setContent(messageContentResponse);
         return messageResponse;

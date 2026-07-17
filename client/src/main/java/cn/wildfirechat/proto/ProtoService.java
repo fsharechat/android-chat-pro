@@ -416,7 +416,9 @@ public class ProtoService extends AbstractProtoService {
 
     public ProtoGroupMember[] getGroupMembers(String groupId, boolean forceUpdate){
         log.i("getGroupMembers "+groupId+" forceUpdate "+forceUpdate);
-        if(forceUpdate || imMemoryStore.getGroupMembers(groupId) == null){
+        //内存缓存未命中时返回的是空数组而不是null，空数组同样意味着本地没有数据，需要向服务端拉取
+        ProtoGroupMember[] cachedGroupMembers = imMemoryStore.getGroupMembers(groupId);
+        if(forceUpdate || cachedGroupMembers == null || cachedGroupMembers.length == 0){
             WFCMessage.PullGroupMemberRequest.Builder groupMemberBuilder = WFCMessage.PullGroupMemberRequest.newBuilder();
             groupMemberBuilder.setTarget(groupId);
             groupMemberBuilder.setHead(0);

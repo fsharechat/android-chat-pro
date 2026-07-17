@@ -61,6 +61,12 @@ public class DataStoreFactory implements ImMemoryStore{
     }
 
     @Override
+    public void setUserName(String userName) {
+        memoryStore.setUserName(userName);
+        protoMessageDataStore.setUserName(userName);
+    }
+
+    @Override
     public List<String> getFriendList() {
         return memoryStore.getFriendList();
     }

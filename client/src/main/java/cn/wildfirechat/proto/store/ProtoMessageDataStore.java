@@ -31,6 +31,8 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     private long lastInsertedMessageRowId = -1;
     private long lastInsertedConversationRowId = -1;
     private Map<String,Integer> unReadCountMap = new ConcurrentHashMap<>();
+    private Map<String,Integer> unReadMentionCountMap = new ConcurrentHashMap<>();
+    private Map<String,Integer> unReadMentionAllCountMap = new ConcurrentHashMap<>();
     private Map<Integer,Map<String,String>> userSettingMap = new ConcurrentHashMap<>();
     public static final String COLUMN_ID            = "id";
     public static final String COLUMN_MESSAGE_TARGET = "message_target";
@@ -184,9 +186,37 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
                     unReadCount = unReadCountMap.get(protoMessage.getTarget());
                 }
                 unReadCountMap.put(protoMessage.getTarget(),++unReadCount);
+                updateMentionCount(protoMessage);
             }
 
             createOrUpdateConversation(target,protoMessage.getConversationType(),protoMessage);
+        }
+    }
+
+    /**
+     * 群聊收到消息时统计@我的未读数，会话列表据此显示[有人@我]。
+     * mentionedType: 1-@指定成员 2-@全体成员
+     * */
+    private void updateMentionCount(ProtoMessage protoMessage){
+        if(protoMessage.getDirection() != 1
+                || protoMessage.getConversationType() != Conversation.ConversationType.Group.ordinal()){
+            return;
+        }
+        int mentionedType = protoMessage.getContent().getMentionedType();
+        if(mentionedType == 2){
+            int mentionAllCount = unReadMentionAllCountMap.get(protoMessage.getTarget()) != null ? unReadMentionAllCountMap.get(protoMessage.getTarget()) : 0;
+            unReadMentionAllCountMap.put(protoMessage.getTarget(),++mentionAllCount);
+        } else if(mentionedType == 1 && userName != null){
+            String[] mentionedTargets = protoMessage.getContent().getMentionedTargets();
+            if(mentionedTargets != null){
+                for(String mentionedTarget : mentionedTargets){
+                    if(userName.equals(mentionedTarget)){
+                        int mentionCount = unReadMentionCountMap.get(protoMessage.getTarget()) != null ? unReadMentionCountMap.get(protoMessage.getTarget()) : 0;
+                        unReadMentionCountMap.put(protoMessage.getTarget(),++mentionCount);
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -202,6 +232,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
                     unReadCount = unReadCountMap.get(protoMessage.getTarget());
                 }
                 unReadCountMap.put(protoMessage.getTarget(),++unReadCount);
+                updateMentionCount(protoMessage);
             }
         }
         ProtoMessage lastProtoMessage = protoMessages.get(protoMessages.size() -1);
@@ -397,6 +428,8 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     @Override
     public void clearUnreadStatus(int conversationType, String target, int line) {
         unReadCountMap.put(target,0);
+        unReadMentionCountMap.put(target,0);
+        unReadMentionAllCountMap.put(target,0);
         ProtoConversationInfo protoConversationInfo  = getConversation(conversationType,target,line);
         if(protoConversationInfo != null){
             ProtoUnreadCount protoUnreadCount = new ProtoUnreadCount();
@@ -465,8 +498,11 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     }
 
     private void setUnReadCount(ProtoConversationInfo protoConversationInfo){
+        String target = protoConversationInfo.getTarget();
         ProtoUnreadCount protoUnreadCount = new ProtoUnreadCount();
-        protoUnreadCount.setUnread(getUnreadCount(protoConversationInfo.getTarget()));
+        protoUnreadCount.setUnread(getUnreadCount(target));
+        protoUnreadCount.setUnreadMention(unReadMentionCountMap.get(target) != null ? unReadMentionCountMap.get(target) : 0);
+        protoUnreadCount.setUnreadMentionAll(unReadMentionAllCountMap.get(target) != null ? unReadMentionAllCountMap.get(target) : 0);
         protoConversationInfo.setUnreadCount(protoUnreadCount);
     }
 

@@ -115,6 +115,7 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
         } else {
             if (conversationInfo.unreadCount.unreadMentionAll > 0 || conversationInfo.unreadCount.unreadMention > 0) {
                 promptTextView.setText("[有人@我]");
+                setViewVisibility(R.id.promptTextView, View.VISIBLE);
             } else {
                 setViewVisibility(R.id.promptTextView, View.GONE);
             }

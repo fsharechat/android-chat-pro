@@ -15,6 +15,8 @@ import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoUserInfo;
 
 public interface ImMemoryStore {
+    /**当前登录用户id，用于判断群消息中@的是不是自己*/
+    void setUserName(String userName);
     List<String> getFriendList();
     String[] getFriendListArr();
     void setFriendArr(String[] friendArr,boolean refresh);
