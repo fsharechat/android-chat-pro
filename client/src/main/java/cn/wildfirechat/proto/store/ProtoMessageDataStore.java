@@ -213,20 +213,36 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
         return getMessages(conversationType,target,0,0,false,20,null);
     }
 
+    // message_id 是各端本地时钟生成的雪花ID（发送方设备各不相同），跨设备不可比，
+    // 直接按它排序会因设备时钟偏差导致乱序。message_uid 是服务端雪花ID（单一时钟、单调递增），
+    // 排序优先用它；仅未收到ack的消息（uid=0）退回本地 message_id，两者同为 时间戳<<21 的雪花格式，数值可比。
+    private static final String SORT_KEY = "(CASE WHEN " + COLUMN_MESSAGE_UID + " > 0 THEN " + COLUMN_MESSAGE_UID + " ELSE " + COLUMN_MESSAGE_ID + " END)";
+
+    /**
+     * 分页游标从UI层传来的是本地messageId，比较前需换算成与SORT_KEY同源的排序键
+     */
+    private long getSortKey(long messageId) {
+        List<Map<String, Object>> res = queryMessageDatabase(COLUMN_MESSAGE_ID + "=" + messageId, null);
+        if (!res.isEmpty()) {
+            long messageUid = (long) res.get(0).get(COLUMN_MESSAGE_UID);
+            if (messageUid > 0) {
+                return messageUid;
+            }
+        }
+        return messageId;
+    }
+
     @Override
     public ProtoMessage[] getMessages(int conversationType, String target, int line, long fromIndex, boolean before, int count, String withUser) {
         String query = COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'";
-        // Secondary sort by message_uid (server-assigned, monotonically increasing)
-        // guards against the rare case where two devices generate the same message_id
-        // within the same millisecond after iOS adopted the same Snowflake formula.
-        String orderBy = "message_id DESC, message_uid DESC LIMIT " + count;
+        String orderBy = SORT_KEY + " DESC LIMIT " + count;
         if(fromIndex != 0){
+            long fromKey = getSortKey(fromIndex);
             if(before){
-                orderBy = "message_id DESC, message_uid DESC LIMIT " + count;
-                query = query +" and "+COLUMN_MESSAGE_ID +" < "+fromIndex;
+                query = query +" and "+SORT_KEY+" < "+fromKey;
             } else {
-                orderBy = "message_id ASC, message_uid ASC LIMIT " + count;
-                query = query +" and "+COLUMN_MESSAGE_ID +" > "+fromIndex;
+                orderBy = SORT_KEY + " ASC LIMIT " + count;
+                query = query +" and "+SORT_KEY+" > "+fromKey;
             }
         }
         List<Map<String, Object>> messageList = queryMessageDatabase(query,orderBy);
@@ -367,7 +383,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
 
     @Override
     public ProtoMessage getLastMessage(String target) {
-        List<Map<String, Object>> res = queryMessageDatabase(COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'", "message_id DESC, message_uid DESC LIMIT 1");
+        List<Map<String, Object>> res = queryMessageDatabase(COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'", SORT_KEY + " DESC LIMIT 1");
         if (!res.isEmpty()) {
             Map<String,Object> protoMessageMap = res.get(0);
             ProtoMessage protoMessage = (ProtoMessage) protoMessageMap.get(COLUMN_MESSAGE_DATA);
