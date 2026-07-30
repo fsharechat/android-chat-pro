@@ -13,10 +13,12 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -49,6 +51,7 @@ import cn.wildfire.chat.kit.conversationlist.ConversationListFragment;
 import cn.wildfire.chat.kit.conversationlist.ConversationListViewModel;
 import cn.wildfire.chat.kit.conversationlist.ConversationListViewModelFactory;
 import cn.wildfire.chat.kit.group.GroupInfoActivity;
+import cn.wildfire.chat.kit.net.ServerInfoDialog;
 import cn.wildfire.chat.kit.search.SearchPortalActivity;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfire.chat.kit.user.ChangeMyNameActivity;
@@ -79,6 +82,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
     private ConversationListFragment conversationListFragment;
     private ContactFragment contactFragment;
     private MeFragment meFragment;
+    private ConversationListViewModel conversationListViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -103,7 +107,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
     protected void afterViews() {
         initView();
 
-        ConversationListViewModel conversationListViewModel = ViewModelProviders
+        conversationListViewModel = ViewModelProviders
                 .of(this, new ConversationListViewModelFactory(Arrays.asList(Conversation.ConversationType.Single, Conversation.ConversationType.Group, Conversation.ConversationType.Channel), Arrays.asList(0)))
                 .get(ConversationListViewModel.class);
         conversationListViewModel.unreadCountLiveData().observe(this, unreadCount -> {
@@ -198,6 +202,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
 
     private void initView() {
         setTitle(UIUtils.getString(R.string.app_name));
+        bindTitleClick();
 
         //设置ViewPager的最大缓存页面
         mVpContent.setOffscreenPageLimit(2);
@@ -227,6 +232,34 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
             }
             return true;
         });
+    }
+
+    /**
+     * Toolbar 的标题 TextView 默认不消费触摸，直接给 Toolbar 设监听会让右侧空白区也可点，
+     * 所以只给标题那个 TextView 绑事件。WfcBaseActivity.toolbar 字段是 package-private
+     * 且不在本包，只能 findViewById。post 是为了确保 setTitle 后 TextView 已创建。
+     */
+    private void bindTitleClick() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar == null) {
+            return;
+        }
+        toolbar.post(() -> {
+            for (int i = 0; i < toolbar.getChildCount(); i++) {
+                View child = toolbar.getChildAt(i);
+                if (child instanceof TextView) {
+                    child.setOnClickListener(v -> showServerInfoDialog());
+                    return;
+                }
+            }
+        });
+    }
+
+    private void showServerInfoDialog() {
+        if (conversationListViewModel == null) {
+            return;
+        }
+        new ServerInfoDialog(this, this, conversationListViewModel.connectionStatusLiveData()).show();
     }
 
     @Override
