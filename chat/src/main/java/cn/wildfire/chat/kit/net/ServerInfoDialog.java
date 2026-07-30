@@ -270,6 +270,19 @@ public class ServerInfoDialog extends Dialog {
         return getContext().getString(R.string.server_node_auto);
     }
 
+    /**
+     * connectionStatus LiveData 没有可查询的“当前值”兜底接口，只能靠这个 binder 调用推断。
+     * AbstractProtoService.getConnectedHost() 在非 CONNECTED 状态下明确返回 null，
+     * 所以非空结果就等价于“确实处于已连接状态”。
+     */
+    private boolean isActuallyConnected() {
+        if (ChatManagerHolder.gChatManager == null) {
+            return false;
+        }
+        String connected = ChatManagerHolder.gChatManager.getConnectedHost();
+        return connected != null && !connected.trim().isEmpty();
+    }
+
     private void renderConnectionStatus(Integer status) {
         int textRes;
         int colorRes;
@@ -279,6 +292,11 @@ public class ServerInfoDialog extends Dialog {
         } else if (status != null && status == ConnectionStatus.ConnectionStatusConnecting) {
             textRes = R.string.server_status_connecting;
             colorRes = R.color.cobalt;
+        } else if (status == null && isActuallyConnected()) {
+            // status 为 null 说明这个 LiveData 自创建以来还没被赋值过（只在状态变化时才 postValue），
+            // 不代表真的未连接。用 getConnectedHost() 兜底判断真实连接状态。
+            textRes = R.string.server_status_connected;
+            colorRes = R.color.leaf;
         } else {
             textRes = R.string.server_status_unconnected;
             colorRes = R.color.coral;
