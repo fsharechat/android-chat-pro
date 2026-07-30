@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.comsince.github.client.AndroidNIOClient;
+import com.comsince.github.client.ConnectStatus;
 import com.comsince.github.client.PushMessageCallback;
 import com.comsince.github.core.ByteBufferList;
 import com.comsince.github.core.future.SimpleFuture;
@@ -184,6 +185,18 @@ public abstract class AbstractProtoService implements PushMessageCallback {
         sendConnectMessage();
         cancelHeartbeatTimeoutTimer();
         sendHeartbeat(heartbeatManager.currentHeartInterval());
+    }
+
+    /**
+     * 当前真正连通的 host，未连接时返回 null。
+     * 只反映连接状态，不反映用户固定了哪个节点。
+     */
+    public String getConnectedHost(){
+        AndroidNIOClient client = androidNIOClient;
+        if(client == null || client.connectStatus != ConnectStatus.CONNECTED){
+            return null;
+        }
+        return client.getCurrentHost();
     }
 
     public void reconnect(){

@@ -311,6 +311,10 @@ public class JavaProtoLogic {
         }
     }
 
+    public static String getConnectedHost(){
+        return protoService == null ? null : protoService.getConnectedHost();
+    }
+
     public static void tryHeartbeat(){
         if(protoService != null){
             protoService.tryHeartbeat();

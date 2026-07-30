@@ -1252,6 +1252,22 @@ public class ChatManager {
     }
 
     /**
+     * 当前真正连通的 host，未连接／服务未 bind 时返回 null。
+     * 这是同步跨进程调用，只在弹窗打开与连接状态变化时调用，勿放入高频路径。
+     */
+    public String getConnectedHost() {
+        if (mClient == null) {
+            return null;
+        }
+        try {
+            return mClient.getConnectedHost();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
      * 发送消息
      *
      * @param conversation

@@ -262,6 +262,11 @@ public class ClientService extends Service implements
         }
 
         @Override
+        public String getConnectedHost() throws RemoteException {
+            return JavaProtoLogic.getConnectedHost();
+        }
+
+        @Override
         public void registerMessageContent(String msgContentCls) throws RemoteException {
             try {
                 Class cls = Class.forName(msgContentCls);
