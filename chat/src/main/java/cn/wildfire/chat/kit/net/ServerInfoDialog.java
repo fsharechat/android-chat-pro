@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,7 +20,9 @@ import androidx.lifecycle.Observer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.wildfire.chat.app.Config;
 import cn.wildfire.chat.kit.ChatManagerHolder;
@@ -49,6 +52,12 @@ public class ServerInfoDialog extends Dialog {
 
     private HostLatencyProbe.Cancelable runningProbe;
     private Observer<Integer> statusObserver;
+
+    /** 「自动轮询」行的标识，不是真实 host。 */
+    private static final String HOST_AUTO = "__auto__";
+
+    private final Map<String, View> nodeRows = new LinkedHashMap<>();
+    private String selectedHost;
 
     public ServerInfoDialog(@NonNull Activity activity,
                             @NonNull LifecycleOwner lifecycleOwner,
@@ -133,8 +142,105 @@ public class ServerInfoDialog extends Dialog {
         probeCurrentHost();
     }
 
-    /** Task 9 实现，此处先留空跳转以便状态 1 可独立验证。 */
     private void showSelectState() {
+        cancelProbe();
+        dialogTitle.setText(R.string.server_select_title);
+        nodeListTip.setVisibility(View.VISIBLE);
+        infoContainer.setVisibility(View.GONE);
+        nodeContainer.setVisibility(View.VISIBLE);
+        secondaryButton.setText(R.string.server_select_back);
+        primaryButton.setText(R.string.server_select_confirm);
+        secondaryButton.setOnClickListener(v -> showInfoState());
+        primaryButton.setOnClickListener(v -> confirmSelection());
+
+        selectedHost = ServerNodeManager.pinnedHost(getContext());
+        buildNodeRows();
+        probeAllNodes();
+    }
+
+    /** 构建「自动」+ 各节点的单选行。每次进入状态 2 重建，避免复用脏状态。 */
+    private void buildNodeRows() {
+        nodeContainer.removeAllViews();
+        nodeRows.clear();
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+
+        // HOST_AUTO 不是真实 host，仅作「自动轮询」这一行的标识
+        addNodeRow(inflater, HOST_AUTO,
+                getContext().getString(R.string.server_node_auto),
+                getContext().getString(R.string.server_node_auto_host));
+        for (ServerNode node : Config.IM_SERVER_NODES) {
+            addNodeRow(inflater, node.host, node.name, node.host);
+        }
+        refreshRadios();
+    }
+
+    private void addNodeRow(LayoutInflater inflater, String host, String name, String subtitle) {
+        View row = inflater.inflate(R.layout.server_node_item, nodeContainer, false);
+        ((TextView) row.findViewById(R.id.nodeName)).setText(name);
+        ((TextView) row.findViewById(R.id.nodeHost)).setText(subtitle);
+        row.setOnClickListener(v -> {
+            selectedHost = HOST_AUTO.equals(host) ? null : host;
+            refreshRadios();
+        });
+        nodeContainer.addView(row);
+        nodeRows.put(host, row);
+    }
+
+    private void refreshRadios() {
+        for (Map.Entry<String, View> entry : nodeRows.entrySet()) {
+            boolean checked = HOST_AUTO.equals(entry.getKey())
+                    ? selectedHost == null
+                    : entry.getKey().equals(selectedHost);
+            ((RadioButton) entry.getValue().findViewById(R.id.nodeRadio)).setChecked(checked);
+        }
+    }
+
+    private void probeAllNodes() {
+        List<String> hosts = new ArrayList<>();
+        for (ServerNode node : Config.IM_SERVER_NODES) {
+            hosts.add(node.host);
+            View row = nodeRows.get(node.host);
+            if (row != null) {
+                row.findViewById(R.id.nodeProgress).setVisibility(View.VISIBLE);
+                ((TextView) row.findViewById(R.id.nodeLatency)).setText("");
+            }
+        }
+        runningProbe = HostLatencyProbe.probeAll(hosts, Config.IM_SERVER_PORT,
+                (host, latencyMs) -> {
+                    View row = nodeRows.get(host);
+                    if (row == null) {
+                        return;
+                    }
+                    row.findViewById(R.id.nodeProgress).setVisibility(View.GONE);
+                    ((TextView) row.findViewById(R.id.nodeLatency)).setText(latencyText(latencyMs));
+                });
+    }
+
+    /**
+     * 选中项与当前固定状态一致时不重连，避免无谓地断开一条好连接。
+     * 固定单个节点传该 host，自动则传全部 host 恢复轮询。
+     */
+    private void confirmSelection() {
+        String currentPinned = ServerNodeManager.pinnedHost(getContext());
+        boolean unchanged = (selectedHost == null && currentPinned == null)
+                || (selectedHost != null && selectedHost.equals(currentPinned));
+        if (unchanged) {
+            showInfoState();
+            return;
+        }
+
+        String hostSpec;
+        if (selectedHost == null) {
+            ServerNodeManager.unpin(getContext());
+            hostSpec = ServerHostSpec.joinAll(Config.IM_SERVER_NODES);
+        } else {
+            ServerNodeManager.pin(getContext(), selectedHost);
+            hostSpec = selectedHost;
+        }
+        if (ChatManagerHolder.gChatManager != null) {
+            ChatManagerHolder.gChatManager.switchServerHost(hostSpec);
+        }
+        showInfoState();
     }
 
     private void renderHost() {
