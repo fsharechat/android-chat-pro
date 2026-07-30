@@ -123,7 +123,13 @@ public class AndroidNIOClient implements ConnectCallback,DataCallback,CompletedC
         }
     }
 
-
+    /**
+     * 最近一次连接所选的 host，仅用于展示。连接失败或已 close 后仍返回最后一次选择值，
+     * 是否真正连通由调用方结合 {@link #connectStatus} 判断。
+     */
+    public String getCurrentHost() {
+        return roundRobinHostSelector.getCurrentHost();
+    }
 
     public void sub(){
         sub("");
