@@ -37,14 +37,17 @@ public class HostLatencyProbeTest {
     }
 
     @Test
-    public void probeOnceReportsTimeoutForNonRoutableAddress() {
-        // 192.0.2.0/24 是 RFC 5737 保留的 TEST-NET-1，在标准环境中保证不可路由。
-        // 但某些网络环境可能配置特殊转发或者实际上是可达的，导致连接成功、被拒绝或超时。
-        // 此测试接受所有可能的结果，保证测试不依赖特定网络配置。
-        long latency = HostLatencyProbe.probeOnce("192.0.2.1", 6789, 300);
-        assertTrue("expected timeout, unreachable, or success but was " + latency,
+    public void probeOnceReportsTimeoutForNonRoutableAddress() throws IOException {
+        // 使用绑定但不 accept 的 ServerSocket 模拟一个不可达的端口：
+        // 套接字已建立但立即关闭，导致连接超时或立即被拒。
+        // 这种方式不依赖网络环境配置，能够在任何环境下产生预期的超时或不可达结果。
+        ServerSocket blockingServer = new ServerSocket(0);
+        int timeoutPort = blockingServer.getLocalPort();
+        blockingServer.close();
+
+        long latency = HostLatencyProbe.probeOnce("127.0.0.1", timeoutPort, 300);
+        assertTrue("expected timeout or unreachable but was " + latency,
                 latency == HostLatencyProbe.RESULT_TIMEOUT
-                        || latency == HostLatencyProbe.RESULT_UNREACHABLE
-                        || latency >= 0);
+                        || latency == HostLatencyProbe.RESULT_UNREACHABLE);
     }
 }
