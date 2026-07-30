@@ -85,4 +85,29 @@
     <string name="check_update">检查更新</string>
     <string name="terms_of_use_and_privacy_policy">使用条款和隐私政策</string>
 
+    <!--连接服务弹窗-->
+    <string name="server_info_title">当前连接服务</string>
+    <string name="server_select_title">选择连接服务</string>
+    <string name="server_select_tip">建连耗时</string>
+    <string name="server_info_name_label">服务名称</string>
+    <string name="server_info_name_value">飞享IM 消息服务</string>
+    <string name="server_info_host_label">连接地址</string>
+    <string name="server_info_port_label">端口</string>
+    <string name="server_info_status_label">连接状态</string>
+    <string name="server_info_latency_label">延迟</string>
+    <string name="server_info_switch">切换连接地址</string>
+    <string name="server_info_close">关闭</string>
+    <string name="server_select_back">返回</string>
+    <string name="server_select_confirm">确定</string>
+    <string name="server_node_auto">自动（集群轮询）</string>
+    <string name="server_node_auto_host">按集群顺序轮询</string>
+    <string name="server_status_connected">已连接</string>
+    <string name="server_status_connecting">正在连接…</string>
+    <string name="server_status_unconnected">未连接</string>
+    <string name="server_latency_unknown">——</string>
+    <string name="server_latency_ms">%1$dms</string>
+    <string name="server_latency_timeout">超时</string>
+    <string name="server_latency_unreachable">不可达</string>
+    <string name="server_latency_unresolved">无法解析</string>
+
 </resources>
