@@ -37,6 +37,7 @@ import java.util.List;
 import cn.wildfire.chat.app.Config;
 import cn.wildfire.chat.app.third.location.BackgroundLocation;
 import cn.wildfire.chat.kit.common.AppScopeViewModel;
+import cn.wildfire.chat.kit.net.ServerNodeManager;
 import cn.wildfire.chat.kit.utils.BitmapUtils;
 import cn.wildfire.chat.kit.voip.AsyncPlayer;
 import cn.wildfire.chat.kit.voip.SingleVoipCallActivity;
@@ -102,7 +103,9 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
     }
 
     private void initWFClient(Application application) {
-        ChatManager.init(application, Config.IM_SERVER_HOST, Config.IM_SERVER_PORT);
+        String imHostSpec = ServerNodeManager.currentHostSpec(application);
+        Log.i("WfcUIKit", "im host spec=" + imHostSpec);
+        ChatManager.init(application, imHostSpec, Config.IM_SERVER_PORT);
         try {
             ChatManagerHolder.gChatManager = ChatManager.Instance();
             ChatManagerHolder.gChatManager.startLog();
