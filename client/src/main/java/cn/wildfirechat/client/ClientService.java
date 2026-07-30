@@ -267,6 +267,14 @@ public class ClientService extends Service implements
         }
 
         @Override
+        public void switchServerAddress(String host, int port) throws RemoteException {
+            logger.i("switchServerAddress host "+host+" port "+port);
+            mHost = host;
+            mPort = port;
+            JavaProtoLogic.switchServer(host, port);
+        }
+
+        @Override
         public void registerMessageContent(String msgContentCls) throws RemoteException {
             try {
                 Class cls = Class.forName(msgContentCls);

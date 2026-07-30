@@ -305,6 +305,13 @@ public class JavaProtoLogic {
         protoService.connect(host,shortPort);
     }
 
+    public static void switchServer(String host, int shortPort){
+        logger.i("switchServer host "+host+" port "+shortPort);
+        if(protoService != null){
+            protoService.switchServer(host, shortPort);
+        }
+    }
+
     public static void reconnect(){
         if(protoService != null){
             protoService.reconnect();

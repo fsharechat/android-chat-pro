@@ -1268,6 +1268,23 @@ public class ChatManager {
     }
 
     /**
+     * 切换 IM 连接地址并立即重连。hostSpec 为单个 host（固定节点）或 ":" 分隔的多 host（自动轮询）。
+     * 同步更新 SERVER_HOST，保证服务重新 bind 时 setServerAddress 用的是新值。
+     */
+    public void switchServerHost(String hostSpec) {
+        this.SERVER_HOST = hostSpec;
+        if (mClient == null) {
+            Log.e(TAG, "Chat service not binded");
+            return;
+        }
+        try {
+            mClient.switchServerAddress(hostSpec, SERVER_PORT);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 发送消息
      *
      * @param conversation

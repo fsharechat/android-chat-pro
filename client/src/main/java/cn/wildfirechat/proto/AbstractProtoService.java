@@ -79,7 +79,9 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     private Context context;
     private String userName;
     private String token;
-    private AndroidNIOClient androidNIOClient;
+    //switchServer 会在 AndroidNIOClient 的 worker 线程把它置空再重建，
+    //而 getConnectedHost()/sendMessage() 在别的线程读它，必须 volatile 才能保证可见性
+    private volatile AndroidNIOClient androidNIOClient;
     protected ImMemoryStore imMemoryStore;
     UploadManager uploadManager;
     boolean userQiniu = false;
@@ -200,34 +202,77 @@ public abstract class AbstractProtoService implements PushMessageCallback {
     }
 
     public void reconnect(){
-        if(!userDisconnect && androidNIOClient != null){
-            androidNIOClient.post(new Runnable() {
+        final AndroidNIOClient client = androidNIOClient;
+        if(!userDisconnect && client != null){
+            client.post(new Runnable() {
                 @Override
                 public void run() {
-                    log.i("reconnect status "+androidNIOClient.connectStatus);
-                    switch (androidNIOClient.connectStatus){
+                    AndroidNIOClient current = androidNIOClient;
+                    if(current == null){
+                        log.i("reconnect skipped, client already released");
+                        return;
+                    }
+                    log.i("reconnect status "+current.connectStatus);
+                    switch (current.connectStatus){
                         case CONNECTING:
                             break;
                         case CONNECTED:
                             clearSendMessageTimerMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
-                            androidNIOClient.close();
+                            current.close();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
-                            androidNIOClient.connect();
+                            current.connect();
                             break;
                         case DISCONNECT:
                             clearSendMessageTimerMap();
                             cancelReconnectTimer();
                             cancelHeartTimer();
                             JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
-                            androidNIOClient.connect();
+                            current.connect();
                             break;
                     }
-
                 }
             });
         }
+    }
+
+    /**
+     * 切换到新的 host 并重连，保留会话与本地消息库。
+     *
+     * 顺序是刻意的，三个竞态都靠它规避：
+     * 1) 整个流程经 AndroidNIOClient.post() 提交。该执行器是 static 且核心线程数 1 配无界队列
+     *    （永不扩容），因此与队列中积压的 reconnect runnable 严格串行，不会一新一旧同时连。
+     * 2) close() 前先摘 pushMessageCallback：否则 60s 连接超时 runnable 会走 receiveException(),
+     *    在 reconnectNum <= 3 时排一次重连——那次会连回旧 host。
+     * 3) 先 cancelReconnectTimer()，清掉 alarmWrapper 上待触发的重连。
+     *
+     * AsyncServer.stop() 在非 selector 线程调用时会阻塞到关闭完成，所以本方法不能在主线程执行。
+     */
+    public void switchServer(String host, int port){
+        final AndroidNIOClient oldClient = androidNIOClient;
+        if(oldClient == null){
+            log.i("switchServer without existing client, connect directly host="+host);
+            connect(host, port);
+            return;
+        }
+        final String targetHost = host;
+        final int targetPort = port;
+        oldClient.post(new Runnable() {
+            @Override
+            public void run() {
+                log.i("switchServer to host="+targetHost+" port="+targetPort);
+                cancelHeartTimer();
+                cancelReconnectTimer();
+                clearSendMessageTimerMap();
+                oldClient.setPushMessageCallback(null);
+                oldClient.close();
+                androidNIOClient = null;
+                reconnectNum = 0;
+                JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
+                connect(targetHost, targetPort);
+            }
+        });
     }
 
     private void forceConnect(){
@@ -373,7 +418,14 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                     messageId = 0;
                 }
                 log.i("sendMessage send signal "+signal+" subSignal "+subSignal+" messageId "+messageId);
-                androidNIOClient.sendMessage(signal, subSignal,messageId, message);
+                //switchServer 期间 androidNIOClient 会短暂为 null，此处与 asyncSocket == null 同义处理：
+                //不写 socket，其余流程（requestMap + 超时定时器）照常，由超时把消息标记为发送失败
+                AndroidNIOClient client = androidNIOClient;
+                if(client != null){
+                    client.sendMessage(signal, subSignal,messageId, message);
+                } else {
+                    log.e("sendMessage skipped, client released signal="+signal+" subSignal="+subSignal);
+                }
                 if(callback != null){
                     RequestInfo requestInfo = new RequestInfo(signal,subSignal,callback.getClass(),callback);
                     requestInfo.setProtoMessageId(protoMessageId);
@@ -497,7 +549,12 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 log.i("resendMessage send signal "+requestInfo.getSignal()+" subSignal "+requestInfo.getSubSignal()+" messageId "+messageId+" protoMessageID "+requestInfo.getProtoMessageId());
                 ProtoMessage protoMessage = imMemoryStore.getMessage(requestInfo.getProtoMessageId());
                 WFCMessage.Message wfcMessage = convertWFCMessage(protoMessage);
-                androidNIOClient.sendMessage(requestInfo.getSignal(), requestInfo.getSubSignal(),messageId, wfcMessage.toByteArray());
+                AndroidNIOClient resendClient = androidNIOClient;
+                if(resendClient != null){
+                    resendClient.sendMessage(requestInfo.getSignal(), requestInfo.getSubSignal(),messageId, wfcMessage.toByteArray());
+                } else {
+                    log.e("resendMessage skipped, client released messageId="+messageId);
+                }
                 requestInfo.increaseRetryCount();
                 Timer timer = timerMap.get(requestInfo.getProtoMessageId());
                 if(timer != null){
@@ -552,7 +609,12 @@ public abstract class AbstractProtoService implements PushMessageCallback {
                 }
                 log.i("sendMessageSync send signal "+signal+" subSignal "+subSignal+" messageId "+messageId);
                 futureMap.put(messageId,simpleFuture);
-                androidNIOClient.sendMessage(signal, subSignal,messageId, message);
+                AndroidNIOClient client = androidNIOClient;
+                if(client != null){
+                    client.sendMessage(signal, subSignal,messageId, message);
+                } else {
+                    log.e("sendMessageSync skipped, client released signal="+signal+" subSignal="+subSignal);
+                }
                 PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("message_id",++messageId).apply();
             }
         });
