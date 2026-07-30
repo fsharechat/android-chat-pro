@@ -70,11 +70,19 @@
     </style>
 
     <!--连接服务弹窗：无标题栏、透明窗口背景，圆角由卡片 drawable 提供-->
-    <style name="ServerInfoDialog" parent="Theme.AppCompat.Dialog">
+    <!--父主题必须用 DayNight 版本：Dialog(Context, themeResId) 会把整条父链的主题属性
+        以 force=true 盖到 Activity 主题上，固定深色父主题会让 RadioButton/ProgressBar/ripple
+        这些靠主题属性取色的控件在浅色模式下取到深色配色（未选中圆环几乎不可见等）。
+        这里显式指定控件色，跟随本项目的 token（values/colors.xml 与 values-night/colors.xml 会自动适配深浅色）。-->
+    <style name="ServerInfoDialog" parent="Theme.AppCompat.DayNight.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">true</item>
+        <item name="colorAccent">@color/cobalt</item>
+        <item name="android:colorControlNormal">@color/mist</item>
+        <item name="colorControlNormal">@color/mist</item>
+        <item name="colorControlActivated">@color/cobalt</item>
     </style>
 
 </resources>

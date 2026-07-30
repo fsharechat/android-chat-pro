@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import cn.wildfire.chat.app.Config;
 import cn.wildfire.chat.kit.ChatManagerHolder;
@@ -52,6 +53,9 @@ public class ServerInfoDialog extends Dialog {
 
     private HostLatencyProbe.Cancelable runningProbe;
     private Observer<Integer> statusObserver;
+
+    /** 状态 1 上一次展示/探测的 host，用于判断连接切换后是否需要重新探测延迟。 */
+    private String lastRenderedHost;
 
     /** 「自动轮询」行的标识，不是真实 host。 */
     private static final String HOST_AUTO = "__auto__";
@@ -244,7 +248,9 @@ public class ServerInfoDialog extends Dialog {
     }
 
     private void renderHost() {
-        hostValue.setText(displayHost());
+        String host = displayHost();
+        hostValue.setText(host);
+        lastRenderedHost = host;
     }
 
     /**
@@ -283,7 +289,14 @@ public class ServerInfoDialog extends Dialog {
         statusDot.setBackgroundTintList(ColorStateList.valueOf(color));
 
         if (infoContainer.getVisibility() == View.VISIBLE) {
+            String previousHost = lastRenderedHost;
             renderHost();
+            // switchServerHost() 是 oneway AIDL，切换完成前 getConnectedHost() 仍返回旧 host，
+            // 探测会测到旧节点的延迟。这里在展示 host 真的发生变化（例如新连接建立后）时才重新探测，
+            // 避免连接状态频繁变化（connecting/connected 反复触发本方法）导致的无谓重复探测。
+            if (!Objects.equals(previousHost, lastRenderedHost)) {
+                probeCurrentHost();
+            }
         }
     }
 
