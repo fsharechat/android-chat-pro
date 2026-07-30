@@ -277,17 +277,23 @@ public abstract class AbstractProtoService implements PushMessageCallback {
 
     private void forceConnect(){
         log.i("force connect");
-        if(!userDisconnect && androidNIOClient != null){
-            androidNIOClient.post(new Runnable() {
+        final AndroidNIOClient client = androidNIOClient;
+        if(!userDisconnect && client != null){
+            client.post(new Runnable() {
                 @Override
                 public void run() {
+                    AndroidNIOClient current = androidNIOClient;
+                    if(current == null){
+                        log.i("forceConnect skipped, client already released");
+                        return;
+                    }
                     clearSendMessageTimerMap();
                     cancelReconnectTimer();
                     cancelHeartTimer();
                     resetHeartBeatManager();
-                    androidNIOClient.close();
+                    current.close();
                     JavaProtoLogic.onConnectionStatusChanged(ConnectionStatusConnecting);
-                    androidNIOClient.connect();
+                    current.connect();
                 }
             });
         }
