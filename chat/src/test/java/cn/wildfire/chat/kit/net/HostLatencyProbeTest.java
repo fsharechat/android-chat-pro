@@ -37,15 +37,13 @@ public class HostLatencyProbeTest {
     }
 
     @Test
-    public void probeOnceReportsTimeoutForNonRoutableAddress() throws IOException {
-        // 使用绑定但不 accept 的 ServerSocket 模拟一个不可达的端口：
-        // 套接字已建立但立即关闭，导致连接超时或立即被拒。
-        // 这种方式不依赖网络环境配置，能够在任何环境下产生预期的超时或不可达结果。
-        ServerSocket blockingServer = new ServerSocket(0);
-        int timeoutPort = blockingServer.getLocalPort();
-        blockingServer.close();
-
-        long latency = HostLatencyProbe.probeOnce("127.0.0.1", timeoutPort, 300);
+    public void probeOnceReportsTimeoutForNonRoutableAddress() {
+        // 192.0.2.0/24 是 RFC 5737 保留的 TEST-NET-1，标准环境下不可路由；
+        // 但本机 JVM 会自动经本地代理转发出站连接（见 all_proxy 环境变量），
+        // 导致较大的 timeoutMs 下该地址反而会"连接成功"。
+        // 用极短的 1ms 超时代替依赖目标真的不可达：任何真实握手（含被代理转发的）
+        // 都不可能在 1ms 内完成，因此这里必然触发 SocketTimeoutException 或连接异常。
+        long latency = HostLatencyProbe.probeOnce("192.0.2.1", 6789, 1);
         assertTrue("expected timeout or unreachable but was " + latency,
                 latency == HostLatencyProbe.RESULT_TIMEOUT
                         || latency == HostLatencyProbe.RESULT_UNREACHABLE);
