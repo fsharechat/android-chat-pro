@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.lqr.optionitemview.OptionItemView;
 
@@ -238,9 +237,13 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
 
     @OnClick(R.id.myGroupNickNameOptionItemView)
     void updateMyGroupAlias() {
-        MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
-                .input("请输入你的群昵称", groupMember.alias, false, (dialog1, input) -> {
-                    groupViewModel.modifyMyGroupAlias(groupInfo.target, input.toString().trim())
+        FshareDialog dialog = new FshareDialog.Builder(getActivity())
+                .title("修改群昵称")
+                .input("请输入你的群昵称", groupMember.alias)
+                .secondary("取消", null)
+                .primary("确定", d -> {
+                    String alias = d.getInputText().trim();
+                    groupViewModel.modifyMyGroupAlias(groupInfo.target, alias)
                             .observe(GroupConversationInfoFragment.this, new Observer<OperateResult>() {
                                 @Override
                                 public void onChanged(@Nullable OperateResult operateResult) {
@@ -249,18 +252,12 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
                                     UserInfo userInfo = userViewModel.getUserInfo(userViewModel.getUserId(), groupInfo.target, false);
                                     conversationMemberAdapter.updateMember(userInfo);
                                     if (operateResult.isSuccess()) {
-                                        myGroupNickNameOptionItemView.setRightText(input.toString().trim());
+                                        myGroupNickNameOptionItemView.setRightText(alias);
                                     } else {
                                         Toast.makeText(getActivity(), "修改群昵称失败:" + operateResult.getErrorCode(), Toast.LENGTH_SHORT).show();
-
                                     }
                                 }
                             });
-                })
-                .negativeText("取消")
-                .positiveText("确定")
-                .onPositive((dialog12, which) -> {
-                    dialog12.dismiss();
                 })
                 .build();
         dialog.show();
