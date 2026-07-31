@@ -4,16 +4,16 @@
 
     <item
         android:id="@+id/conversation_list"
-        android:icon="@drawable/ic_nav_chat"
+        android:icon="@drawable/ic_nav_chat_state"
         android:title="会话"
         app:showAsAction="never" />
     <item
         android:id="@+id/contact"
-        android:icon="@drawable/ic_nav_contacts"
+        android:icon="@drawable/ic_nav_contacts_state"
         android:title="联系人" />
     <item
         android:id="@+id/me"
-        android:icon="@drawable/ic_nav_me"
+        android:icon="@drawable/ic_nav_me_state"
         android:title="我" />
 
 </menu>
