@@ -12,9 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,6 +31,7 @@ import cn.wildfire.chat.kit.conversation.message.viewholder.LoadingViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageContentViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageViewHolderManager;
 import cn.wildfire.chat.kit.conversation.message.viewholder.SimpleNotificationMessageContentViewHolder;
+import cn.wildfire.chat.kit.widget.dialog.FshareBottomSheetDialog;
 import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.Message;
@@ -352,9 +350,9 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
                 for (ContextMenuItemWrapper itemWrapper : contextMenus) {
                     titles.add(itemWrapper.contextMenuItem.title());
                 }
-                new MaterialDialog.Builder(mContext).items(titles).itemsCallback(new MaterialDialog.ListCallback() {
+                new FshareBottomSheetDialog(mContext).items(titles).callback(new FshareBottomSheetDialog.Callback() {
                     @Override
-                    public void onSelection(MaterialDialog dialog, View v, int position, CharSequence text) {
+                    public void onSelect(int position, CharSequence text) {
                         try {
                             ContextMenuItemWrapper menuItem = contextMenus.get(position);
                             if (menuItem.contextMenuItem.confirm()) {

@@ -5,8 +5,6 @@ import android.widget.FrameLayout;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,6 +13,7 @@ import java.util.List;
 import cn.wildfire.chat.kit.annotation.ExtContextMenuItem;
 import cn.wildfire.chat.kit.conversation.ConversationViewModel;
 import cn.wildfire.chat.kit.widget.ViewPagerFixed;
+import cn.wildfire.chat.kit.widget.dialog.FshareBottomSheetDialog;
 import cn.wildfirechat.model.Conversation;
 
 public class ConversationExtension {
@@ -61,7 +60,7 @@ public class ConversationExtension {
                     titles.add(itemWrapper.extContextMenuItem.title());
                 }
                 // TODO sort
-                new MaterialDialog.Builder(activity).items(titles).itemsCallback((dialog, v, position, text) -> {
+                new FshareBottomSheetDialog(activity).items(titles).callback((position, text) -> {
                     try {
                         extMenuItems.get(position).method.invoke(ext, containerLayout, conversation);
                     } catch (IllegalAccessException e) {
