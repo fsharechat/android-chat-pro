@@ -3,8 +3,6 @@ package cn.wildfire.chat.kit.conversation.forward;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -14,6 +12,7 @@ import cn.wildfire.chat.kit.common.OperateResult;
 import cn.wildfire.chat.kit.contact.model.UIUserInfo;
 import cn.wildfire.chat.kit.contact.pick.PickConversationTargetActivity;
 import cn.wildfire.chat.kit.group.GroupViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.model.GroupInfo;
 
 public class PickConversationTargetToForwardActivity extends PickConversationTargetActivity {
@@ -25,11 +24,7 @@ public class PickConversationTargetToForwardActivity extends PickConversationTar
     protected void onContactPicked(List<UIUserInfo> userInfos) {
         if (singleMode && userInfos.size() > 1) {
             // 先创建群组
-            MaterialDialog dialog = new MaterialDialog.Builder(this)
-                    .content("创建中...")
-                    .progress(true, 100)
-                    .build();
-            dialog.show();
+            FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "创建中...", true);
             GroupViewModel groupViewModel = ViewModelProviders.of(this).get(GroupViewModel.class);
             groupViewModel.createGroup(this, userInfos)
                     .observe(this, new Observer<OperateResult<String>>() {

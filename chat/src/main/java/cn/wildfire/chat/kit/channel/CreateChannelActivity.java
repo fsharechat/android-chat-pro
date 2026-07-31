@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.textfield.TextInputEditText;
@@ -26,6 +25,7 @@ import butterknife.OnTextChanged;
 import cn.wildfire.chat.kit.WfcBaseActivity;
 import cn.wildfire.chat.kit.common.OperateResult;
 import cn.wildfire.chat.kit.conversation.ConversationActivity;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.Conversation;
 
@@ -104,11 +104,7 @@ public class CreateChannelActivity extends WfcBaseActivity {
             Toast.makeText(this, "请设置头像", Toast.LENGTH_SHORT).show();
             return;
         }
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("创建频道中...")
-                .progress(true, 10)
-                .cancelable(false)
-                .show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "创建频道中...", false);
         channelViewModel.createChannel(null, channelName, portraitPath, desc, null).observe(this, new Observer<OperateResult<String>>() {
             @Override
             public void onChanged(@Nullable OperateResult<String> result) {

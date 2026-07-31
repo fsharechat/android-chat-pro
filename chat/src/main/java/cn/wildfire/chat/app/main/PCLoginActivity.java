@@ -4,8 +4,6 @@ import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +17,7 @@ import cn.wildfire.chat.kit.WfcUIKit;
 import cn.wildfire.chat.kit.net.OKHttpHelper;
 import cn.wildfire.chat.kit.net.SimpleCallback;
 import cn.wildfire.chat.kit.user.UserViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 
 public class PCLoginActivity extends WfcBaseActivity {
@@ -52,11 +51,7 @@ public class PCLoginActivity extends WfcBaseActivity {
     }
 
     private void scanPCLogin(String token) {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("处理中")
-                .progress(true, 100)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "处理中", true);
         String url = "https://" + Config.APP_SERVER_HOST + ":" + Config.APP_SERVER_PORT + "/scan_pc";
         url += "/" + token;
         OKHttpHelper.post(url, null, new SimpleCallback<PCSession>() {

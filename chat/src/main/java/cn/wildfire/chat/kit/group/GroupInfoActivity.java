@@ -5,8 +5,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +16,7 @@ import cn.wildfire.chat.kit.WfcBaseActivity;
 import cn.wildfire.chat.kit.WfcUIKit;
 import cn.wildfire.chat.kit.conversation.ConversationActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.GroupInfo;
@@ -36,7 +35,7 @@ public class GroupInfoActivity extends WfcBaseActivity {
     @Bind(R.id.actionButton)
     Button actionButton;
 
-    private MaterialDialog dialog;
+    private FshareLoadingDialog dialog;
     private int actionCount = 0;
 
     @Override
@@ -99,10 +98,7 @@ public class GroupInfoActivity extends WfcBaseActivity {
     private void showLoading() {
         actionCount++;
         if (dialog == null) {
-            dialog = new MaterialDialog.Builder(this)
-                    .progress(true, 100)
-                    .build();
-            dialog.show();
+            dialog = FshareLoadingDialog.show(this, null, true);
         }
     }
 

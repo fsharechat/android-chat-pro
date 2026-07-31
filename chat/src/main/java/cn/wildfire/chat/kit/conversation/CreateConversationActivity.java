@@ -2,8 +2,6 @@ package cn.wildfire.chat.kit.conversation;
 
 import android.content.Intent;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.List;
 
 import androidx.lifecycle.ViewModelProviders;
@@ -11,6 +9,7 @@ import cn.wildfire.chat.kit.contact.model.UIUserInfo;
 import cn.wildfire.chat.kit.contact.pick.PickConversationTargetActivity;
 import cn.wildfire.chat.kit.group.GroupViewModel;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.GroupInfo;
@@ -39,11 +38,7 @@ public class CreateConversationActivity extends PickConversationTargetActivity {
             startActivity(intent);
             finish();
         } else {
-            MaterialDialog dialog = new MaterialDialog.Builder(this)
-                    .content("创建中...")
-                    .progress(true, 100)
-                    .build();
-            dialog.show();
+            FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "创建中...", true);
 
             groupViewModel.createGroup(this, newlyCheckedUserInfos).observe(this, result -> {
                 dialog.dismiss();

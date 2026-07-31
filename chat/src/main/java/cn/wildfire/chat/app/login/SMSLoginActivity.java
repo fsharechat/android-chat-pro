@@ -10,8 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +24,7 @@ import cn.wildfire.chat.kit.WfcBaseActivity;
 import cn.wildfire.chat.kit.net.OKHttpHelper;
 import cn.wildfire.chat.kit.net.SimpleCallback;
 import cn.wildfire.chat.kit.net.base.StatusResult;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 
 public class SMSLoginActivity extends WfcBaseActivity {
@@ -92,12 +91,7 @@ public class SMSLoginActivity extends WfcBaseActivity {
             return;
         }
 
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("登录中...")
-                .progress(true, 100)
-                .cancelable(false)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "登录中...", false);
         OKHttpHelper.post(url, params, new SimpleCallback<LoginResult>() {
             @Override
             public void onUiSuccess(LoginResult loginResult) {

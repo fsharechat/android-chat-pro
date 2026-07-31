@@ -16,7 +16,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
@@ -26,6 +25,7 @@ import butterknife.OnClick;
 import cn.wildfire.chat.kit.WfcUIKit;
 import cn.wildfire.chat.kit.common.OperateResult;
 import cn.wildfire.chat.kit.user.UserViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.ChannelInfo;
 
@@ -102,12 +102,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
 
     @OnClick(R.id.followChannelButton)
     void followChannelButtonClick() {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content(isFollowed ? "正在取消收听" : "正在收听")
-                .progress(true, 100)
-                .cancelable(false)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, isFollowed ? "正在取消收听" : "正在收听", false);
         channelViewModel.listenChannel(channelInfo.channelId, !isFollowed).observe(this, new Observer<OperateResult<Boolean>>() {
             @Override
             public void onChanged(@Nullable OperateResult<Boolean> booleanOperateResult) {

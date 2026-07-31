@@ -4,14 +4,13 @@ import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.ViewModelProviders;
 import cn.wildfire.chat.kit.contact.model.UIUserInfo;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 
 public class RemoveGroupMemberActivity extends BasePickGroupMemberActivity {
@@ -60,12 +59,7 @@ public class RemoveGroupMemberActivity extends BasePickGroupMemberActivity {
     }
 
     void removeMember(List<UIUserInfo> checkedUsers) {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("删除中...")
-                .progress(true, 100)
-                .cancelable(false)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "删除中...", false);
         if (checkedUsers != null && !checkedUsers.isEmpty()) {
             ArrayList<String> checkedIds = new ArrayList<>(checkedUsers.size());
             for (UIUserInfo user : checkedUsers) {

@@ -8,8 +8,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.Collections;
 
 import butterknife.Bind;
@@ -17,6 +15,7 @@ import butterknife.OnTextChanged;
 import cn.wildfire.chat.kit.WfcBaseActivity;
 import cn.wildfire.chat.kit.WfcUIKit;
 import cn.wildfire.chat.kit.common.OperateResult;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.ModifyMyInfoEntry;
 import cn.wildfirechat.model.UserInfo;
@@ -89,11 +88,7 @@ public class ChangeMyNameActivity extends WfcBaseActivity {
 
 
     private void changeMyName() {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("修改中...")
-                .progress(true, 100)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "修改中...", true);
         String nickName = nameEditText.getText().toString().trim();
         ModifyMyInfoEntry entry = new ModifyMyInfoEntry(Modify_DisplayName, nickName);
         userViewModel.modifyMyInfo(Collections.singletonList(entry)).observe(this, new Observer<OperateResult<Boolean>>() {

@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +14,7 @@ import cn.wildfire.chat.kit.WfcBaseActivity;
 import cn.wildfire.chat.kit.contact.model.UIUserInfo;
 import cn.wildfire.chat.kit.contact.pick.PickContactViewModel;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.GroupInfo;
 
@@ -91,12 +90,7 @@ public class AddGroupMemberActivity extends WfcBaseActivity {
 
 
     void addMember() {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("添加中...")
-                .progress(true, 100)
-                .cancelable(false)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "添加中...", false);
         List<UIUserInfo> checkedUsers = pickContactViewModel.getCheckedContacts();
         if (checkedUsers != null && !checkedUsers.isEmpty()) {
             ArrayList<String> checkedIds = new ArrayList<>(checkedUsers.size());

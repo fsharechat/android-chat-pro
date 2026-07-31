@@ -10,12 +10,11 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import butterknife.Bind;
 import butterknife.OnTextChanged;
 import cn.wildfire.chat.kit.WfcBaseActivity;
 import cn.wildfire.chat.kit.common.OperateResult;
+import cn.wildfire.chat.kit.widget.dialog.FshareLoadingDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.GroupInfo;
 import cn.wildfirechat.model.ModifyGroupInfoType;
@@ -81,12 +80,7 @@ public class SetGroupNameActivity extends WfcBaseActivity {
 
     private void setGroupName() {
         groupInfo.name = nameEditText.getText().toString().trim();
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .content("请稍后...")
-                .progress(true, 100)
-                .cancelable(false)
-                .build();
-        dialog.show();
+        FshareLoadingDialog dialog = FshareLoadingDialog.show(this, "请稍后...", false);
 
         groupViewModel.modifyGroupInfo(groupInfo.target, ModifyGroupInfoType.Modify_Group_Name, groupInfo.name, null).observe(this, new Observer<OperateResult<Boolean>>() {
             @Override
