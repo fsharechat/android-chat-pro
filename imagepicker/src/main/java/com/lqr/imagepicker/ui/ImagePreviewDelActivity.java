@@ -1,15 +1,14 @@
 package com.lqr.imagepicker.ui;
 
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AlertDialog;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.lqr.imagepicker.R;
+import com.lqr.imagepicker.widget.SimpleConfirmDialog;
 
 public class ImagePreviewDelActivity extends ImagePreviewBaseActivity implements View.OnClickListener {
 
@@ -45,25 +44,17 @@ public class ImagePreviewDelActivity extends ImagePreviewBaseActivity implements
 
     /** 是否删除此张图片 */
     private void showDeleteDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("提示");
-        builder.setMessage("要删除这张照片吗？");
-        builder.setNegativeButton("取消", null);
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //移除当前图片刷新界面
-                mImageItems.remove(mCurrentPosition);
-                if (mImageItems.size() > 0) {
-                    mAdapter.setData(mImageItems);
-                    mAdapter.notifyDataSetChanged();
-                    mTitleCount.setText(getString(R.string.preview_image_count, mCurrentPosition + 1, mImageItems.size()));
-                } else {
-                    onBackPressed();
-                }
+        SimpleConfirmDialog.show(this, "提示", "要删除这张照片吗？", "取消", "确定", () -> {
+            //移除当前图片刷新界面
+            mImageItems.remove(mCurrentPosition);
+            if (mImageItems.size() > 0) {
+                mAdapter.setData(mImageItems);
+                mAdapter.notifyDataSetChanged();
+                mTitleCount.setText(getString(R.string.preview_image_count, mCurrentPosition + 1, mImageItems.size()));
+            } else {
+                onBackPressed();
             }
         });
-        builder.show();
     }
 
     @Override

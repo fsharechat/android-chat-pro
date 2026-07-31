@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--与 chat 模块 values-night/colors.xml 保持一致，见 values/colors.xml 的说明。-->
+    <color name="ink">#ECEEF4</color>
+    <color name="surface">#171B23</color>
+    <color name="paper">#0F1218</color>
+    <color name="fog">#232936</color>
+    <color name="cobalt">#6E8BFF</color>
+    <color name="cobalt_pressed">#5A78F0</color>
+    <color name="text_color_white">#FFFFFF</color>
+</resources>

@@ -4,4 +4,14 @@
     <color name="black">#000000</color>
     <color name="status_bar">#303135</color>
     <color name="transparent">#00000000</color>
+
+    <!--以下 token 与 chat 模块 values/colors.xml 保持一致。
+        imagepicker 不依赖 chat，无法共享资源，改样式时两边都要改。-->
+    <color name="ink">#171A21</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="paper">#F5F7FC</color>
+    <color name="fog">#E9EDF6</color>
+    <color name="cobalt">#3E64E4</color>
+    <color name="cobalt_pressed">#2D4FD8</color>
+    <color name="text_color_white">#FFFFFF</color>
 </resources>
