@@ -66,7 +66,7 @@ public class ServerInfoDialog extends Dialog {
     public ServerInfoDialog(@NonNull Activity activity,
                             @NonNull LifecycleOwner lifecycleOwner,
                             @NonNull LiveData<Integer> connectionStatus) {
-        super(activity, R.style.ServerInfoDialog);
+        super(activity, R.style.FshareDialog);
         this.lifecycleOwner = lifecycleOwner;
         this.connectionStatus = connectionStatus;
     }
