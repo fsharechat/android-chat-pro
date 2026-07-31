@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--与 chat 模块 layout/fshare_dialog.xml 保持一致，改样式时两边都要改。-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -33,6 +34,7 @@
         android:paddingTop="4dp"
         android:paddingEnd="20dp"
         android:paddingBottom="20dp"
+        android:lineSpacingExtra="4dp"
         android:textColor="@color/ink"
         android:textSize="15sp" />
 

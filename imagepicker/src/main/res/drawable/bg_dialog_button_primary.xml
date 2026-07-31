@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--与 chat 模块 drawable/bg_dialog_button_primary.xml 保持一致，改样式时两边都要改。-->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/cobalt_pressed">
     <item>

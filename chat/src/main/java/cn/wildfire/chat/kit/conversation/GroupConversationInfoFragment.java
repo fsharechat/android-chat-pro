@@ -243,6 +243,10 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
                 .secondary("取消", null)
                 .primary("确定", d -> {
                     String alias = d.getInputText().trim();
+                    if (TextUtils.isEmpty(alias)) {
+                        Toast.makeText(getActivity(), "群昵称不能为空", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     groupViewModel.modifyMyGroupAlias(groupInfo.target, alias)
                             .observe(GroupConversationInfoFragment.this, new Observer<OperateResult>() {
                                 @Override

@@ -16,4 +16,12 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
 
+    <!--material 1.0.0 没有 DayNight 版本的 BottomSheetDialog 父主题，浅色版用的是
+        Theme.Design.Light.BottomSheetDialog，这里用 values-night 覆盖为非 Light 版本。-->
+    <style name="FshareBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/FshareBottomSheetStyle</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="colorAccent">@color/cobalt</item>
+    </style>
+
 </resources>

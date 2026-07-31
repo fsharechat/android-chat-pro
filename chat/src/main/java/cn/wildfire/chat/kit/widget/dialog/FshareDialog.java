@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -59,6 +60,9 @@ public class FshareDialog extends Dialog {
             window.setLayout(
                     (int) (getContext().getResources().getDisplayMetrics().widthPixels * WIDTH_RATIO),
                     ViewGroup.LayoutParams.WRAP_CONTENT);
+            if (builder.contentMode == ContentMode.INPUT) {
+                window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            }
         }
 
         setCancelable(builder.cancelable);
@@ -140,6 +144,7 @@ public class FshareDialog extends Dialog {
         lp.setMargins(dp(20), TextUtils.isEmpty(builder.title) ? dp(20) : dp(4),
                 dp(20), dp(20));
         view.setLayoutParams(lp);
+        view.requestFocus();
         return view;
     }
 
@@ -182,7 +187,9 @@ public class FshareDialog extends Dialog {
             if (hasSecondary) {
                 lp.setMarginStart(dp(12));
             } else {
-                // 只有一个按钮时占满整行，用不带左边距的整行背景
+                // 只有一个按钮时占满整行：真正起作用的是去掉左边距（setMarginStart(0)）；
+                // bg_dialog_button_full 目前与 bg_dialog_button_primary 内容相同，
+                // 单独保留这份资源是为了以后可以只调整单按钮样式而不影响双按钮场景
                 lp.setMarginStart(0);
                 primary.setBackgroundResource(R.drawable.bg_dialog_button_full);
             }

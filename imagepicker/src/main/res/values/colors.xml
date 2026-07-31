@@ -11,6 +11,7 @@
     <color name="surface">#FFFFFF</color>
     <color name="paper">#F5F7FC</color>
     <color name="fog">#E9EDF6</color>
+    <color name="mist">#8B93A7</color>
     <color name="cobalt">#3E64E4</color>
     <color name="cobalt_pressed">#2D4FD8</color>
     <color name="text_color_white">#FFFFFF</color>

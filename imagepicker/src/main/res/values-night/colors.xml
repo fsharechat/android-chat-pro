@@ -5,6 +5,7 @@
     <color name="surface">#171B23</color>
     <color name="paper">#0F1218</color>
     <color name="fog">#232936</color>
+    <color name="mist">#9AA3B5</color>
     <color name="cobalt">#6E8BFF</color>
     <color name="cobalt_pressed">#5A78F0</color>
     <color name="text_color_white">#FFFFFF</color>
