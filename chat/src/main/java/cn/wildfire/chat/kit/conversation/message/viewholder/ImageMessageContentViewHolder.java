@@ -124,7 +124,7 @@ public class ImageMessageContentViewHolder extends MediaMessageContentViewHolder
         }
     }
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_SAVE, title = "保存图片", priority = 13)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_SAVE, title = "保存图片", icon = R.drawable.ic_menu_save, priority = 13)
     public void save(View itemView, UiMessage message) {
         ImageMessageContent imageMessage = (ImageMessageContent) message.message.content;
         SaveMediaUtils.saveFileToGalleryAsync(context,imageMessage.remoteUrl,false);

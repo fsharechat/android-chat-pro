@@ -35,6 +35,21 @@ public @interface MessageContextMenuItem {
     boolean confirm() default false;
 
     /**
+     * 菜单项图标，0 表示不显示图标。
+     * <p>不按 tag 映射图标是因为 tag 并不唯一（例如「删除会话」与「清空会话」共用 TAG_REMOVE）。
+     *
+     * @return
+     */
+    int icon() default 0;
+
+    /**
+     * 是否为危险操作（删除、清空这类不可逆操作），为 true 时菜单项文案与图标标红
+     *
+     * @return
+     */
+    boolean destructive() default false;
+
+    /**
      * 二次确认的提示，只有当{@link #confirm()}为true时有用
      *
      * @return

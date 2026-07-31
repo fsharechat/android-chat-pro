@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--取消置顶：图钉 + 斜杠。fillColor 仅为占位，实际颜色由代码着色-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M16,12V4h1V2H7v2h1v8l-2,2v2h5.2v6h1.6v-6H18v-2l-2,-2z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M3.87,2.6L2.6,3.87l17.53,17.53 1.27,-1.27z" />
+</vector>

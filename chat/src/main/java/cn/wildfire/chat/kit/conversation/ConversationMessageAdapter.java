@@ -31,7 +31,7 @@ import cn.wildfire.chat.kit.conversation.message.viewholder.LoadingViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageContentViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageViewHolderManager;
 import cn.wildfire.chat.kit.conversation.message.viewholder.SimpleNotificationMessageContentViewHolder;
-import cn.wildfire.chat.kit.widget.dialog.FshareBottomSheetDialog;
+import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
 import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.Message;
@@ -346,13 +346,19 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
                 }
 
                 Collections.sort(contextMenus, (o1, o2) -> o1.contextMenuItem.priority() - o2.contextMenuItem.priority());
-                List<String> titles = new ArrayList<>(contextMenus.size());
+                List<FshareContextMenu.Item> menuItems = new ArrayList<>(contextMenus.size());
                 for (ContextMenuItemWrapper itemWrapper : contextMenus) {
-                    titles.add(itemWrapper.contextMenuItem.title());
+                    menuItems.add(new FshareContextMenu.Item(
+                            itemWrapper.contextMenuItem.title(),
+                            itemWrapper.contextMenuItem.icon(),
+                            itemWrapper.contextMenuItem.destructive()));
                 }
-                new FshareBottomSheetDialog(mContext).items(titles).callback(new FshareBottomSheetDialog.Callback() {
+                // 锚点用消息气泡而不是整行，菜单才会贴在气泡旁边（长按可能发生在气泡的子 View 上）
+                View anchorView = itemView.findViewById(R.id.contentFrameLayout);
+                new FshareContextMenu(mContext, anchorView != null ? anchorView : itemView)
+                        .items(menuItems).callback(new FshareContextMenu.Callback() {
                     @Override
-                    public void onSelect(int position, CharSequence text) {
+                    public void onSelect(int position, FshareContextMenu.Item selected) {
                         try {
                             ContextMenuItemWrapper menuItem = contextMenus.get(position);
                             if (menuItem.contextMenuItem.confirm()) {

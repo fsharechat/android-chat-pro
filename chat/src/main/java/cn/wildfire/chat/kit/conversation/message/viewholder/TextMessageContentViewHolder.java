@@ -129,7 +129,7 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
 //        Toast.makeText(context, "onTextMessage click: " + ((TextMessageContent) message.message.content).getContent(), Toast.LENGTH_SHORT).show();
     }
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_CLIP, title = "复制", confirm = false, priority = 12)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_CLIP, title = "复制", icon = R.drawable.ic_menu_copy, confirm = false, priority = 12)
     public void clip(View itemView, UiMessage message) {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager == null) {

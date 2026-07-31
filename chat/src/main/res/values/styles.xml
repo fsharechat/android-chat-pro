@@ -86,6 +86,23 @@
         <item name="colorControlActivated">@color/cobalt</item>
     </style>
 
+    <!--锚定弹出菜单。必须把 windowMinWidthMajor/Minor 清零：
+        Theme.AppCompat.Dialog 默认给对话框窗口设了约屏宽 65% 的最小宽度，
+        会把菜单卡片强行撑宽，并且让实际窗口宽度与代码测量出的宽度不一致，
+        进而导致按测量值算出来的水平位置也是错的。-->
+    <style name="FshareContextMenu" parent="Theme.AppCompat.DayNight.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.3</item>
+        <item name="android:windowMinWidthMajor">0dp</item>
+        <item name="android:windowMinWidthMinor">0dp</item>
+        <item name="windowMinWidthMajor">0dp</item>
+        <item name="windowMinWidthMinor">0dp</item>
+        <item name="colorAccent">@color/cobalt</item>
+    </style>
+
     <!--底部弹出菜单：让 material 的 BottomSheetDialog 容器透明，圆角交给 bg_dialog_sheet-->
     <style name="FshareBottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/FshareBottomSheetStyle</item>

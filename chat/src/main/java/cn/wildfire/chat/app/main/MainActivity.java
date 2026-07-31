@@ -62,6 +62,7 @@ import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.UserInfo;
 import q.rorbin.badgeview.QBadgeView;
+import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
 
 public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageChangeListener {
 
@@ -267,18 +268,47 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
             case R.id.search:
                 showSearchPortal();
                 break;
-            case R.id.chat:
-                createConversation();
+            case R.id.more:
+                showMoreMenu();
                 break;
-            case R.id.add_contact:
-                searchUser();
-                break;
-            case R.id.scan_qrcode:
-                startActivityForResult(new Intent(this, CaptureActivity.class), REQUEST_CODE_SCAN_QR_CODE);
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * 顶栏「+」的菜单。原本是系统 overflow 子菜单，改成贴着「+」按钮弹出的
+     * {@link FshareContextMenu}，与长按会话/长按消息的菜单保持同一形态。
+     */
+    private void showMoreMenu() {
+        // 「+」在 toolbar 上是 showAsAction=always，其 ActionMenuItemView 会带上菜单项的 id
+        View anchor = findViewById(R.id.more);
+        if (anchor == null) {
+            return;
+        }
+        List<FshareContextMenu.Item> items = Arrays.asList(
+                new FshareContextMenu.Item("发起聊天", R.drawable.ic_menu_new_chat),
+                new FshareContextMenu.Item("添加朋友", R.drawable.ic_menu_person_add),
+                new FshareContextMenu.Item("扫一扫", R.drawable.ic_menu_scan));
+        new FshareContextMenu(this, anchor)
+                .items(items)
+                .callback((position, selected) -> {
+                    switch (position) {
+                        case 0:
+                            createConversation();
+                            break;
+                        case 1:
+                            searchUser();
+                            break;
+                        case 2:
+                            startActivityForResult(new Intent(this, CaptureActivity.class), REQUEST_CODE_SCAN_QR_CODE);
+                            break;
+                        default:
+                            break;
+                    }
+                })
+                .show();
     }
 
     private void showSearchPortal() {

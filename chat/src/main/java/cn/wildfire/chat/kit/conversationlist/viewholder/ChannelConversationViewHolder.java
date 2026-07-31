@@ -48,6 +48,7 @@ public class ChannelConversationViewHolder extends ConversationViewHolder {
 
     @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_UNSUBSCRIBE,
             title = "取消收听",
+            icon = R.drawable.ic_menu_unsubscribe,
             confirm = true,
             confirmPrompt = "确认取消订阅频道？",
             priority = 0)

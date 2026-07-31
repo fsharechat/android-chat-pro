@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--宽度先用 wrap_content，卡片才能按最长的一项来定宽（match_parent 的子 View 在
+    wrap_content 的 LinearLayout 里只贡献 margin，不会把内容宽度传上去）。
+    测量完成后由 FshareContextMenu 统一改成 match_parent，把每行撑满卡片。-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:background="@drawable/bg_dialog_list_item"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="18dp"
+    android:paddingEnd="20dp">
+
+    <ImageView
+        android:id="@+id/menuIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="14dp" />
+
+    <TextView
+        android:id="@+id/menuTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="16sp" />
+</LinearLayout>

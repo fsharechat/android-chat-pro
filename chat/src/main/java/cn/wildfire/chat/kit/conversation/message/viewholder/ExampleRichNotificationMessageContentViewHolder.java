@@ -68,7 +68,7 @@ public class ExampleRichNotificationMessageContentViewHolder extends Notificatio
         return false;
     }
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_FORWARD, title = "转发", priority = 11)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_FORWARD, title = "转发", icon = R.drawable.ic_menu_forward, priority = 11)
     public void forwardMessage(View itemView, UiMessage message) {
         Intent intent = new Intent(context, ForwardActivity.class);
         intent.putExtra("message", message.message);

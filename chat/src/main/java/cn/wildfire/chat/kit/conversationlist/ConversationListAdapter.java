@@ -23,7 +23,7 @@ import cn.wildfire.chat.kit.conversationlist.notification.StatusNotification;
 import cn.wildfire.chat.kit.conversationlist.viewholder.ConversationViewHolder;
 import cn.wildfire.chat.kit.conversationlist.viewholder.ConversationViewHolderManager;
 import cn.wildfire.chat.kit.conversationlist.viewholder.StatusNotificationContainerViewHolder;
-import cn.wildfire.chat.kit.widget.dialog.FshareBottomSheetDialog;
+import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
 import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.Conversation;
@@ -247,13 +247,17 @@ public class ConversationListAdapter extends RecyclerView.Adapter<RecyclerView.V
                     return false;
                 }
                 Collections.sort(contextMenus, (o1, o2) -> o1.contextMenuItem.priority() - o2.contextMenuItem.priority());
-                List<String> titles = new ArrayList<>(contextMenus.size());
+                List<FshareContextMenu.Item> menuItems = new ArrayList<>(contextMenus.size());
                 for (ContextMenuItemWrapper itemWrapper : contextMenus) {
-                    titles.add(itemWrapper.contextMenuItem.title());
+                    menuItems.add(new FshareContextMenu.Item(
+                            itemWrapper.contextMenuItem.title(),
+                            itemWrapper.contextMenuItem.icon(),
+                            itemWrapper.contextMenuItem.destructive()));
                 }
-                new FshareBottomSheetDialog(fragment.getContext()).items(titles).callback(new FshareBottomSheetDialog.Callback() {
+                // 锚点是被长按的会话行，菜单贴着它弹出
+                new FshareContextMenu(fragment.getContext(), itemView).items(menuItems).callback(new FshareContextMenu.Callback() {
                     @Override
-                    public void onSelect(int position, CharSequence text) {
+                    public void onSelect(int position, FshareContextMenu.Item selected) {
                         try {
                             ContextMenuItemWrapper menuItem = contextMenus.get(position);
                             if (menuItem.contextMenuItem.confirm()) {

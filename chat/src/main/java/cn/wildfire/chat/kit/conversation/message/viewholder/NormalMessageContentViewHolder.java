@@ -126,24 +126,24 @@ public abstract class NormalMessageContentViewHolder extends MessageContentViewH
     }
 
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_RECALL, title = "撤回", priority = 10)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_RECALL, title = "撤回", icon = R.drawable.ic_menu_recall, priority = 10)
     public void recall(View itemView, UiMessage message) {
         conversationViewModel.recallMessage(message.message);
     }
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_DELETE, title = "删除", confirm = true, confirmPrompt = "确认删除此消息", priority = 11)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_DELETE, title = "删除", icon = R.drawable.ic_menu_trash, destructive = true, confirm = true, confirmPrompt = "确认删除此消息", priority = 11)
     public void removeMessage(View itemView, UiMessage message) {
         conversationViewModel.deleteMessage(message.message);
     }
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_FORWARD, title = "转发", priority = 11)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_FORWARD, title = "转发", icon = R.drawable.ic_menu_forward, priority = 11)
     public void forwardMessage(View itemView, UiMessage message) {
         Intent intent = new Intent(context, ForwardActivity.class);
         intent.putExtra("message", message.message);
         context.startActivity(intent);
     }
 
-    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_CHANEL_PRIVATE_CHAT, title = "私聊", priority = 12)
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_CHANEL_PRIVATE_CHAT, title = "私聊", icon = R.drawable.ic_menu_private_chat, priority = 12)
     public void startChanelPrivateChat(View itemView, UiMessage message) {
         Intent intent = ConversationActivity.buildConversationIntent(context, Conversation.ConversationType.Channel, message.message.conversation.target, message.message.conversation.line, message.message.sender);
         context.startActivity(intent);

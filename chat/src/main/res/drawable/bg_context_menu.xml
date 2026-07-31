@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--锚定弹出菜单的卡片底。圆角比居中弹窗(16dp)小一档，贴近 iOS 上下文菜单的观感-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/surface" />
+    <corners android:radius="14dp" />
+</shape>

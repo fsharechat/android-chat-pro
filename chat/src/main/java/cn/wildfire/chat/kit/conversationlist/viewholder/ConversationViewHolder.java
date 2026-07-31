@@ -166,6 +166,8 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
 
     @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_REMOVE,
             title = "删除会话",
+            icon = R.drawable.ic_menu_delete_conv,
+            destructive = true,
             confirm = true,
             confirmPrompt = "确认删除会话？",
             priority = 0)
@@ -175,6 +177,8 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
 
     @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_REMOVE,
             title = "清空会话",
+            icon = R.drawable.ic_menu_clear,
+            destructive = true,
             confirm = true,
             confirmPrompt = "确认清空会话？",
             priority = 0)
@@ -182,12 +186,12 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
         conversationListViewModel.clearMessages(conversationInfo.conversation);
     }
 
-    @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_TOP, title = "置顶", priority = 1)
+    @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_TOP, title = "置顶", icon = R.drawable.ic_menu_pin, priority = 1)
     public void stickConversationTop(View itemView, ConversationInfo conversationInfo) {
         conversationListViewModel.setConversationTop(conversationInfo, true);
     }
 
-    @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_CANCEL_TOP, title = "取消置顶", priority = 2)
+    @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_CANCEL_TOP, title = "取消置顶", icon = R.drawable.ic_menu_unpin, priority = 2)
     public void cancelStickConversationTop(View itemView, ConversationInfo conversationInfo) {
         conversationListViewModel.setConversationTop(conversationInfo, false);
     }
