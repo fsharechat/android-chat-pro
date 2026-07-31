@@ -34,6 +34,7 @@ import cn.wildfire.chat.kit.conversation.message.viewholder.LoadingViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageContentViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageViewHolderManager;
 import cn.wildfire.chat.kit.conversation.message.viewholder.SimpleNotificationMessageContentViewHolder;
+import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.model.UserInfo;
@@ -357,23 +358,18 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
                         try {
                             ContextMenuItemWrapper menuItem = contextMenus.get(position);
                             if (menuItem.contextMenuItem.confirm()) {
-                                new MaterialDialog.Builder(mContext)
+                                new FshareDialog.Builder(mContext)
                                         .content(menuItem.contextMenuItem.confirmPrompt())
-                                        .negativeText("取消")
-                                        .positiveText("确认")
-                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                try {
-                                                    menuItem.method.invoke(viewHolder, itemView, message);
-                                                } catch (IllegalAccessException e) {
-                                                    e.printStackTrace();
-                                                } catch (InvocationTargetException e) {
-                                                    e.printStackTrace();
-                                                }
+                                        .secondary("取消", null)
+                                        .primary("确认", d -> {
+                                            try {
+                                                menuItem.method.invoke(viewHolder, itemView, message);
+                                            } catch (IllegalAccessException e) {
+                                                e.printStackTrace();
+                                            } catch (InvocationTargetException e) {
+                                                e.printStackTrace();
                                             }
                                         })
-                                        .build()
                                         .show();
 
                             } else {

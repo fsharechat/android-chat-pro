@@ -20,8 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +31,7 @@ import cn.wildfire.chat.kit.conversation.GroupConversationInfoFragment;
 import cn.wildfire.chat.kit.conversationlist.notification.ConnectionStatusNotification;
 import cn.wildfire.chat.kit.conversationlist.notification.StatusNotificationViewModel;
 import cn.wildfire.chat.kit.user.UserViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
@@ -201,22 +200,19 @@ public class ConversationListFragment extends Fragment {
                         default:
                             break;
                     }
-                    MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
+                    FshareDialog dialog = new FshareDialog.Builder(getActivity())
                             .title(title)
                             .content(content)
-                            .positiveText("确认")
-                            .negativeText("取消")
-                            .onPositive(((quitDialog, which) -> {
+                            .secondary("取消", null)
+                            .primary("确认", d -> {
                                 ConversationInfo conversationInfo = data.getParcelableExtra("conversationInfo");
-                                if(conversationInfo != null){
+                                if (conversationInfo != null) {
                                     //重新获取conversation 不然当前退出群组时，未读消息为0，导致删除会话仍然又未读消息
                                     conversationInfo = ChatManager.Instance().getConversation(conversationInfo.conversation);
                                     conversationListViewModel.removeConversation(conversationInfo);
                                 }
-                            }))
-                            .onNegative((quitDialog, which) -> {
-                                quitDialog.dismiss();
-                            }).build();
+                            })
+                            .build();
                     dialog.show();
                 }
 

@@ -27,8 +27,6 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.king.zxing.CaptureActivity;
@@ -58,6 +56,7 @@ import cn.wildfire.chat.kit.user.ChangeMyNameActivity;
 import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfire.chat.kit.widget.ViewPagerFixed;
+import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
@@ -419,17 +418,14 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
     }
 
     private void updateDisplayName() {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
+        FshareDialog dialog = new FshareDialog.Builder(this)
                 .content("修改个人昵称？")
-                .positiveText("修改")
-                .negativeText("取消")
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        Intent intent = new Intent(MainActivity.this, ChangeMyNameActivity.class);
-                        startActivity(intent);
-                    }
-                }).build();
+                .secondary("取消", null)
+                .primary("修改", d -> {
+                    Intent intent = new Intent(MainActivity.this, ChangeMyNameActivity.class);
+                    startActivity(intent);
+                })
+                .build();
         dialog.show();
     }
 

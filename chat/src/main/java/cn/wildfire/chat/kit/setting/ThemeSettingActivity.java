@@ -4,14 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import butterknife.OnClick;
 import cn.wildfire.chat.app.MyApp;
 import cn.wildfire.chat.app.ThemeManager;
 import cn.wildfire.chat.app.main.SplashActivity;
 import cn.wildfire.chat.kit.WfcBaseActivity;
+import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 
 public class ThemeSettingActivity extends WfcBaseActivity {
@@ -60,23 +58,19 @@ public class ThemeSettingActivity extends WfcBaseActivity {
         String currentMode = ThemeManager.getInstance(this).getThemeModeString(ThemeManager.getInstance(this).getThemeMode());
         String newMode = ThemeManager.getInstance(this).getThemeModeString(themeMode);
         
-        new MaterialDialog.Builder(this)
+        new FshareDialog.Builder(this)
                 .title("切换主题")
                 .content("当前主题：" + currentMode + "\n新主题：" + newMode + "\n\n切换主题需要重启应用，是否继续？")
-                .positiveText("确定")
-                .negativeText("取消")
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(MaterialDialog dialog, DialogAction which) {
-                        ThemeManager.getInstance(ThemeSettingActivity.this).setThemeMode(themeMode);
-                        Toast.makeText(ThemeSettingActivity.this, "主题已切换，应用将重启", Toast.LENGTH_SHORT).show();
-                        
-                        // 重启应用
-                        Intent intent = new Intent(ThemeSettingActivity.this, SplashActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                    }
+                .secondary("取消", null)
+                .primary("确定", d -> {
+                    ThemeManager.getInstance(ThemeSettingActivity.this).setThemeMode(themeMode);
+                    Toast.makeText(ThemeSettingActivity.this, "主题已切换，应用将重启", Toast.LENGTH_SHORT).show();
+
+                    // 重启应用
+                    Intent intent = new Intent(ThemeSettingActivity.this, SplashActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
                 })
                 .show();
     }

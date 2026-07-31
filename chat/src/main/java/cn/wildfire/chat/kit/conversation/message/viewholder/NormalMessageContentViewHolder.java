@@ -16,7 +16,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 
@@ -30,6 +29,7 @@ import cn.wildfire.chat.kit.conversation.ConversationActivity;
 import cn.wildfire.chat.kit.conversation.forward.ForwardActivity;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.group.GroupViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.MessageContent;
@@ -118,12 +118,10 @@ public abstract class NormalMessageContentViewHolder extends MessageContentViewH
     @Nullable
     @OnClick(R.id.errorLinearLayout)
     public void onRetryClick(View itemView) {
-        new MaterialDialog.Builder(context)
+        new FshareDialog.Builder(context)
                 .content("重新发送?")
-                .negativeText("取消")
-                .positiveText("重发")
-                .onPositive((dialog, which) -> conversationViewModel.resendMessage(message.message))
-                .build()
+                .secondary("取消", null)
+                .primary("重发", d -> conversationViewModel.resendMessage(message.message))
                 .show();
     }
 

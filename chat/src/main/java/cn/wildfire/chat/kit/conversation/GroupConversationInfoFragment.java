@@ -51,6 +51,7 @@ import cn.wildfire.chat.kit.qrcode.QRCodeActivity;
 import cn.wildfire.chat.kit.search.SearchMessageActivity;
 import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
+import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ConversationInfo;
@@ -268,45 +269,39 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
     @OnClick(R.id.quitButton)
     void quitGroup() {
         if(groupInfo != null && userViewModel.getUserId().equals(groupInfo.owner) ){
-            MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
+            FshareDialog dialog = new FshareDialog.Builder(getActivity())
                     .title("解散群组")
                     .content("请确认是否要解散此群组,群组解散将不能恢复,请谨慎操作")
-                    .positiveText("确认")
-                    .negativeText("取消")
-                    .onPositive(((quitDialog, which) -> {
-                        groupViewModel.dismissGroup(conversationInfo.conversation.target,Collections.singletonList(0))
+                    .secondary("取消", null)
+                    .primary("确认", d -> {
+                        groupViewModel.dismissGroup(conversationInfo.conversation.target, Collections.singletonList(0))
                                 .observe(this, aBoolean -> {
                                     if (aBoolean != null && aBoolean) {
-                                        getActivity().setResult(RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS,new Intent().putExtra("conversationInfo",conversationInfo).putExtra("groupName",groupInfo.name));
+                                        getActivity().setResult(RESULT_REMOVE_GROUP_CONVERSATION_SUCCESS, new Intent().putExtra("conversationInfo", conversationInfo).putExtra("groupName", groupInfo.name));
                                         getActivity().finish();
                                     } else {
                                         Toast.makeText(getActivity(), "解散群组失败", Toast.LENGTH_SHORT).show();
                                     }
                                 });
-                    }))
-                    .onNegative((quitDialog, which) -> {
-                        quitDialog.dismiss();
-                    }).build();
+                    })
+                    .build();
             dialog.show();
         } else {
-            MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
+            FshareDialog dialog = new FshareDialog.Builder(getActivity())
                     .title("退出群组")
                     .content("请确认是否要退出此群组")
-                    .positiveText("确认")
-                    .negativeText("取消")
-                    .onPositive(((quitDialog, which) -> {
+                    .secondary("取消", null)
+                    .primary("确认", d -> {
                         groupViewModel.quitGroup(conversationInfo.conversation.target, Collections.singletonList(0)).observe(this, aBoolean -> {
                             if (aBoolean != null && aBoolean) {
-                                getActivity().setResult(RESULT_QUIT_GROUP_CONVERSATION_SUCCESS,new Intent().putExtra("conversationInfo",conversationInfo).putExtra("groupName",groupInfo.name));
+                                getActivity().setResult(RESULT_QUIT_GROUP_CONVERSATION_SUCCESS, new Intent().putExtra("conversationInfo", conversationInfo).putExtra("groupName", groupInfo.name));
                                 getActivity().finish();
                             } else {
                                 Toast.makeText(getActivity(), "退出群组失败", Toast.LENGTH_SHORT).show();
                             }
                         });
-                    }))
-                    .onNegative((quitDialog, which) -> {
-                        quitDialog.dismiss();
-                    }).build();
+                    })
+                    .build();
             dialog.show();
 
         }
