@@ -57,7 +57,7 @@ public class ShootExt extends ConversationExt {
 
     @Override
     public int iconResId() {
-        return R.mipmap.ic_func_pic;
+        return R.drawable.ic_ext_camera;
     }
 
     @Override

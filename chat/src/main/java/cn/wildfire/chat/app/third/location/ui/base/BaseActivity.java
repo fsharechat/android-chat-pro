@@ -1,6 +1,7 @@
 package cn.wildfire.chat.app.third.location.ui.base;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -60,11 +61,31 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
         setupAppBarAndToolbar();
 
         //沉浸式状态栏
-        StatusBarUtil.setColor(this, UIUtils.getColor(R.color.colorPrimaryDark), 10);
+        applyThemedStatusBar();
 
         initView();
         initData();
         initListener();
+    }
+
+    /**
+     * 状态栏与顶栏同色：浅色主题用深色图标，深色主题用浅色图标，
+     * 避免浅色顶栏上出现看不见的白色状态栏图标
+     */
+    protected void applyThemedStatusBar() {
+        StatusBarUtil.setColor(this, UIUtils.getColor(R.color.location_toolbar_background), 0);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        boolean isNight = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        View decorView = getWindow().getDecorView();
+        int flags = decorView.getSystemUiVisibility();
+        if (isNight) {
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
+        decorView.setSystemUiVisibility(flags);
     }
 
     /**

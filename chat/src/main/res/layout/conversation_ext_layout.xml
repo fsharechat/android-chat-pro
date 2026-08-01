@@ -1,232 +1,251 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--消息扩展面板：4 列栅格，顶部对齐，行高按内容撑开，避免被键盘高度撑成大间距-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="8dp"
+    android:paddingTop="16dp"
+    android:paddingRight="8dp"
+    android:paddingBottom="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:orientation="horizontal">
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_0"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_0"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_0"
-                tools:src="@mipmap/ic_func_pic" />
+                tools:src="@drawable/ic_ext_album" />
 
             <TextView
                 android:id="@+id/title_0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_0"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_0"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="@string/album" />
-        </RelativeLayout>
+                tools:text="照片" />
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_1"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_1"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_1"
-                tools:src="@mipmap/ic_func_shot" />
+                tools:src="@drawable/ic_ext_camera" />
 
             <TextView
                 android:id="@+id/title_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_1"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_1"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="@string/shot" />
-        </RelativeLayout>
+                tools:text="拍摄" />
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_2"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_2"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_2"
-                tools:src="@mipmap/ic_func_location" />
+                tools:src="@drawable/ic_ext_file" />
 
             <TextView
                 android:id="@+id/title_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_2"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_2"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="@string/location" />
-        </RelativeLayout>
+                tools:text="文件" />
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_3"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_3"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_3"
-                tools:src="@mipmap/ic_func_file" />
+                tools:src="@drawable/ic_ext_location" />
 
             <TextView
                 android:id="@+id/title_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_3"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_3"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="@string/file" />
-        </RelativeLayout>
+                tools:text="位置" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/container_4"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:orientation="horizontal">
 
-        <RelativeLayout
-            android:id="@+id/rlCall"
+        <LinearLayout
+            android:id="@+id/container_4"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_4"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_4"
-                tools:src="@mipmap/ic_func_video" />
+                tools:src="@drawable/ic_ext_audio_call" />
 
             <TextView
                 android:id="@+id/title_4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_4"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_4"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="@string/video" />
-        </RelativeLayout>
+                tools:text="语音通话" />
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_5"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_5"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_5"
-                tools:src="@mipmap/ic_func_video" />
+                tools:src="@drawable/ic_ext_video_call" />
 
             <TextView
                 android:id="@+id/title_5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_5"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_5"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="音频" />
-        </RelativeLayout>
+                tools:text="视频通话" />
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_6"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_6"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_6"
-                tools:src="@mipmap/ic_func_video" />
+                tools:src="@drawable/ic_ext_album" />
 
             <TextView
                 android:id="@+id/title_6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_6"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_6"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="音频" />
-        </RelativeLayout>
+                tools:text="" />
+        </LinearLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/container_7"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/icon_7"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
-                android:clickable="false"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
                 android:tag="icon_7"
-                tools:src="@mipmap/ic_func_video" />
+                tools:src="@drawable/ic_ext_album" />
 
             <TextView
                 android:id="@+id/title_7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_7"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="7dp"
+                android:layout_marginTop="6dp"
                 android:tag="title_7"
+                android:textColor="@color/ext_panel_title_text"
                 android:textSize="12sp"
-                tools:text="音频" />
-        </RelativeLayout>
-
+                tools:text="" />
+        </LinearLayout>
     </LinearLayout>
-
 
 </LinearLayout>

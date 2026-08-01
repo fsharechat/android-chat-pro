@@ -4,12 +4,12 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.wildfire.chat.kit.conversation.ext.ExampleAudioInputExt;
+import cn.wildfire.chat.kit.conversation.ext.AudioVoipExt;
 import cn.wildfire.chat.kit.conversation.ext.FileExt;
 import cn.wildfire.chat.kit.conversation.ext.ImageExt;
 import cn.wildfire.chat.kit.conversation.ext.LocationExt;
 import cn.wildfire.chat.kit.conversation.ext.ShootExt;
-import cn.wildfire.chat.kit.conversation.ext.VoipExt;
+import cn.wildfire.chat.kit.conversation.ext.VideoVoipExt;
 import cn.wildfirechat.model.Conversation;
 
 public class ConversationExtManager {
@@ -29,12 +29,13 @@ public class ConversationExtManager {
     }
 
     private void init() {
+        // 注册顺序即面板中的排列顺序
         registerExt(ImageExt.class);
-        registerExt(VoipExt.class);
         registerExt(ShootExt.class);
         registerExt(FileExt.class);
         registerExt(LocationExt.class);
-        registerExt(ExampleAudioInputExt.class);
+        registerExt(AudioVoipExt.class);
+        registerExt(VideoVoipExt.class);
     }
 
     public void registerExt(Class<? extends ConversationExt> clazz) {

@@ -76,7 +76,7 @@ public class FileExt extends ConversationExt {
 
     @Override
     public int iconResId() {
-        return R.mipmap.ic_func_file;
+        return R.drawable.ic_ext_file;
     }
 
     @Override

@@ -116,4 +116,10 @@
     <color name="search_bar_bg_transparent">#80FFFFFF</color>
     <color name="search_text_color">@color/ink</color>
     <color name="search_hint_color">@color/mist</color>
+
+    <!--消息扩展面板（＋号面板）-->
+    <color name="ext_panel_tile_bg">@color/paper</color>
+    <color name="ext_panel_tile_pressed_bg">@color/fog</color>
+    <color name="ext_panel_icon_tint">@color/mist</color>
+    <color name="ext_panel_title_text">@color/mist</color>
 </resources>

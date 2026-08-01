@@ -99,15 +99,8 @@ public class MyLocationActivity extends BaseActivity<IMyLocationAtView, MyLocati
                 decorView.setSystemUiVisibility(flags);
             }
         } else {
-            // Day mode: set pure blue status bar without alpha overlay to avoid divider
-            StatusBarUtil.setColor(this, UIUtils.getColor(R.color.colorPrimaryDark), 0);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                View decorView = getWindow().getDecorView();
-                int flags = decorView.getSystemUiVisibility();
-                // ensure light icons on blue status bar
-                flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-                decorView.setSystemUiVisibility(flags);
-            }
+            // 浅色模式：状态栏与顶栏同为 surface 色，图标转为深色，否则白色图标看不见
+            applyThemedStatusBar();
         }
     }
 

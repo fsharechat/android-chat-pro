@@ -43,7 +43,7 @@ public class LocationExt extends ConversationExt {
 
     @Override
     public int iconResId() {
-        return R.mipmap.ic_func_location;
+        return R.drawable.ic_ext_location;
     }
 
     @Override

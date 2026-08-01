@@ -30,7 +30,6 @@ import butterknife.Bind;
 import cn.wildfire.chat.app.third.location.ui.base.BaseActivity;
 import cn.wildfire.chat.app.third.location.ui.presenter.MyLocationAtPresenter;
 import cn.wildfire.chat.app.third.location.ui.view.IMyLocationAtView;
-import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfirechat.chat.R;
 
 /**
@@ -73,15 +72,8 @@ public class ShowLocationActivity extends BaseActivity<IMyLocationAtView, MyLoca
                 decorView.setSystemUiVisibility(flags);
             }
         } else {
-            // Day mode: set pure blue status bar without alpha overlay to avoid divider
-            StatusBarUtil.setColor(this, UIUtils.getColor(R.color.colorPrimaryDark), 0);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                View decorView = getWindow().getDecorView();
-                int flags = decorView.getSystemUiVisibility();
-                // ensure light icons on blue status bar
-                flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-                decorView.setSystemUiVisibility(flags);
-            }
+            // 浅色模式：状态栏与顶栏同为 surface 色，图标转为深色，否则白色图标看不见
+            applyThemedStatusBar();
         }
     }
 
