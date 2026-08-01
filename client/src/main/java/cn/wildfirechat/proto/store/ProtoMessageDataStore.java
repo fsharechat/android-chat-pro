@@ -20,6 +20,7 @@ import cn.wildfirechat.model.ProtoUnreadCount;
 import static cn.wildfirechat.Constants.USER_SETTING_SPLIT_TAG;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Accept;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Accept_T;
+import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Taken;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_End;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Modify;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Signal;
@@ -167,7 +168,8 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
                 contentType != ContentType_Call_Accept &&
                 contentType != ContentType_Call_Signal &&
                 contentType != ContentType_Call_Modify &&
-                contentType != ContentType_Call_Accept_T
+                contentType != ContentType_Call_Accept_T &&
+                contentType != ContentType_Call_Taken
                 ;
     }
 

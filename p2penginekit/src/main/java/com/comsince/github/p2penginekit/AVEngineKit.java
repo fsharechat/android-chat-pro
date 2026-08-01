@@ -9,6 +9,7 @@ import com.comsince.github.p2penginekit.PeerConnectionClient.PeerConnectionEvent
 import com.comsince.github.message.AnswerMessage;
 import com.comsince.github.message.AnswerTMessage;
 import com.comsince.github.message.ByeMessage;
+import com.comsince.github.message.CallTakenMessage;
 import com.comsince.github.message.ModifyMessage;
 import com.comsince.github.message.SignalMessage;
 import cn.wildfirechat.client.NotInitializedExecption;
@@ -249,6 +250,7 @@ public class AVEngineKit implements OnReceiveMessageListener {
                 ChatManager.Instance().registerMessageContent(ByeMessage.class);
                 ChatManager.Instance().registerMessageContent(SignalMessage.class);
                 ChatManager.Instance().registerMessageContent(ModifyMessage.class);
+                ChatManager.Instance().registerMessageContent(CallTakenMessage.class);
             } catch (NotInitializedExecption var3) {
                 var3.printStackTrace();
             }
@@ -291,6 +293,19 @@ public class AVEngineKit implements OnReceiveMessageListener {
         }
 
         return null;
+    }
+
+    /**
+     * 本端 IM clientId，作为 406 的 d 字段。取不到时返回空串 —— 一期不消费该字段，
+     * 不能因为取不到就阻断多端同步。
+     */
+    private String currentDeviceId() {
+        try {
+            return ChatManager.Instance().getClientId();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     private void onOfferMessage(final MessageContent message, final String clientId, final boolean isKeyMsg) {
@@ -369,10 +384,12 @@ public class AVEngineKit implements OnReceiveMessageListener {
             return false;
         }
 
-        if (!(message.content instanceof SignalMessage) && !(message.content instanceof CallStartMessageContent) && !(message.content instanceof AnswerMessage) && !(message.content instanceof ByeMessage) && !(message.content instanceof ModifyMessage)) {
+        if (!(message.content instanceof SignalMessage) && !(message.content instanceof CallStartMessageContent) && !(message.content instanceof AnswerMessage) && !(message.content instanceof ByeMessage) && !(message.content instanceof ModifyMessage) && !(message.content instanceof CallTakenMessage)) {
             return false;
         } else {
-            if (System.currentTimeMillis() - (message.serverTime - deltaTime) < 90000L && (message.direction == MessageDirection.Receive || message.content instanceof AnswerMessage)) {
+            if (System.currentTimeMillis() - (message.serverTime - deltaTime) < 90000L && (message.direction == MessageDirection.Receive
+                    || message.content instanceof AnswerMessage
+                    || message.content instanceof CallTakenMessage)) {
                 this.executor.submit(() -> {
                     if (message.content instanceof SignalMessage) {
                         if (message.messageUid > 0) {
@@ -412,6 +429,21 @@ public class AVEngineKit implements OnReceiveMessageListener {
                             newSession.startMsgId = message.messageId;
                             this.currentSession = newSession;
                             this.engineCallback.onReceiveCall(newSession);
+                        }
+                    } else if (message.content instanceof CallTakenMessage) {
+                        // 只处理自己其他设备发来的(direction == Send),且必须还在响铃。
+                        CallTakenMessage taken = (CallTakenMessage) message.content;
+                        if (message.direction == MessageDirection.Send
+                                && this.currentSession != null
+                                && this.currentSession.state == AVEngineKit.CallState.Incoming
+                                && taken.getCallId() != null
+                                && taken.getCallId().equals(this.currentSession.callId)) {
+                            Log.d("CallRTCClient", "call taken elsewhere reason=" + taken.getReason()
+                                    + " device=" + taken.getDeviceId());
+                            this.currentSession.endCall(
+                                    CallTakenMessage.REASON_REJECTED.equals(taken.getReason())
+                                            ? AVEngineKit.CallEndReason.RejectByOtherClient
+                                            : AVEngineKit.CallEndReason.AcceptByOtherClient);
                         }
                     } else {
                         if (message.content instanceof AnswerMessage) {
@@ -459,6 +491,7 @@ public class AVEngineKit implements OnReceiveMessageListener {
                 });
             }
 
+            // 返回值无人使用：唯一调用点 onReceiveMessage() 直接丢弃它。
             return message.content instanceof SignalMessage || message.content instanceof AnswerMessage || message.content instanceof ByeMessage;
         }
     }
@@ -749,6 +782,12 @@ public class AVEngineKit implements OnReceiveMessageListener {
         private Timer waitTimer;
         private long startMsgId;
 
+        /**
+         * 结束时要写入通话记录的 status 覆盖值,0 表示不覆盖、沿用原有逻辑。
+         * setState 拿不到结束原因,由 endCall 在切 Idle 之前置位。
+         */
+        private int endStatusOverride;
+
         public boolean isAudioOnly() {
             return this.audioOnly;
         }
@@ -872,6 +911,9 @@ public class AVEngineKit implements OnReceiveMessageListener {
                                     if (state == AVEngineKit.CallState.Connected) {
                                         startMessageContent.setConnectTime(System.currentTimeMillis());
                                         startMessageContent.setStatus(1);
+                                    } else if (this.endStatusOverride > 0) {
+                                        startMessageContent.setEndTime(System.currentTimeMillis());
+                                        startMessageContent.setStatus(this.endStatusOverride);
                                     } else {
                                         startMessageContent.setEndTime(System.currentTimeMillis());
                                         startMessageContent.setStatus(2);
@@ -1002,6 +1044,9 @@ public class AVEngineKit implements OnReceiveMessageListener {
                     AVEngineKit.this.onOfferMessage(answer, this.clientId, false);
                     AnswerMessage answerx = new AnswerMessage(this.callId, ao);
                     AVEngineKit.this.onOfferMessage(answerx, this.clientId, true);
+                    CallTakenMessage taken = new CallTakenMessage(
+                            this.callId, CallTakenMessage.REASON_ANSWERED, AVEngineKit.this.currentDeviceId());
+                    AVEngineKit.this.onOfferMessage(taken, this.clientId, false);
                     AVEngineKit.this.startMedia(true);
                 }
             });
@@ -1015,9 +1060,26 @@ public class AVEngineKit implements OnReceiveMessageListener {
             AVEngineKit.this.executor.submit(() -> {
                 if (this.state != AVEngineKit.CallState.Idle) {
                     this.endTime = System.currentTimeMillis();
-                    if (reason != AVEngineKit.CallEndReason.AcceptByOtherClient) {
+                    if (reason != AVEngineKit.CallEndReason.AcceptByOtherClient
+                            && reason != AVEngineKit.CallEndReason.RejectByOtherClient) {
                         ByeMessage bye = new ByeMessage(this.callId);
                         AVEngineKit.this.onOfferMessage(bye, this.clientId, false);
+                    }
+
+                    // 只有「本端用户主动拒接」才广播 rejected：reason == Hangup 表示
+                    // 用户主动触发，state == Incoming 把它与通话中挂断区分开。
+                    // 通话中挂断时其他端并不在响铃，广播 406 只是无意义噪音。
+                    if (reason == AVEngineKit.CallEndReason.Hangup
+                            && this.state == AVEngineKit.CallState.Incoming) {
+                        CallTakenMessage taken = new CallTakenMessage(
+                                this.callId, CallTakenMessage.REASON_REJECTED, AVEngineKit.this.currentDeviceId());
+                        AVEngineKit.this.onOfferMessage(taken, this.clientId, false);
+                    }
+
+                    // 在别的设备上接听了 —— 本地记录写 3(已在其他设备接听)而不是 2(对方未接听)。
+                    // 其他端拒接(RejectByOtherClient)沿用 2,语义上确实没人接。
+                    if (reason == AVEngineKit.CallEndReason.AcceptByOtherClient) {
+                        this.endStatusOverride = 3;
                     }
 
                     this.clientId = null;
@@ -1116,7 +1178,9 @@ public class AVEngineKit implements OnReceiveMessageListener {
         RemoteHangup,
         OpenCameraFailure,
         Timeout,
-        AcceptByOtherClient;
+        AcceptByOtherClient,
+        /** 自己账号的其他设备拒接了这通来电 —— 本端静默收场，不发 Bye。 */
+        RejectByOtherClient;
     }
 
     public enum CallState {

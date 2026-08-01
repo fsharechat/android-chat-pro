@@ -38,6 +38,8 @@ public class VoipMessageViewHolder extends NormalMessageContentViewHolder {
             textView.setText("对方未接听");
         } else if (content.getStatus() == 1) {
             textView.setText("通话中");
+        } else if (content.getStatus() == 3) {
+            textView.setText("已在其他设备接听");
         } else {
             String text;
             if (content.getConnectTime() > 0) {

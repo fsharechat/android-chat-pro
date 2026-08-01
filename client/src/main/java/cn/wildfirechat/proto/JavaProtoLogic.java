@@ -711,7 +711,10 @@ public class JavaProtoLogic {
     public static void joinChatRoom(String chatRoomId, JavaProtoLogic.IGeneralCallback callback){}
     public static void quitChatRoom(String chatRoomId, JavaProtoLogic.IGeneralCallback callback){}
 
-    public static void registerMessageFlag(int contentType, int flag){}
+    public static void registerMessageFlag(int contentType, int flag){
+        // 空实现：本地是否落库由 ProtoMessageDataStore.canPersistent() 的硬编码 contentType 名单决定，
+        // @ContentTag 上的 PersistFlag 只影响出站 wire message。新增 VOIP 信令时必须同时改那份名单。
+    }
     /**
      * 获取底层已加载模块
      * @return
