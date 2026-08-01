@@ -100,8 +100,22 @@
         android:layout_marginBottom="10dp"
         android:layout_toRightOf="@id/fileIconFrameLayout"
         android:maxLines="1"
-        android:text="20.15M"
         android:textSize="12sp"
-        android:textColor="@color/message_text_send_dark" />
+        android:textColor="@color/message_text_send_dark"
+        tools:text="20.15M" />
+
+    <!--下载状态：接收方向才有意义，发送方向隐藏，此处仅为保证 ViewHolder 绑定一致-->
+    <TextView
+        android:id="@+id/fileStatusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/fileSizeTextView"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@id/fileSizeTextView"
+        android:maxLines="1"
+        android:textSize="12sp"
+        android:textColor="@color/message_text_send_dark"
+        android:visibility="gone" />
 
 </RelativeLayout>

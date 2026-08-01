@@ -30,6 +30,7 @@ import cn.wildfire.chat.kit.utils.FileUtils;
 import cn.wildfire.chat.kit.widget.BubbleImageView;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.FileMessageContent;
+import cn.wildfirechat.message.core.MessageDirection;
 import cn.wildfirechat.message.core.MessageStatus;
 
 @MessageContentType(FileMessageContent.class)
@@ -48,6 +49,8 @@ public class FileMessageContentViewHolder extends MediaMessageContentViewHolder 
     TextView fileNameTextView;
     @Bind(R.id.fileSizeTextView)
     TextView fileSizeTextView;
+    @Bind(R.id.fileStatusTextView)
+    TextView fileStatusTextView;
     private FileMessageContent fileMessageContent;
 
     public FileMessageContentViewHolder(FragmentActivity context, RecyclerView.Adapter adapter, View itemView) {
@@ -71,10 +74,33 @@ public class FileMessageContentViewHolder extends MediaMessageContentViewHolder 
 //                .apply(new RequestOptions().override(UIUtils.dip2Px(150), UIUtils.dip2Px(150)).centerCrop()).into(imageView);
         fileNameTextView.setText(fileMessageContent.getName());
         fileSizeTextView.setText(FileUtils.getReadableFileSize(fileMessageContent.getSize()));
+        setDownloadStatus(message);
 
         String extension = fileExtension(fileMessageContent.getName());
         fileTypeTextView.setText(TextUtils.isEmpty(extension) ? "FILE" : extension);
         ((GradientDrawable) fileTypeTextView.getBackground().mutate()).setColor(fileTypeColor(extension));
+    }
+
+    /**
+     * 参考 iOS 的做法，把下载状态放到文件大小右侧文字里：未下载 / 下载中 xx% / 已下载，
+     * 气泡右侧那个小转圈就不再显示了。
+     */
+    private void setDownloadStatus(UiMessage message) {
+        if (message.message.direction != MessageDirection.Receive) {
+            fileStatusTextView.setVisibility(View.GONE);
+            return;
+        }
+        // 下载进度已经由这行文字表达，去掉气泡右侧的小圆圈
+        progressBar.setVisibility(View.GONE);
+
+        fileStatusTextView.setVisibility(View.VISIBLE);
+        if (message.isDownloading) {
+            fileStatusTextView.setText(context.getString(R.string.file_downloading_percent, message.progress));
+            return;
+        }
+        File file = conversationViewModel.mediaMessageContentFile(message);
+        boolean downloaded = file != null && file.exists();
+        fileStatusTextView.setText(downloaded ? R.string.file_downloaded : R.string.file_not_downloaded);
     }
 
     private static String fileExtension(String fileName) {

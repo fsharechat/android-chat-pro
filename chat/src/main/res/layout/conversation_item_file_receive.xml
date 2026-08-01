@@ -100,8 +100,22 @@ xmlns:tools="http://schemas.android.com/tools"  xmlns:app="http://schemas.androi
         android:layout_marginBottom="10dp"
         android:layout_toRightOf="@id/fileIconFrameLayout"
         android:maxLines="1"
-        android:text="20.15M"
         android:textSize="12sp"
-        android:textColor="@color/message_text_receive_dark" />
+        android:textColor="@color/mist"
+        tools:text="20.15M" />
+
+    <!--下载状态：紧跟文件大小右侧，未下载/下载中 xx%/已下载-->
+    <TextView
+        android:id="@+id/fileStatusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/fileSizeTextView"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@id/fileSizeTextView"
+        android:maxLines="1"
+        android:textSize="12sp"
+        android:textColor="@color/mist"
+        tools:text="未下载" />
 
 </RelativeLayout>

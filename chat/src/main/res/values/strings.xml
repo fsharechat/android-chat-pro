@@ -110,4 +110,9 @@
     <string name="server_latency_unreachable">不可达</string>
     <string name="server_latency_unresolved">无法解析</string>
 
+    <!-- 文件消息下载状态 -->
+    <string name="file_not_downloaded">未下载</string>
+    <string name="file_downloaded">已下载</string>
+    <string name="file_downloading_percent">下载中 %1$d%%</string>
+
 </resources>
