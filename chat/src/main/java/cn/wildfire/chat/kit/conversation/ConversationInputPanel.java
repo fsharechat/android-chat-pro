@@ -138,6 +138,10 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
 
         this.extension = new ConversationExtension(activity, this, extViewPager);
 
+        // 表情/扩展面板都按键盘高度显示，先用已知的键盘高度预置一次，
+        // 之后键盘每次弹出时同步更新，避免键盘与面板互相切换时高度跳变
+        post(this::syncPanelHeightWithKeyboard);
+        rootLinearLayout.addOnKeyboardShownListener(this::syncPanelHeightWithKeyboard);
 
         sharedPreferences = getContext().getSharedPreferences("sticker", Context.MODE_PRIVATE);
 
@@ -385,6 +389,12 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
         if (onConversationInputPanelStateChangeListener != null) {
             onConversationInputPanelStateChangeListener.onInputPanelCollapsed();
         }
+    }
+
+    private void syncPanelHeightWithKeyboard() {
+        int keyboardHeight = rootLinearLayout.getKeyboardHeight();
+        emotionContainerFrameLayout.applyPanelHeight(keyboardHeight);
+        extContainerFrameLayout.applyPanelHeight(keyboardHeight);
     }
 
     private void showConversationExtension() {

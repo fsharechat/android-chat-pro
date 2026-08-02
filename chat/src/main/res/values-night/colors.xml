@@ -112,6 +112,6 @@
     <!--消息扩展面板（＋号面板）-->
     <color name="ext_panel_tile_bg">@color/fog</color>
     <color name="ext_panel_tile_pressed_bg">#2A3140</color>
-    <color name="ext_panel_icon_tint">@color/mist</color>
+    <color name="ext_panel_icon_tint">@color/cobalt</color>
     <color name="ext_panel_title_text">@color/mist</color>
 </resources>

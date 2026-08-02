@@ -42,8 +42,9 @@ public class ConversationExtPageView extends LinearLayout implements View.OnClic
     }
 
     private void init(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.conversation_ext_layout, this, false);
-        addView(view);
+        setOrientation(VERTICAL);
+        // attachToRoot，让栅格沿用布局里的 match_parent 高度，撑满整个扩展面板
+        LayoutInflater.from(context).inflate(R.layout.conversation_ext_layout, this, true);
     }
 
     public void updateExtViews(List<ConversationExt> exts) {

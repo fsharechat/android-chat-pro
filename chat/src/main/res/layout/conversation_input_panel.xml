@@ -111,6 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_custom_keyboard_size"
             android:background="@color/white"
+            android:minHeight="@dimen/conversation_ext_panel_min_height"
             android:visibility="gone">
 
             <!--其他功能-->

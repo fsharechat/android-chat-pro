@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--消息扩展面板：4 列栅格，顶部对齐，行高按内容撑开，避免被键盘高度撑成大间距-->
+<!--消息扩展面板：4 列栅格，高度撑满面板，剩余空间由三个等权重的 Space 均分，
+    使「顶部留白 / 行间距 / 底部留白」保持一致，避免所有空白堆在底部-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingLeft="8dp"
-    android:paddingTop="16dp"
+    android:paddingTop="6dp"
     android:paddingRight="8dp"
-    android:paddingBottom="8dp">
+    android:paddingBottom="6dp">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -26,9 +31,9 @@
 
             <ImageView
                 android:id="@+id/icon_0"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_0"
                 tools:src="@drawable/ic_ext_album" />
@@ -37,10 +42,10 @@
                 android:id="@+id/title_0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_0"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="照片" />
         </LinearLayout>
 
@@ -54,9 +59,9 @@
 
             <ImageView
                 android:id="@+id/icon_1"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_1"
                 tools:src="@drawable/ic_ext_camera" />
@@ -65,10 +70,10 @@
                 android:id="@+id/title_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_1"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="拍摄" />
         </LinearLayout>
 
@@ -82,9 +87,9 @@
 
             <ImageView
                 android:id="@+id/icon_2"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_2"
                 tools:src="@drawable/ic_ext_file" />
@@ -93,10 +98,10 @@
                 android:id="@+id/title_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_2"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="文件" />
         </LinearLayout>
 
@@ -110,9 +115,9 @@
 
             <ImageView
                 android:id="@+id/icon_3"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_3"
                 tools:src="@drawable/ic_ext_location" />
@@ -121,18 +126,22 @@
                 android:id="@+id/title_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_3"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="位置" />
         </LinearLayout>
     </LinearLayout>
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="14dp"
+        android:layout_weight="1" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -145,9 +154,9 @@
 
             <ImageView
                 android:id="@+id/icon_4"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_4"
                 tools:src="@drawable/ic_ext_audio_call" />
@@ -156,10 +165,10 @@
                 android:id="@+id/title_4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_4"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="语音通话" />
         </LinearLayout>
 
@@ -173,9 +182,9 @@
 
             <ImageView
                 android:id="@+id/icon_5"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_5"
                 tools:src="@drawable/ic_ext_video_call" />
@@ -184,10 +193,10 @@
                 android:id="@+id/title_5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_5"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="视频通话" />
         </LinearLayout>
 
@@ -201,9 +210,9 @@
 
             <ImageView
                 android:id="@+id/icon_6"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_6"
                 tools:src="@drawable/ic_ext_album" />
@@ -212,10 +221,10 @@
                 android:id="@+id/title_6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_6"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="" />
         </LinearLayout>
 
@@ -229,9 +238,9 @@
 
             <ImageView
                 android:id="@+id/icon_7"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:padding="14dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"
                 android:tag="icon_7"
                 tools:src="@drawable/ic_ext_album" />
@@ -240,12 +249,17 @@
                 android:id="@+id/title_7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="10dp"
                 android:tag="title_7"
                 android:textColor="@color/ext_panel_title_text"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 tools:text="" />
         </LinearLayout>
     </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

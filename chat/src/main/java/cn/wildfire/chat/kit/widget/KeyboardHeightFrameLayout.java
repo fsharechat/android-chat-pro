@@ -31,11 +31,26 @@ public class KeyboardHeightFrameLayout extends FrameLayout implements InputAware
 
     @Override
     public void show(int height, boolean immediate) {
-        // TODO
-        ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.height = height;
+        applyPanelHeight(height);
         getChildAt(0).setVisibility(VISIBLE);
         setVisibility(VISIBLE);
+    }
+
+    /**
+     * 面板高度与键盘高度保持一致（不小于自身 minHeight），面板隐藏时也可以提前设置，
+     * 这样再次显示时不会因为高度变化引起整个会话界面重新布局。
+     */
+    public void applyPanelHeight(int height) {
+        int target = Math.max(height, getMinimumHeight());
+        if (target <= 0) {
+            // 根布局还没测量出来时拿不到有效的键盘高度，保留布局里的默认高度
+            return;
+        }
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        if (layoutParams != null && layoutParams.height != target) {
+            layoutParams.height = target;
+            setLayoutParams(layoutParams);
+        }
     }
 
     @Override

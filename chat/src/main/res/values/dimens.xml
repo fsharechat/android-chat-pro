@@ -14,7 +14,10 @@
     <dimen name="option_item_margin_right">20dp</dimen>
 
     <dimen name="min_keyboard_size">50dp</dimen>
-    <dimen name="default_custom_keyboard_size">220dp</dimen>
+    <!--尚未测量到真实键盘高度时的兜底值，取常见输入法高度，减少首次打开面板后再切键盘的高度跳变-->
+    <dimen name="default_custom_keyboard_size">270dp</dimen>
+    <!--扩展面板最小高度，保证两行栅格始终完整可见-->
+    <dimen name="conversation_ext_panel_min_height">235dp</dimen>
     <dimen name="min_custom_keyboard_size">110dp</dimen>
     <dimen name="min_custom_keyboard_top_margin">170dp</dimen>
 </resources>
