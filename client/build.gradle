@@ -52,6 +52,7 @@ android {
 
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
     def lifecycle_version = '2.0.0-beta01'
     api project(':push-sdk')
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"

@@ -72,6 +72,8 @@ public interface ImMemoryStore {
     void setUserSetting(int scope, String key, String value);
     String getUserSetting(int scope, String key);
     Map<String, String> getUserSettings(int scope);
+    long getUserSettingVersion();
+    void setUserSettingVersion(long version);
     void saveRequestProtoMessageIds(Set<String> protoMessageIds);
     Set<String> getRequestProtoMessageIds();
     void stop();

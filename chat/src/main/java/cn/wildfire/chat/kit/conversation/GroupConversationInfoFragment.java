@@ -152,7 +152,8 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
         groupLinearLayout_0.setVisibility(View.VISIBLE);
         groupLinearLayout_1.setVisibility(View.VISIBLE);
         markGroupLinearLayout.setVisibility(View.VISIBLE);
-        markGroupSwitchButton.setOnCheckedChangeListener(this);
+        // 监听器与初始状态一起在方法末尾设置：此处 groupInfo 还没赋值（见下方 groupViewModel.getGroupInfo），
+        // 而且必须先 setChecked 再挂监听，否则回显初始状态会触发一次伪造的写入
         quitGroupButton.setVisibility(View.VISIBLE);
 
         groupViewModel = ViewModelProviders.of(this).get(GroupViewModel.class);
@@ -212,8 +213,11 @@ public class GroupConversationInfoFragment extends Fragment implements Conversat
         memberReclerView.setNestedScrollingEnabled(false);
         memberReclerView.setHasFixedSize(true);
         memberReclerView.setFocusable(false);
+        // 三个开关一律「先回显、再挂监听」，顺序反了会在每次进入页面时触发一次伪造的写入
+        markGroupSwitchButton.setChecked(groupViewModel.isFavGroup(groupInfo.target));
         stickTopSwitchButton.setChecked(conversationInfo.isTop);
         silentSwitchButton.setChecked(conversationInfo.isSilent);
+        markGroupSwitchButton.setOnCheckedChangeListener(this);
         stickTopSwitchButton.setOnCheckedChangeListener(this);
         silentSwitchButton.setOnCheckedChangeListener(this);
     }

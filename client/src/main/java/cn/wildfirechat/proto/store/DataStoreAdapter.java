@@ -298,6 +298,15 @@ public class DataStoreAdapter implements ImMemoryStore{
     }
 
     @Override
+    public long getUserSettingVersion() {
+        return 0;
+    }
+
+    @Override
+    public void setUserSettingVersion(long version) {
+    }
+
+    @Override
     public void saveRequestProtoMessageIds(Set<String> protoMessageIds) {
 
     }

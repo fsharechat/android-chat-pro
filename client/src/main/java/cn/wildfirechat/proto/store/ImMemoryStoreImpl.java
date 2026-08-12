@@ -22,6 +22,7 @@ import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoUnreadCount;
 import cn.wildfirechat.model.ProtoUserInfo;
 import cn.wildfirechat.proto.ProtoConstants;
+import cn.wildfirechat.proto.UserSettingKeys;
 
 import static cn.wildfirechat.remote.UserSettingScope.ConversationSilent;
 import static cn.wildfirechat.remote.UserSettingScope.ConversationTop;
@@ -338,11 +339,10 @@ public class ImMemoryStoreImpl extends DataStoreAdapter{
 
     private boolean conversationSetting(int scope,int conversationType,String target){
         boolean flag = false;
-        String top = getUserSetting(scope,conversationType + "-" + 0 + "-" + target);
-        if(!TextUtils.isEmpty(top)){
-            flag = top.equals("1");
+        String setting = getUserSetting(scope, UserSettingKeys.conversationKey(conversationType, 0, target));
+        if(!TextUtils.isEmpty(setting)){
+            flag = setting.equals("1");
         }
-        logger.i(scope+"-"+conversationType + "-" + 0 + "-" + target+" flag->"+flag);
         return flag;
     }
 

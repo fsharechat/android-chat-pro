@@ -3170,6 +3170,7 @@ public class ChatManager {
             e.printStackTrace();
         }
         ConversationInfo conversationInfo = getConversation(conversation);
+        conversationInfo.isSilent = silent;
         for (OnConversationInfoUpdateListener listener : conversationInfoUpdateListeners) {
             listener.onConversationSilentUpdate(conversationInfo, silent);
         }

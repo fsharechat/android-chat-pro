@@ -48,7 +48,12 @@ public enum SubSignal {
     MRP,
     MRR,
     MDR,
-    SAI
+    SAI,
+    // 用户设置同步：UG 拉取、UP 上报、UN 服务端通知。
+    // 只允许在末尾追加，ordinal 与服务端 push-common、ios SubSignal.swift 对齐
+    UG,
+    UP,
+    UN
     ;
 
 

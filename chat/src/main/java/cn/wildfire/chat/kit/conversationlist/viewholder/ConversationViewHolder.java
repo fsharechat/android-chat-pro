@@ -196,6 +196,16 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
         conversationListViewModel.setConversationTop(conversationInfo, false);
     }
 
+    @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_SILENT, title = "消息免打扰", icon = R.drawable.ic_menu_silent, priority = 3)
+    public void silentConversation(View itemView, ConversationInfo conversationInfo) {
+        conversationListViewModel.setConversationSilent(conversationInfo, true);
+    }
+
+    @ConversationContextMenuItem(tag = ConversationContextMenuItemTags.TAG_CANCEL_SILENT, title = "取消免打扰", icon = R.drawable.ic_menu_unsilent, priority = 4)
+    public void cancelSilentConversation(View itemView, ConversationInfo conversationInfo) {
+        conversationListViewModel.setConversationSilent(conversationInfo, false);
+    }
+
     /**
      * @param conversationInfo
      * @param itemTag
@@ -208,6 +218,14 @@ public abstract class ConversationViewHolder extends RecyclerView.ViewHolder {
 
         if (ConversationContextMenuItemTags.TAG_CANCEL_TOP.equals(itemTag)) {
             return !conversationInfo.isTop;
+        }
+
+        if (ConversationContextMenuItemTags.TAG_SILENT.equals(itemTag)) {
+            return conversationInfo.isSilent;
+        }
+
+        if (ConversationContextMenuItemTags.TAG_CANCEL_SILENT.equals(itemTag)) {
+            return !conversationInfo.isSilent;
         }
         return false;
     }

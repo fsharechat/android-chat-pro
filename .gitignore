@@ -146,3 +146,6 @@ gradle-app.setting
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 
+
+# superpowers SDD 临时工作区（ledger/briefs/reports/review 包，非项目文件）
+.superpowers/

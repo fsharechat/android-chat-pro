@@ -44,6 +44,7 @@ import cn.wildfirechat.proto.handler.ModifyMyInfoHandler;
 import cn.wildfirechat.proto.handler.NotifyFriendHandler;
 import cn.wildfirechat.proto.handler.NotifyFriendRequestHandler;
 import cn.wildfirechat.proto.handler.NotifyMessageHandler;
+import cn.wildfirechat.proto.handler.NotifyUserSettingHandler;
 import cn.wildfirechat.proto.handler.QiniuTokenHandler;
 import cn.wildfirechat.proto.handler.QuitGroupHandler;
 import cn.wildfirechat.proto.handler.ReadReportHandler;
@@ -53,6 +54,7 @@ import cn.wildfirechat.proto.handler.ReceiveMessageHandler;
 import cn.wildfirechat.proto.handler.RemoteMessageHandler;
 import cn.wildfirechat.proto.handler.SearchUserResultMessageHandler;
 import cn.wildfirechat.proto.handler.SendMessageHandler;
+import cn.wildfirechat.proto.handler.UserSettingPullHandler;
 import cn.wildfirechat.proto.store.DataStoreFactory;
 import cn.wildfirechat.proto.store.ImMemoryStore;
 import cn.wildfirechat.proto.util.MessageShardingUtil;
@@ -80,6 +82,8 @@ public class ProtoService extends AbstractProtoService {
         messageHandlers.add(new FriendRequestHandler(this));
         messageHandlers.add(new HandlerFriendRequestHandler(this));
         messageHandlers.add(new FriendPullHandler(this));
+        messageHandlers.add(new UserSettingPullHandler(this));
+        messageHandlers.add(new NotifyUserSettingHandler(this));
         messageHandlers.add(new SendMessageHandler(this));
         messageHandlers.add(new ReceiveMessageHandler(this));
         messageHandlers.add(new NotifyMessageHandler(this));
@@ -255,6 +259,29 @@ public class ProtoService extends AbstractProtoService {
 
     public boolean isMyFriend(String userId){
         return imMemoryStore.isMyFriend(userId);
+    }
+
+    /**
+     * 拉取用户设置增量。version 传本地已同步到的最大 updateDt，新设备传 0 即全量。
+     * 结果由 UserSettingPullHandler 落到本地 store，这里不等待。
+     */
+    public void pullUserSettings(long version){
+        log.i("pull user settings from version "+version);
+        WFCMessage.Version request = WFCMessage.Version.newBuilder().setVersion(version).build();
+        sendMessage(Signal.PUBLISH, SubSignal.UG, request.toByteArray(), null);
+    }
+
+    /**
+     * 上报一条用户设置。取消操作传 value "0"（tombstone），不要用删除表达。
+     */
+    public void updateUserSetting(int scope, String key, String value, JavaProtoLogic.IGeneralCallback callback){
+        log.i("update user setting scope "+scope+" key "+key+" value "+value);
+        WFCMessage.ModifyUserSettingReq request = WFCMessage.ModifyUserSettingReq.newBuilder()
+                .setScope(scope)
+                .setKey(key == null ? "" : key)
+                .setValue(value == null ? "" : value)
+                .build();
+        sendMessage(Signal.PUBLISH, SubSignal.UP, request.toByteArray(), callback);
     }
 
     public ProtoMessage[] getMessages(int conversationType, String target, int line, long fromIndex, boolean before, int count, String withUser){

@@ -26,11 +26,20 @@ public class ConnectAckMessageHandler extends AbstractMessageHandler {
         try {
             WFCMessage.ConnectAckPayload connectAckPayload = WFCMessage.ConnectAckPayload.parseFrom(byteBufferList.getAllByteArray());
             long lastMessageSeq = protoService.getImMemoryStore().getLastMessageSeq();
-            logger.i(TAG,"friendHead "+connectAckPayload.getFriendHead()+" msgHead "+connectAckPayload.getMsgHead()+" lastMessageSeq "+lastMessageSeq+" serverTime "+connectAckPayload.getServerTime());
+            long settingHead = connectAckPayload.getSettingHead();
+            long localSettingVersion = protoService.getImMemoryStore().getUserSettingVersion();
+            logger.i(TAG,"friendHead "+connectAckPayload.getFriendHead()+" msgHead "+connectAckPayload.getMsgHead()+" settingHead "+settingHead+" localSettingVersion "+localSettingVersion+" lastMessageSeq "+lastMessageSeq+" serverTime "+connectAckPayload.getServerTime());
             workExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     protoService.getMyFriendList(true);
+
+                    // 用户设置存在纯内存 store，进程重启后 localSettingVersion 归零，
+                    // 这里就是一次全量拉取；服务端没有任何设置时 settingHead 为 0，跳过
+                    if (settingHead > localSettingVersion) {
+                        protoService.pullUserSettings(localSettingVersion);
+                    }
+
                     //如果lastMessageSeq为0表示初始用户下拉消息，其他为连接获取未读消息
                     if(lastMessageSeq != 0){
                         protoService.pullMessage(lastMessageSeq,0);

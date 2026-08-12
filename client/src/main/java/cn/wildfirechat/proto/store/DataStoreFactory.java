@@ -452,6 +452,16 @@ public class DataStoreFactory implements ImMemoryStore{
     }
 
     @Override
+    public long getUserSettingVersion() {
+        return protoMessageDataStore.getUserSettingVersion();
+    }
+
+    @Override
+    public void setUserSettingVersion(long version) {
+        protoMessageDataStore.setUserSettingVersion(version);
+    }
+
+    @Override
     public void saveRequestProtoMessageIds(Set<String> protoMessageIds) {
         preferences.edit().putStringSet(REQUEST_PROMESSAGE_IDS,protoMessageIds).apply();
     }

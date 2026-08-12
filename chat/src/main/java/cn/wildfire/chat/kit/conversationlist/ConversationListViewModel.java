@@ -272,6 +272,10 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
         ChatManager.Instance().setConversationTop(conversationInfo.conversation, top);
     }
 
+    public void setConversationSilent(ConversationInfo conversationInfo, boolean silent) {
+        ChatManager.Instance().setConversationSilent(conversationInfo.conversation, silent);
+    }
+
     public void uploadReport(ConversationInfo conversationInfo){
         ChatManager.Instance().uploadReport(2,conversationInfo.conversation.target,conversationInfo.conversation.type.getValue(),null,null);
     }

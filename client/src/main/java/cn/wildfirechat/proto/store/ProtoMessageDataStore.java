@@ -16,8 +16,8 @@ import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.ProtoConversationInfo;
 import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoUnreadCount;
+import cn.wildfirechat.proto.UserSettingKeys;
 
-import static cn.wildfirechat.Constants.USER_SETTING_SPLIT_TAG;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Accept;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Accept_T;
 import static cn.wildfirechat.message.core.MessageContentType.ContentType_Call_Taken;
@@ -35,6 +35,9 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     private Map<String,Integer> unReadMentionCountMap = new ConcurrentHashMap<>();
     private Map<String,Integer> unReadMentionAllCountMap = new ConcurrentHashMap<>();
     private Map<Integer,Map<String,String>> userSettingMap = new ConcurrentHashMap<>();
+    // 与 userSettingMap 同为纯内存，必须一起生一起死：
+    // 若把 version 持久化而设置没持久化，重启后客户端会误判「无需拉取」而永久丢失设置
+    private volatile long userSettingVersion = 0;
     public static final String COLUMN_ID            = "id";
     public static final String COLUMN_MESSAGE_TARGET = "message_target";
     public static final String COLUMN_MESSAGE_DATA    = "message_data";
@@ -70,6 +73,15 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
 
     public ProtoMessageDataStore(Context context){
         super(context);
+    }
+
+    // 登出时清空内存态的用户设置及其 version，避免下一次登录的用户读到上一个账号残留的设置
+    // （DataStoreFactory 是进程级单例，:marsservice 进程登出后不会被杀，userSettingMap/userSettingVersion 会跨账号存活）。
+    @Override
+    public void stop() {
+        userSettingMap.clear();
+        userSettingVersion = 0;
+        super.stop();
     }
 
     public List<Map<String, Object>> queryMessageDatabase(String query, String orderBy) {
@@ -510,7 +522,7 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
 
     private boolean conversationSetting(int scope,int conversationType,String target){
         boolean flag = false;
-        String top = getUserSetting(scope,conversationType + "-" + 0 + "-" + target);
+        String top = getUserSetting(scope,UserSettingKeys.conversationKey(conversationType, 0, target));
         if(!TextUtils.isEmpty(top)){
             flag = top.equals("1");
         }
@@ -591,25 +603,43 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
 
     @Override
     public void setUserSetting(int scope, String key, String value) {
-        Map<String,String> scopeMap = userSettingMap.get(scope);
-        if(scopeMap == null){
-            scopeMap = new HashMap<>();
-        }
+        Map<String,String> scopeMap = userSettingMap.computeIfAbsent(scope, k -> new ConcurrentHashMap<>());
         scopeMap.put(key,value);
-        userSettingMap.put(scope,scopeMap);
-        if(!TextUtils.isEmpty(key)){
-            String[] keys = key.split(USER_SETTING_SPLIT_TAG);
+
+        // 只有置顶/免打扰的 key 是会话三元组，才需要回写会话对象。
+        // scope 6 的 key 是群 id、scope 2 的 key 是空串，旧代码在这里 parseInt 会抛 NumberFormatException
+        if(UserSettingKeys.isConversationScope(scope)){
+            String[] keys = UserSettingKeys.parseConversationKey(key);
+            if(keys == null){
+                logger.e("illegal conversation setting key scope="+scope+" key="+key);
+                return;
+            }
             int conversationType = Integer.parseInt(keys[0]);
             int line = Integer.parseInt(keys[1]);
             String target = keys[2];
-            ProtoConversationInfo updateProtoConversation = getConversation(conversationType,target,line);
-            if(scope == ConversationTop){
-                updateProtoConversation.setTop(value.equals("1") ? true : false);
-            } else if(scope == ConversationSilent){
-                updateProtoConversation.setSilent(value.equals("1") ? true : false);
+            // 只回写已存在的会话，不能用 getConversation：它在查不到行时会插入一条空会话
+            // （lastMessage=null，timestamp=now），reinstall 后 UG 先于消息拉取执行，会给每条
+            // scope-3/1 设置（含服务端永久保留的 "0" tombstone）都插出一条排在最前面的空白会话。
+            // 跳过不会丢设置：会话稍后由 newProtoConversation 创建时会从 userSettingMap 读到本次写入的值。
+            ProtoConversationInfo updateProtoConversation = queryExistingConversation(conversationType, target);
+            if(updateProtoConversation != null){
+                if(scope == ConversationTop){
+                    updateProtoConversation.setTop("1".equals(value));
+                } else if(scope == ConversationSilent){
+                    updateProtoConversation.setSilent("1".equals(value));
+                }
+                updateConversation(conversationType,target,line,updateProtoConversation);
             }
-            updateConversation(conversationType,target,0,updateProtoConversation);
         }
+    }
+
+    // 与 getConversation 用同一条查询语句判断会话是否已存在，但查不到时不插入新行
+    private ProtoConversationInfo queryExistingConversation(int conversationType, String target){
+        List<Map<String,Object>> conversation = queryConversation(COLUMN_CONVERSATION_TARGET +"="+"'"+target+"'"+" and "+COLUMN_CONVERSATION_TYPE+"="+conversationType,null);
+        if(conversation != null && conversation.size() == 1){
+            return (ProtoConversationInfo) conversation.get(0).get(COLUMN_CONVERSATION_INFO);
+        }
+        return null;
     }
 
     @Override
@@ -623,6 +653,17 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
 
     @Override
     public Map<String, String> getUserSettings(int scope) {
-        return userSettingMap.get(scope);
+        Map<String,String> scopeMap = userSettingMap.get(scope);
+        return scopeMap == null ? null : new HashMap<>(scopeMap);
+    }
+
+    @Override
+    public long getUserSettingVersion() {
+        return userSettingVersion;
+    }
+
+    @Override
+    public void setUserSettingVersion(long version) {
+        this.userSettingVersion = version;
     }
 }

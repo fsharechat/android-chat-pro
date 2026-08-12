@@ -284,6 +284,14 @@ public class GroupViewModel extends ViewModel implements AppScopeViewModel, OnGr
         return result;
     }
 
+    /**
+     * 该群是否已保存到通讯录。取消保存写的是 "0"（tombstone）而非删除记录，
+     * 所以只有等于 "1" 才算已保存。
+     */
+    public boolean isFavGroup(String groupId) {
+        return "1".equals(ChatManager.Instance().getUserSetting(UserSettingScope.FavoriteGroup, groupId));
+    }
+
     public MutableLiveData<Boolean> quitGroup(String groupId, List<Integer> lines) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
         ChatManager.Instance().quitGroup(groupId, lines, null, new GeneralCallback() {

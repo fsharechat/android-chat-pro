@@ -24,6 +24,7 @@ import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoMessageContent;
 import cn.wildfirechat.model.ProtoUnreadCount;
 import cn.wildfirechat.model.ProtoUserInfo;
+import cn.wildfirechat.remote.UserSettingScope;
 
 public class JavaProtoLogic {
 
@@ -490,14 +491,18 @@ public class JavaProtoLogic {
     }
 
     public static void setConversationTop(int conversationType, String target, int line, boolean top){
-        logger.i("setConversationTop "+conversationType+" target "+target+" top "+false);
+        setUserSetting(UserSettingScope.ConversationTop,
+                UserSettingKeys.conversationKey(conversationType, line, target), top ? "1" : "0", null);
     }
 
     public static void setConversationDraft(int conversationType, String target, int line, String draft){
         protoService.getImMemoryStore().setConversationDraft(conversationType,target,line,draft);
     }
 
-    public static void setConversationSilent(int conversationType, String target, int line, boolean silent){}
+    public static void setConversationSilent(int conversationType, String target, int line, boolean silent){
+        setUserSetting(UserSettingScope.ConversationSilent,
+                UserSettingKeys.conversationKey(conversationType, line, target), silent ? "1" : "0", null);
+    }
 
     public static void searchUser(String keyword, JavaProtoLogic.ISearchUserCallback callback){
         protoService.searchUser(keyword,callback);
@@ -697,7 +702,9 @@ public class JavaProtoLogic {
     }
     public static void setUserSetting(int scope, String key, String value, JavaProtoLogic.IGeneralCallback callback){
         logger.i("setUserSetting scope "+scope+" key "+key+" value "+value);
+        // 先写本地，UI 立即生效；再上报服务端，失败不回滚，下次登录以服务端为准
         protoService.getImMemoryStore().setUserSetting(scope,key,value);
+        protoService.updateUserSetting(scope, key, value, callback);
     }
     public static void setDeviceToken(String appName, String token, int pushType){}
     public static void setDNSResult(String[] serverIPs){}

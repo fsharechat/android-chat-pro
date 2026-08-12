@@ -345,60 +345,6 @@ public class ConversationListAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     private int targetPosition(ConversationInfo conversationInfo, int currentPosition) {
-        if (conversationInfos == null) {
-            return -1;
-        }
-        if (conversationInfos.isEmpty()) {
-            return 0;
-        }
-        // isTop
-        ConversationInfo info;
-        int position = 0;
-        if (conversationInfo.isTop) {
-            for (int i = 0; i < conversationInfos.size(); i++) {
-                info = conversationInfos.get(i);
-                if (info.isTop) {
-                    if (conversationInfo.timestamp >= info.timestamp) {
-                        position = i;
-                        break;
-                    }
-                } else {
-                    position = i;
-                    break;
-                }
-            }
-        } else {
-            for (int i = 0; i < conversationInfos.size(); i++) {
-                info = conversationInfos.get(i);
-                if (info.isTop) {
-                    // do nothing, just continue
-                } else {
-                    if (conversationInfo.timestamp >= info.timestamp) {
-                        position = i;
-                        break;
-                    }
-                }
-            }
-        }
-        if (currentPosition >= 0 && position > currentPosition) {
-            position = position - 1;
-        }
-
-        //计算新加的会话位置
-        if(currentPosition == -1){
-            position = conversationInfos.size();
-            for (int i = 0; i < conversationInfos.size(); i++) {
-                info = conversationInfos.get(i);
-                if (info.isTop) {
-                    // do nothing, just continue
-                } else {
-                    if (conversationInfo.timestamp >= info.timestamp) {
-                        position = i;
-                        break;
-                    }
-                }
-            }
-        }
-        return position;
+        return ConversationOrdering.targetPosition(conversationInfos, conversationInfo, currentPosition);
     }
 }
