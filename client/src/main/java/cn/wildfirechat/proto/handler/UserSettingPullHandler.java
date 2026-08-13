@@ -8,8 +8,11 @@ import com.comsince.github.push.Signal;
 import com.comsince.github.push.SubSignal;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.proto.ProtoService;
+import cn.wildfirechat.proto.UserSettingApplier;
 import cn.wildfirechat.proto.WFCMessage;
+import cn.wildfirechat.proto.store.ImMemoryStore;
 
 /**
  * UG 的应答：服务端只返回 updateDt 大于请求 version 的条目。
@@ -41,14 +44,31 @@ public class UserSettingPullHandler extends AbstractMessageHandler {
                     WFCMessage.GetUserSettingResult.parseFrom(byteBufferList.getAllByteArray());
             log.i("pull user setting count " + result.getEntryCount());
 
-            long maxUpdateDt = protoService.getImMemoryStore().getUserSettingVersion();
-            for (WFCMessage.UserSettingEntry entry : result.getEntryList()) {
-                protoService.getImMemoryStore().setUserSetting(entry.getScope(), entry.getKey(), entry.getValue());
-                if (entry.getUpdateDt() > maxUpdateDt) {
-                    maxUpdateDt = entry.getUpdateDt();
+            final ImMemoryStore store = protoService.getImMemoryStore();
+            UserSettingApplier.apply(new UserSettingApplier.SettingSink() {
+                @Override
+                public long getUserSettingVersion() {
+                    return store.getUserSettingVersion();
                 }
-            }
-            protoService.getImMemoryStore().setUserSettingVersion(maxUpdateDt);
+
+                @Override
+                public void setUserSetting(int scope, String key, String value) {
+                    store.setUserSetting(scope, key, value);
+                }
+
+                @Override
+                public void setUserSettingVersion(long version) {
+                    store.setUserSettingVersion(version);
+                }
+            }, result.getEntryList(), new UserSettingApplier.Notifier() {
+                @Override
+                public void onSettingUpdated() {
+                    // 与 NotifyFriendHandler 落库后调 onFriendRequestUpdated() 对应：
+                    // 不发这一下，其他设备改的置顶/免打扰/保存的群组只会静静躺在本地库里，
+                    // 会话列表要等下次重进页面才更新。
+                    JavaProtoLogic.onSettingUpdated();
+                }
+            });
         } catch (InvalidProtocolBufferException e) {
             log.e("UserSettingPullHandler parse error " + e.getMessage());
         }
