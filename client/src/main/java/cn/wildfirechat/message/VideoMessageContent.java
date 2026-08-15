@@ -1,13 +1,13 @@
 package cn.wildfirechat.message;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.os.Parcel;
 import android.provider.MediaStore;
 
 import java.io.ByteArrayOutputStream;
 
+import cn.wildfirechat.proto.util.BitmapUtils;
 import cn.wildfirechat.message.core.ContentTag;
 import cn.wildfirechat.message.core.MessageContentType;
 import cn.wildfirechat.message.core.MessagePayload;
@@ -58,7 +58,7 @@ public class VideoMessageContent extends MediaMessageContent {
     public void decode(MessagePayload payload) {
         super.decode(payload);
         if (payload.binaryContent != null) {
-            thumbnail = BitmapFactory.decodeByteArray(payload.binaryContent, 0, payload.binaryContent.length);
+            thumbnail = BitmapUtils.decodeBoundedBitmap(payload.binaryContent, BitmapUtils.MAX_THUMBNAIL_EDGE);
         }
     }
 
@@ -75,7 +75,8 @@ public class VideoMessageContent extends MediaMessageContent {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(this.thumbnail, flags);
+        // 缩略图以压缩后的字节传递，直接写 Bitmap 会因为像素数据超出 binder 缓冲而失败
+        dest.writeByteArray(BitmapUtils.compressToJpeg(this.thumbnail, 75));
         dest.writeString(this.localPath);
         dest.writeString(this.remoteUrl);
         dest.writeInt(this.mediaType == null ? -1 : this.mediaType.ordinal());
@@ -84,7 +85,7 @@ public class VideoMessageContent extends MediaMessageContent {
     }
 
     protected VideoMessageContent(Parcel in) {
-        this.thumbnail = in.readParcelable(Bitmap.class.getClassLoader());
+        this.thumbnail = BitmapUtils.decodeBoundedBitmap(in.createByteArray(), BitmapUtils.MAX_THUMBNAIL_EDGE);
         this.localPath = in.readString();
         this.remoteUrl = in.readString();
         int tmpMediaType = in.readInt();
