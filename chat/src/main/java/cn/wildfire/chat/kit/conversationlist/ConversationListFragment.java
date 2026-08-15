@@ -58,9 +58,13 @@ public class ConversationListFragment extends Fragment {
             // just handle what we care about
             if (types.contains(conversationInfo.conversation.type) && lines.contains(conversationInfo.conversation.line)) {
                 Log.d("ConversationList", "onChanged: "+conversationInfo.conversation.type);
-                adapter.submitConversationInfo(conversationInfo);
-                // scroll or not?
-                //recyclerView.scrollToPosition(0);
+                // 必须在 notify 之前取，此时 RecyclerView 还是变更前的布局
+                boolean wasAtTop = isListAtTop();
+                boolean movedToTop = adapter.submitConversationInfo(conversationInfo);
+                if (movedToTop && wasAtTop) {
+                    // 否则新的第一条会被排到视口上方，屏幕上第一个仍是原来那条
+                    recyclerView.scrollToPosition(0);
+                }
             }
         }
     };
@@ -74,6 +78,13 @@ public class ConversationListFragment extends Fragment {
             if (types.contains(conversation.type) && lines.contains(conversation.line)) {
                 adapter.removeConversation(conversation);
             }
+        }
+    };
+
+    // 置顶是用户主动操作，无论当前滚到哪里都把列表拉回顶部，让置顶结果可见
+    private Observer<ConversationInfo> conversationTopObserver = conversationInfo -> {
+        if (recyclerView != null) {
+            recyclerView.scrollToPosition(0);
         }
     };
 
@@ -122,6 +133,7 @@ public class ConversationListFragment extends Fragment {
 
         conversationListViewModel.conversationInfoLiveData().observeForever(conversationInfoObserver);
         conversationListViewModel.conversationRemovedLiveData().observeForever(conversationRemovedObserver);
+        conversationListViewModel.conversationTopLiveData().observeForever(conversationTopObserver);
         conversationListViewModel.settingUpdateLiveData().observeForever(settingUpdateObserver);
 
         imServiceStatusViewModel = WfcUIKit.getAppScopeViewModel(IMServiceStatusViewModel.class);
@@ -157,6 +169,27 @@ public class ConversationListFragment extends Fragment {
 //        });
     }
 
+    /**
+     * 列表当前是否停在最顶部（第一条完整贴着顶边）。只有这种情况下才需要在
+     * 有会话插到头部时把列表滚回去；用户已经往下翻了就不该打断。
+     */
+    private boolean isListAtTop() {
+        if (recyclerView == null || !(recyclerView.getLayoutManager() instanceof LinearLayoutManager)) {
+            return false;
+        }
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        int firstVisible = layoutManager.findFirstVisibleItemPosition();
+        if (firstVisible == RecyclerView.NO_POSITION) {
+            // 还没布局或者列表为空，等价于在顶部
+            return true;
+        }
+        if (firstVisible != 0) {
+            return false;
+        }
+        View firstChild = layoutManager.findViewByPosition(0);
+        return firstChild != null && firstChild.getTop() >= recyclerView.getPaddingTop();
+    }
+
     public void reloadConversations() {
         if(conversationListViewModel != null){
             conversationListViewModel.getConversationListAsync(types, lines)
@@ -172,6 +205,7 @@ public class ConversationListFragment extends Fragment {
         super.onDestroyView();
         conversationListViewModel.conversationInfoLiveData().removeObserver(conversationInfoObserver);
         conversationListViewModel.conversationRemovedLiveData().removeObserver(conversationRemovedObserver);
+        conversationListViewModel.conversationTopLiveData().removeObserver(conversationTopObserver);
         conversationListViewModel.settingUpdateLiveData().removeObserver(settingUpdateObserver);
         imServiceStatusViewModel.imServiceStatusLiveData().removeObserver(imStatusLiveDataObserver);
         userViewModel.userInfoLiveData().removeObserver(userInfoLiveDataObserver);

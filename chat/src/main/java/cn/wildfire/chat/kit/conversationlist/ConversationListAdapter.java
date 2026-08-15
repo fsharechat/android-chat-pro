@@ -100,9 +100,14 @@ public class ConversationListAdapter extends RecyclerView.Adapter<RecyclerView.V
         this.conversationInfos = conversationInfos;
     }
 
-    public void submitConversationInfo(ConversationInfo conversationInfo) {
+    /**
+     * @return true 表示该会话被移动或插入到了列表头部。
+     * LinearLayoutManager 在数据变更后会保持当前第一个可见 child 的屏幕位置不变，
+     * 插到 0 的那一条会被顶到视口上方看不见，所以调用方要据此把列表滚回顶部。
+     */
+    public boolean submitConversationInfo(ConversationInfo conversationInfo) {
         if (conversationInfos == null) {
-            return;
+            return false;
         }
 
         int currentPosition, targetPosition;
@@ -113,15 +118,19 @@ public class ConversationListAdapter extends RecyclerView.Adapter<RecyclerView.V
             if (currentPosition == targetPosition) {
                 conversationInfos.set(targetPosition, conversationInfo);
                 notifyItemChanged(headerCount() + targetPosition);
+                // 位置没变，不需要滚动
+                return false;
             } else {
                 conversationInfos.remove(currentPosition);
                 conversationInfos.add(targetPosition, conversationInfo);
                 notifyItemRemoved(headerCount() + currentPosition);
                 notifyItemInserted(headerCount() + targetPosition);
+                return targetPosition == 0;
             }
         } else {
             conversationInfos.add(targetPosition, conversationInfo);
             notifyItemInserted(headerCount() + targetPosition);
+            return targetPosition == 0;
         }
     }
 

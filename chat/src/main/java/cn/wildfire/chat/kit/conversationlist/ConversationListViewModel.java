@@ -46,6 +46,7 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
         OnConversationInfoUpdateListener, OnConnectionStatusChangeListener, OnClearMessageListener {
     private MutableLiveData<ConversationInfo> conversationInfoLiveData;
     private MutableLiveData<Conversation> conversationRemovedLiveData;
+    private MutableLiveData<ConversationInfo> conversationTopLiveData;
     private MutableLiveData<UnreadCount> unreadCountLiveData;
     private MutableLiveData<Object> settingUpdateLiveData;
     private MutableLiveData<Integer> connectionStatusLiveData = new MutableLiveData<>();
@@ -107,6 +108,17 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
             conversationRemovedLiveData = new MutableLiveData<>();
         }
         return conversationRemovedLiveData;
+    }
+
+    /**
+     * 会话被置顶（top == true）时触发，携带被置顶的会话。
+     * 置顶是用户主动操作，界面必须让结果可见，所以列表要无条件滚回顶部。
+     */
+    public MutableLiveData<ConversationInfo> conversationTopLiveData() {
+        if (conversationTopLiveData == null) {
+            conversationTopLiveData = new MutableLiveData<>();
+        }
+        return conversationTopLiveData;
     }
 
     public MutableLiveData<Object> settingUpdateLiveData() {
@@ -324,6 +336,10 @@ public class ConversationListViewModel extends ViewModel implements OnReceiveMes
     @Override
     public void onConversationTopUpdate(ConversationInfo conversationInfo, boolean top) {
         postConversationInfo(conversationInfo);
+        // 取消置顶是往下沉，不需要滚动；置顶要保证用户能看到结果
+        if (top && conversationTopLiveData != null) {
+            UIUtils.postTaskSafely(() -> conversationTopLiveData.setValue(conversationInfo));
+        }
     }
 
     @Override
