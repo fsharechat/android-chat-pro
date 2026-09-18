@@ -7,17 +7,24 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import android.text.Spanned;
 import io.noties.markwon.Markwon;
+import io.noties.markwon.SoftBreakAddsNewLinePlugin;
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
+import io.noties.markwon.ext.tables.TableRowSpan;
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -43,19 +50,33 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
     @Bind(R.id.contentTextView)
     TextView contentTextView;
 
+    @Bind(R.id.expandToggleTextView)
+    TextView expandToggleTextView;
+
     @Bind(R.id.progressBar)
     ProgressBar progressBar;
 
+    // 与 web 端一致：超过阈值的消息默认折叠为纯文本摘要，点「展开全文」才渲染完整 Markdown
+    private static final int COLLAPSE_THRESHOLD = 600;
+    private static final int PREVIEW_LENGTH = 280;
+    // 展开状态按消息记住，滚出屏幕、切换会话后回来仍保持展开
+    private static final Set<Long> expandedMessageIds = new HashSet<>();
+
     private ValueAnimator blinkAnimator;
     private final Markwon markwon;
+    private final int textMaxWidth;
 
     public TextMessageContentViewHolder(FragmentActivity activity, RecyclerView.Adapter adapter, View itemView) {
         super(activity, adapter, itemView);
         // 布局里 maxWidth=340dp 在窄屏上会超过可用宽度，导致长消息越过对面头像；
         // 两侧各预留 51dp（行内边距 5 + 头像 40 + 头像左右边距 3+3），保证气泡止于对面头像位置
+        // 气泡左右 padding 各 16dp 在外层容器上，TextView 自身的最大宽度要扣掉这 32dp
         int reservedWidth = UIUtils.dip2Px(102);
-        contentTextView.setMaxWidth(Math.min(UIUtils.dip2Px(340), UIUtils.getDisplayWidth() - reservedWidth));
+        textMaxWidth = Math.min(UIUtils.dip2Px(340), UIUtils.getDisplayWidth() - reservedWidth) - UIUtils.dip2Px(32);
+        contentTextView.setMaxWidth(textMaxWidth);
         markwon = Markwon.builder(activity)
+                // 聊天里粘贴的多行文本只有单个 \n，CommonMark 会当软换行渲染成空格，这里保留为换行
+                .usePlugin(SoftBreakAddsNewLinePlugin.create())
                 .usePlugin(TablePlugin.create(activity))
                 .usePlugin(StrikethroughPlugin.create())
                 .build();
@@ -69,9 +90,30 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
         }
         String text = ((TextMessageContent) message.message.content).getContent();
         boolean isReceived = message.message.direction == MessageDirection.Receive;
+        if (message.isStreaming) {
+            // 流式消息保持展开，结束后也不会突然收起
+            expandedMessageIds.add(message.message.messageId);
+        }
+        boolean collapsible = !message.isStreaming && text.length() > COLLAPSE_THRESHOLD;
+        boolean expanded = expandedMessageIds.contains(message.message.messageId);
+        if (collapsible) {
+            expandToggleTextView.setVisibility(View.VISIBLE);
+            // 发送气泡是主题色底，按钮加下划线以区别于正文，与 web 端一致
+            int flags = expandToggleTextView.getPaintFlags();
+            expandToggleTextView.setPaintFlags(isReceived ? flags & ~Paint.UNDERLINE_TEXT_FLAG : flags | Paint.UNDERLINE_TEXT_FLAG);
+            expandToggleTextView.setText(expanded ? "收起" : "展开全文");
+        } else {
+            expandToggleTextView.setVisibility(View.GONE);
+        }
 
-        if (message.isStreaming && text.isEmpty()) {
+        if (collapsible && !expanded) {
+            // 折叠态只显示纯文本摘要，不解析 Markdown，避免大表格拖慢列表
+            contentTextView.setMinWidth(0);
+            int end = Character.isHighSurrogate(text.charAt(PREVIEW_LENGTH - 1)) ? PREVIEW_LENGTH - 1 : PREVIEW_LENGTH;
+            contentTextView.setText(text.substring(0, end) + "…");
+        } else if (message.isStreaming && text.isEmpty()) {
             // 占位符：文字未到达，光标闪烁提示 AI 正在思考
+            contentTextView.setMinWidth(0);
             contentTextView.setText("▌");
             final int baseColor = contentTextView.getCurrentTextColor();
             final int r = Color.red(baseColor), g = Color.green(baseColor), b = Color.blue(baseColor);
@@ -113,6 +155,7 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
      */
     private void setMarkdownCached(UiMessage message, String text, boolean useCache) {
         if (useCache && message.cachedMarkdown != null && text.equals(message.cachedMarkdownSource)) {
+            applyTableWidth(message.cachedMarkdown);
             markwon.setParsedMarkdown(contentTextView, message.cachedMarkdown);
         } else {
             Spanned spanned = markwon.toMarkdown(text);
@@ -120,7 +163,57 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
                 message.cachedMarkdown = spanned;
                 message.cachedMarkdownSource = text;
             }
+            applyTableWidth(spanned);
             markwon.setParsedMarkdown(contentTextView, spanned);
+        }
+    }
+
+    /**
+     * TableRowSpan 测量时返回的宽度取自上一次绘制时 TextView 的宽度，首次测量为 0；
+     * 气泡是 wrap_content，于是被量成只剩 padding 的窄条，表格画在 0 宽里什么都看不到。
+     * 含表格时把气泡撑到最大宽度，给表格一个确定的绘制宽度；ViewHolder 复用，普通文本要复位。
+     */
+    private void applyTableWidth(Spanned spanned) {
+        boolean hasTable = spanned.getSpans(0, spanned.length(), TableRowSpan.class).length > 0;
+        contentTextView.setMinWidth(hasTable ? textMaxWidth : 0);
+    }
+
+    /**
+     * 流式占位消息被真实消息替换时 messageId 会变，把展开状态带过去，AI 回复结束后才不会突然折叠
+     */
+    public static void transferExpandState(long fromMessageId, long toMessageId) {
+        if (expandedMessageIds.remove(fromMessageId)) {
+            expandedMessageIds.add(toMessageId);
+        }
+    }
+
+    @OnClick(R.id.expandToggleTextView)
+    public void onToggleExpand(View view) {
+        long messageId = message.message.messageId;
+        boolean collapsing = expandedMessageIds.contains(messageId);
+        if (collapsing) {
+            expandedMessageIds.remove(messageId);
+        } else {
+            expandedMessageIds.add(messageId);
+        }
+        onBind(message);
+        if (collapsing) {
+            keepBubbleVisibleAfterCollapse();
+        }
+    }
+
+    /**
+     * 「收起」按钮在长消息底部，点击时消息顶部通常已滚出屏幕；收起后气泡变矮，
+     * 若不处理，整条消息会被顶到视口外。收起后把这条消息的顶部对齐到列表顶部。
+     */
+    private void keepBubbleVisibleAfterCollapse() {
+        if (!(itemView.getParent() instanceof RecyclerView) || itemView.getTop() >= 0) {
+            return;
+        }
+        RecyclerView.LayoutManager layoutManager = ((RecyclerView) itemView.getParent()).getLayoutManager();
+        int position = getAdapterPosition();
+        if (layoutManager instanceof LinearLayoutManager && position != RecyclerView.NO_POSITION) {
+            ((LinearLayoutManager) layoutManager).scrollToPositionWithOffset(position, 0);
         }
     }
 

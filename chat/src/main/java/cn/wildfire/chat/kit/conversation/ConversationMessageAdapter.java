@@ -31,6 +31,7 @@ import cn.wildfire.chat.kit.conversation.message.viewholder.LoadingViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageContentViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageViewHolderManager;
 import cn.wildfire.chat.kit.conversation.message.viewholder.SimpleNotificationMessageContentViewHolder;
+import cn.wildfire.chat.kit.conversation.message.viewholder.TextMessageContentViewHolder;
 import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
 import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
@@ -134,6 +135,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
     public boolean replaceMessage(UiMessage oldMsg, UiMessage newMsg) {
         int pos = messages.indexOf(oldMsg);
         if (pos >= 0) {
+            TextMessageContentViewHolder.transferExpandState(oldMsg.message.messageId, newMsg.message.messageId);
             messages.set(pos, newMsg);
             notifyItemChanged(pos);
             return true;

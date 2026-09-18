@@ -1,18 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/contentTextView"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/contentBubble"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:autoLink="phone|email|map|web"
     android:background="@drawable/shape_bubble_receive"
-    android:gravity="left|center_vertical"
-    android:maxWidth="340dp"
+    android:gravity="center_vertical"
     android:minHeight="40dp"
-    android:paddingBottom="8dp"
+    android:orientation="vertical"
     android:paddingLeft="16dp"
-    android:paddingRight="16dp"
     android:paddingTop="8dp"
-    android:text="嗯嗯嗯嗯嗯嗯嗯"
-    android:textColor="@color/message_text_receive_dark"
-    android:textColorLink="@color/message_text_link_receive_dark"
-    android:textSize="15sp" />
+    android:paddingRight="16dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/contentTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autoLink="phone|email|map|web"
+        android:gravity="left|center_vertical"
+        android:linksClickable="true"
+        android:text="嗯嗯嗯嗯嗯嗯"
+        android:textColor="@color/message_text_receive_dark"
+        android:textColorLink="@color/message_text_link_receive_dark"
+        android:textSize="15sp" />
+
+    <!-- 超长消息折叠开关：展开全文 / 收起 -->
+    <TextView
+        android:id="@+id/expandToggleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:text="展开全文"
+        android:textColor="@color/message_text_link_receive_dark"
+        android:textSize="13sp"
+        android:visibility="gone" />
+</LinearLayout>
