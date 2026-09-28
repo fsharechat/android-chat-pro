@@ -15,14 +15,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # AdoptOpenJDK 已停止维护，改用 Temurin（Adoptium）发行版
     - name: Set up JDK 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v4
       with:
         java-version: '11'
-        distribution: 'adopt'
+        distribution: 'temurin'
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     # 预装项目所需的旧版 SDK 组件，避免 AGP 3.4 自带的旧 sdklib
     # 去解析新版 Google 仓库元数据时报错（'35x' is not a valid integer）
@@ -74,23 +75,17 @@ jobs:
         script: |
           cp -f /data/temp-release/chat-release.apk /data/minio/miniodata/minio-bucket-file-name/chat-release.apk
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+    # actions/create-release 与 upload-release-asset 已归档不再维护，
+    # 用 action-gh-release 一步完成建 Release 与上传 APK；附件名取自文件名，先复制一份
+    - name: Prepare release asset
+      run: cp chat/build/outputs/apk/release/chat-release.apk "fsharechat-release-${{ github.ref_name }}.apk"
+
+    - name: Create Release and upload APK
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref }}  # 使用提取的版本号作为标签名称
-        release_name: Release ${{ github.ref }}  # 使用提取的版本号作为发布名称
+        token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
-
-    - name: Upload APK artifact
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: chat/build/outputs/apk/release/chat-release.apk
-        asset_name: fsharechat-release-${{ github.ref_name }}.apk
-        asset_content_type: application/vnd.android.package-archive
+        files: fsharechat-release-${{ github.ref_name }}.apk
