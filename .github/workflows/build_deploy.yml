@@ -14,6 +14,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # 自带的 GITHUB_TOKEN 默认只读，创建 Release 需要 contents 写权限
+    permissions:
+      contents: write
+
     steps:
     # AdoptOpenJDK 已停止维护，改用 Temurin（Adoptium）发行版
     - name: Set up JDK 11
@@ -83,7 +87,8 @@ jobs:
     - name: Create Release and upload APK
       uses: softprops/action-gh-release@v2
       with:
-        token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+        # 用 Actions 自带的 token，不依赖会过期的个人 token（PERSONAL_GITHUB_TOKEN 已失效）
+        token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
         draft: false
