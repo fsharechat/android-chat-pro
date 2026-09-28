@@ -3,13 +3,20 @@
 buildscript {
 
     repositories {
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
-//        google()
-//        jcenter()
-        mavenCentral()
+        // CI 跑在海外，阿里云镜像会返回 502，Gradle 遇到 5xx 直接失败而不会换下一个仓库；
+        // GitHub Actions 会设置 CI=true，此时走官方仓库，本地仍用阿里云镜像
+        if (System.getenv('CI')) {
+            google()
+            mavenCentral()
+            gradlePluginPortal()
+            jcenter()
+        } else {
+            maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+            maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
+            maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
+            maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+            mavenCentral()
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.0'
@@ -22,18 +29,29 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
-//        google()
-        jcenter()
-        maven {
-            url "http://developer.huawei.com/repo/"
-        }
+        if (System.getenv('CI')) {
+            // 同上：CI 优先走官方仓库；bintray 已停服，CI 上不再访问。
+            // 部分老库（com.lqr.*、zxing-lite、google-webrtc 等）只发布在已停服的 JCenter，
+            // 官方仓库里找不到，只能放在最后由阿里云 jcenter 镜像兜底
+            google()
+            mavenCentral()
+            jcenter()
+            maven { url 'https://developer.huawei.com/repo/' }
+            maven { url 'https://jitpack.io' }
+            maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        } else {
+            maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+            maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
+            maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
+            maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+            jcenter()
+            maven {
+                url "http://developer.huawei.com/repo/"
+            }
 
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://dl.bintray.com/jenly/maven' }
+            maven { url 'https://jitpack.io' }
+            maven { url 'https://dl.bintray.com/jenly/maven' }
+        }
     }
     configurations {
         all {
