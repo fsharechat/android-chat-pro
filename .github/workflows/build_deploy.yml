@@ -32,19 +32,27 @@ jobs:
     # 预装项目所需的旧版 SDK 组件，避免 AGP 3.4 自带的旧 sdklib
     # 去解析新版 Google 仓库元数据时报错（'35x' is not a valid integer）
     # sdkmanager 需要 Java 17，这一步单独用 runner 预装的 JDK 17，
-    # 不影响后面 Gradle 用 JDK 11 构建
+    # 不影响后面 Gradle 用 JDK 11 构建。
+    # 装到单独的干净目录并让后续步骤只用它：runner 预装的 SDK 里有 android-34~37、
+    # SDK extension、NDK 27 等新组件，AGP 3.4 解析它们的 package.xml 会打印上万行
+    # 异常堆栈（不影响构建但淹没编译日志）
     - name: Install Android SDK components
       run: |
         export JAVA_HOME="$JAVA_HOME_17_X64"
-        yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+        SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+        SDK_DIR="$RUNNER_TEMP/android-sdk"
+        yes | "$SDKMANAGER" --sdk_root="$SDK_DIR" --licenses > /dev/null || true
+        "$SDKMANAGER" --sdk_root="$SDK_DIR" \
           "platforms;android-29" "platforms;android-28" "build-tools;28.0.3"
+        echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
+        echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    # 项目不用 NDK；runner 的 ANDROID_NDK_HOME 指向 NDK 27，AGP 3.4 会报 NDK 缺 platforms 目录的警告
     - name: Build Release APK
-      run: ./gradlew assembleRelease
+      run: env -u ANDROID_NDK_HOME -u ANDROID_NDK_ROOT ./gradlew assembleRelease
 
     # chat/build.gradle 会把产物改名为 Fsharechat-{版本}-{日期}.apk，
     # 后续部署/上传步骤写死了 chat-release.apk，这里统一命名
