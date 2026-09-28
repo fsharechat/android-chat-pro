@@ -93,7 +93,7 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
             @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
             public void onBackground() {
                 isBackground = true;
-                viewModelStore.clear();
+                // 不能在切后台时 clear：界面缓存的 AppScope ViewModel 会被 onCleared 摘掉监听，回前台后再也收不到更新
             }
         });
 

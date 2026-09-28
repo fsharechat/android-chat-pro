@@ -28,6 +28,7 @@ import cn.wildfire.chat.kit.setting.SettingActivity;
 import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfirechat.chat.R;
+import cn.wildfirechat.model.NullUserInfo;
 import cn.wildfirechat.model.UserInfo;
 
 public class MeFragment extends Fragment {
@@ -83,14 +84,27 @@ public class MeFragment extends Fragment {
 
     private void init() {
         userViewModel = WfcUIKit.getAppScopeViewModel(UserViewModel.class);
+        loadMyInfo();
+        userViewModel.userInfoLiveData().observeForever(userInfoLiveDataObserver);
+    }
+
+    private void loadMyInfo() {
         userViewModel.getUserInfoAsync(userViewModel.getUserId(), true)
                 .observe(this, info -> {
-                    userInfo = info;
-                    if (userInfo != null) {
+                    if (info != null) {
+                        userInfo = info;
                         updateUserInfo(userInfo);
                     }
                 });
-        userViewModel.userInfoLiveData().observeForever(userInfoLiveDataObserver);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 断连时拉取失败只能拿到 NullUserInfo，回到前台时补拉一次
+        if (userInfo instanceof NullUserInfo) {
+            loadMyInfo();
+        }
     }
 
     @Override
