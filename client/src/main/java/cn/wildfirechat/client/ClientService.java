@@ -399,6 +399,29 @@ public class ClientService extends Service implements
         }
 
         @Override
+        public void speechToText(long messageUid, final IGeneralCallback2 callback) throws RemoteException {
+            JavaProtoLogic.speechToText(messageUid, new JavaProtoLogic.IGeneralCallback2() {
+                @Override
+                public void onSuccess(String text) {
+                    try {
+                        callback.onSuccess(text);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(int errorCode) {
+                    try {
+                        callback.onFailure(errorCode);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        @Override
         public long getServerDeltaTime() throws RemoteException {
             return JavaProtoLogic.getServerDeltaTime();
         }

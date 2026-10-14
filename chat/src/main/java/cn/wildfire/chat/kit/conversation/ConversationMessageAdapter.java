@@ -132,6 +132,17 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
+    /** 转文字结果变化：按 messageUid 找到气泡并重绘 */
+    public int notifyMessageUidChanged(long messageUid) {
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            if (messages.get(i).message.messageUid == messageUid) {
+                notifyItemChanged(i);
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public boolean replaceMessage(UiMessage oldMsg, UiMessage newMsg) {
         int pos = messages.indexOf(oldMsg);
         if (pos >= 0) {

@@ -3,37 +3,57 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="right"
-    android:orientation="horizontal">
+    android:gravity="right"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/durationTextView"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_toLeftOf="@id/audioContentLayout"
-        android:layout_marginRight="8dp"
-        android:text="6''"
-        android:textColor="@color/mist" />
+        android:orientation="horizontal">
 
-    <RelativeLayout
-        android:id="@+id/audioContentLayout"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:layout_alignParentRight="true"
+        <TextView
+            android:id="@+id/durationTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="8dp"
+            android:text="6''"
+            android:textColor="@color/mist" />
+
+        <RelativeLayout
+            android:id="@+id/audioContentLayout"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:background="@drawable/shape_bubble_send"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp">
+
+            <ImageView
+                android:id="@+id/audioImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:background="@drawable/audio_animation_right_list" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/transcriptTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:background="@drawable/shape_bubble_send"
+        android:maxWidth="240dp"
         android:paddingLeft="12dp"
         android:paddingTop="8dp"
         android:paddingRight="12dp"
-        android:paddingBottom="8dp">
-
-        <ImageView
-            android:id="@+id/audioImageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerInParent="true"
-            android:background="@drawable/audio_animation_right_list" />
-
-    </RelativeLayout>
-
+        android:paddingBottom="8dp"
+        android:clickable="true"
+        android:textColor="@color/message_text_send_dark"
+        android:textSize="14sp"
+        android:visibility="gone" />
 </LinearLayout>

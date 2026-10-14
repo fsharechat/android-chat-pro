@@ -31,4 +31,10 @@ public class SubSignalOrdinalTest {
         assertEquals(SubSignal.UP, SubSignal.toEnum(42));
         assertEquals(SubSignal.UN, SubSignal.toEnum(43));
     }
+
+    @Test
+    public void speechToTextSignalIsAppendedAfterUserSetting() {
+        assertEquals(44, SubSignal.ASR.ordinal());
+        assertEquals(SubSignal.ASR, SubSignal.toEnum(44));
+    }
 }

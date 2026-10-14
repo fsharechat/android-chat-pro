@@ -37,6 +37,7 @@ import java.util.List;
 import cn.wildfire.chat.app.Config;
 import cn.wildfire.chat.app.third.location.BackgroundLocation;
 import cn.wildfire.chat.kit.common.AppScopeViewModel;
+import cn.wildfire.chat.kit.conversation.transcript.TranscriptManager;
 import cn.wildfire.chat.kit.net.ServerNodeManager;
 import cn.wildfire.chat.kit.utils.BitmapUtils;
 import cn.wildfire.chat.kit.voip.AsyncPlayer;
@@ -74,6 +75,7 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
     private BackgroundLocation backgroundLocation;
 
     public void init(Application application) {
+        TranscriptManager.init(application);
         WfcUIKit.application = application;
         initWFClient(application);
         //初始化表情控件
@@ -220,6 +222,7 @@ public class WfcUIKit implements AVEngineKit.AVEngineCallback, AVGroupEngineKit.
     @Override
     public void onReceiveMessage(List<Message> messages, boolean hasMore) {
         Log.i("comsince","notification message size "+messages.size()+" backgroud "+isBackground);
+        TranscriptManager.get().onReceiveMessages(messages);
         if (isBackground) {
             // FIXME: 2018/5/28 只是临时方案，No_Persist消息，我觉得不应当到这儿，注册监听时，
             // 就表明自己关系哪些类型的消息, 设置哪些种类的消息

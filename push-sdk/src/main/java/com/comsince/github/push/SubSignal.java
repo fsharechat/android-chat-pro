@@ -53,7 +53,9 @@ public enum SubSignal {
     // 只允许在末尾追加，ordinal 与服务端 push-common、ios SubSignal.swift 对齐
     UG,
     UP,
-    UN
+    UN,
+    // 语音转文字：带 messageUid 请求，PUB_ACK 返回 SpeechToTextResult。只允许在末尾追加，ordinal 与服务端、ios 对齐
+    ASR
     ;
 
 

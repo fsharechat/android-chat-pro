@@ -24,6 +24,7 @@ import cn.wildfirechat.model.ProtoMessage;
 import cn.wildfirechat.model.ProtoMessageContent;
 import cn.wildfirechat.model.ProtoUserInfo;
 import cn.wildfirechat.proto.handler.StreamingAiHandler;
+import cn.wildfirechat.proto.handler.SpeechToTextHandler;
 import cn.wildfirechat.proto.handler.AddFriendRequestHandler;
 import cn.wildfirechat.proto.handler.AddGroupMemberHandler;
 import cn.wildfirechat.proto.handler.ConnectAckMessageHandler;
@@ -99,6 +100,7 @@ public class ProtoService extends AbstractProtoService {
         messageHandlers.add(new ModifyMyInfoHandler(this));
         messageHandlers.add(new QiniuTokenHandler(this));
         messageHandlers.add(new RecallMessageHandler(this));
+        messageHandlers.add(new SpeechToTextHandler(this));
         messageHandlers.add(new RecallNotifyMessageHandler(this));
         messageHandlers.add(new RemoteMessageHandler(this));
         messageHandlers.add(new GetMinioUploadUrlHandler(this));
@@ -518,6 +520,14 @@ public class ProtoService extends AbstractProtoService {
                 .setId(messageUid)
                 .build();
        sendMessage(Signal.PUBLISH,SubSignal.MR,int64Buf.toByteArray(),callback);
+    }
+
+    public void speechToText(long messageUid, JavaProtoLogic.IGeneralCallback2 callback){
+        log.i("speechToText message Uid "+messageUid);
+        WFCMessage.SpeechToTextRequest request = WFCMessage.SpeechToTextRequest.newBuilder()
+                .setMessageUid(messageUid)
+                .build();
+        sendMessage(Signal.PUBLISH, SubSignal.ASR, request.toByteArray(), callback);
     }
 
     /**

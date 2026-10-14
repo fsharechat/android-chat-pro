@@ -114,4 +114,6 @@
     <color name="ext_panel_tile_pressed_bg">#2A3140</color>
     <color name="ext_panel_icon_tint">@color/cobalt</color>
     <color name="ext_panel_title_text">@color/mist</color>
+    <color name="voice_pill_bg">#34353A</color>
+    <color name="voice_pill_text">#B8B8B8</color>
 </resources>

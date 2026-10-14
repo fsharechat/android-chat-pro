@@ -8,6 +8,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,9 +19,13 @@ import butterknife.OnClick;
 import cn.wildfire.chat.app.Config;
 import cn.wildfire.chat.kit.annotation.EnableContextMenu;
 import cn.wildfire.chat.kit.annotation.MessageContentType;
+import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
+import cn.wildfire.chat.kit.conversation.transcript.TranscriptEngine;
+import cn.wildfire.chat.kit.conversation.transcript.TranscriptManager;
+import cn.wildfire.chat.kit.conversation.transcript.VoiceTranscriptRules;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.SoundMessageContent;
@@ -41,6 +46,11 @@ public class AudioMessageContentViewHolder extends MediaMessageContentViewHolder
     @Nullable
     @Bind(R.id.playStatusIndicator)
     View playStatusIndicator;
+    @Nullable
+    @Bind(R.id.transcribePillTextView)
+    TextView transcribePillTextView;
+    @Bind(R.id.transcriptTextView)
+    TextView transcriptTextView;
 
     public AudioMessageContentViewHolder(FragmentActivity context, RecyclerView.Adapter adapter, View itemView) {
         super(context, adapter, itemView);
@@ -63,7 +73,7 @@ public class AudioMessageContentViewHolder extends MediaMessageContentViewHolder
                 playStatusIndicator.setVisibility(View.GONE);
             }
         }
-
+        bindTranscript(message);
 
         AnimationDrawable animation;
         if (message.isPlaying) {
@@ -111,4 +121,83 @@ public class AudioMessageContentViewHolder extends MediaMessageContentViewHolder
         }
     }
 
+    private void bindTranscript(UiMessage message) {
+        TranscriptEngine engine = TranscriptManager.get().engine();
+        long uid = message.message.messageUid;
+        TranscriptEngine.Entry entry = engine.get(uid);
+        boolean incoming = message.message.direction == MessageDirection.Receive;
+        boolean played = message.message.status == MessageStatus.Played;
+
+        if (transcribePillTextView != null) {
+            boolean showPill = VoiceTranscriptRules.showPill(incoming, played, uid, entry, engine.isAutoTranscribe());
+            transcribePillTextView.setVisibility(showPill ? View.VISIBLE : View.GONE);
+            // ButterKnife 7.0.1 的 @OnClick 需要 @Optional，发送布局无此控件，改用手动监听
+            transcribePillTextView.setOnClickListener(v -> transcribe(message));
+        }
+
+        // 文字块背景与语音气泡一致（接收灰、发送蓝），文字颜色沿用文本消息配色；
+        // 发送方蓝底上提示色看不清，提示状态也用发送文本色
+        int textColor = incoming ? R.color.message_text_receive_dark : R.color.message_text_send_dark;
+        int hintColor = incoming ? R.color.mist : R.color.message_text_send_dark;
+        int errorColor = incoming ? R.color.coral : R.color.message_text_send_dark;
+        switch (VoiceTranscriptRules.block(entry)) {
+            case LOADING:
+                showTranscript(message, "转文字中…", hintColor, false);
+                break;
+            case ERROR:
+                showTranscript(message, "转文字失败，点击重试", errorColor, true);
+                break;
+            case EMPTY:
+                showTranscript(message, "未识别到文字", hintColor, false);
+                break;
+            case TEXT:
+                showTranscript(message, entry.text, textColor, false);
+                break;
+            default:
+                transcriptTextView.setVisibility(View.GONE);
+                transcriptTextView.setOnClickListener(null);
+                break;
+        }
+    }
+
+    private void showTranscript(UiMessage message, String text, int colorRes, boolean retryOnClick) {
+        transcriptTextView.setVisibility(View.VISIBLE);
+        transcriptTextView.setText(text);
+        transcriptTextView.setTextColor(ContextCompat.getColor(context, colorRes));
+        if (retryOnClick) {
+            transcriptTextView.setOnClickListener(v -> TranscriptManager.get().engine().request(message.message.messageUid));
+        } else {
+            transcriptTextView.setOnClickListener(null);
+        }
+    }
+
+    /** 点「转文字」视为已读：消红点 */
+    private void transcribe(UiMessage message) {
+        conversationViewModel.markAudioPlayed(message);
+        TranscriptManager.get().engine().request(message.message.messageUid);
+    }
+
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_TRANSCRIBE, title = "转文字", icon = R.drawable.ic_menu_copy, priority = 9)
+    public void transcribeFromMenu(View itemView, UiMessage message) {
+        transcribe(message);
+    }
+
+    @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_HIDE_TRANSCRIPT, title = "隐藏文字", icon = R.drawable.ic_menu_clear, priority = 9)
+    public void hideTranscript(View itemView, UiMessage message) {
+        TranscriptManager.get().engine().hide(message.message.messageUid);
+    }
+
+    @Override
+    public boolean contextMenuItemFilter(UiMessage uiMessage, String tag) {
+        // 返回 true 表示过滤掉（不显示）该菜单项
+        long uid = uiMessage.message.messageUid;
+        TranscriptEngine.Entry entry = TranscriptManager.get().engine().get(uid);
+        if (MessageContextMenuItemTags.TAG_TRANSCRIBE.equals(tag)) {
+            return !VoiceTranscriptRules.showTranscribeMenu(uid, entry);
+        }
+        if (MessageContextMenuItemTags.TAG_HIDE_TRANSCRIPT.equals(tag)) {
+            return !VoiceTranscriptRules.showHideMenu(uid, entry);
+        }
+        return super.contextMenuItemFilter(uiMessage, tag);
+    }
 }

@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -40,6 +41,7 @@ import cn.wildfire.chat.kit.common.OperateResult;
 import cn.wildfire.chat.kit.conversation.ext.core.ConversationExtension;
 import cn.wildfire.chat.kit.conversation.mention.MentionSpan;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
+import cn.wildfire.chat.kit.conversation.transcript.TranscriptManager;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
 import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
@@ -160,6 +162,22 @@ public class ConversationActivity extends WfcBaseActivity implements
             if (isDisplayableMessage(uiMessage)) {
                 adapter.updateMessage(uiMessage);
             }
+        }
+    };
+    private Observer<Long> transcriptChangedObserver = uid -> {
+        if (uid == null) {
+            return;
+        }
+        int pos = adapter.notifyMessageUidChanged(uid);
+        // 最后一条语音转出文字后气泡变高，文字块会落到屏幕外；用户原本停在底部时，等这一行重新布局后再把它的底部滚进可见区域
+        if (pos >= 0 && pos == adapter.getItemCount() - 1 && moveToBottom) {
+            recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    scrollToStreamingBottom();
+                }
+            });
         }
     };
 
@@ -387,6 +405,7 @@ public class ConversationActivity extends WfcBaseActivity implements
 
             conversationViewModel.messageLiveData().observeForever(messageLiveDataObserver);
             conversationViewModel.messageUpdateLiveData().observeForever(messageUpdateLiveDatObserver);
+            TranscriptManager.get().changedLiveData().observeForever(transcriptChangedObserver);
             conversationViewModel.messageRemovedLiveData().observeForever(messageRemovedLiveDataObserver);
             conversationViewModel.mediaUpdateLiveData().observeForever(mediaUploadedLiveDataObserver);
             conversationViewModel.clearMessageLiveData().observeForever(clearMessageLiveDataObserver);
@@ -661,6 +680,7 @@ public class ConversationActivity extends WfcBaseActivity implements
         super.onDestroy();
         conversationViewModel.messageLiveData().removeObserver(messageLiveDataObserver);
         conversationViewModel.messageUpdateLiveData().removeObserver(messageUpdateLiveDatObserver);
+        TranscriptManager.get().changedLiveData().removeObserver(transcriptChangedObserver);
         conversationViewModel.messageRemovedLiveData().removeObserver(messageRemovedLiveDataObserver);
         conversationViewModel.mediaUpdateLiveData().removeObserver(mediaUploadedLiveDataObserver);
         conversationViewModel.clearMessageLiveData().removeObserver(clearMessageLiveDataObserver);

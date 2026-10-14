@@ -1476,6 +1476,32 @@ public class ChatManager {
         }
     }
 
+    /**
+     * 语音消息转文字。回调在 binder 线程，调用方自行切主线程。
+     */
+    public void speechToText(long messageUid, final GeneralCallback2 callback) {
+        if (!checkRemoteService()) {
+            callback.onFail(ErrorCode.SERVICE_DIED);
+            return;
+        }
+        try {
+            mClient.speechToText(messageUid, new cn.wildfirechat.client.IGeneralCallback2.Stub() {
+                @Override
+                public void onSuccess(String text) throws RemoteException {
+                    callback.onSuccess(text);
+                }
+
+                @Override
+                public void onFailure(int errorCode) throws RemoteException {
+                    callback.onFail(errorCode);
+                }
+            });
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            callback.onFail(ErrorCode.SERVICE_DIED);
+        }
+    }
+
     public void shutdown() {
         if (mClient != null) {
             gContext.unbindService(serviceConnection);

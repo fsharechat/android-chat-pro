@@ -4,13 +4,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.kyleduo.switchbutton.SwitchButton;
+
+import butterknife.Bind;
 import butterknife.OnClick;
 import cn.wildfire.chat.kit.ChatManagerHolder;
 import cn.wildfire.chat.kit.WfcBaseActivity;
+import cn.wildfire.chat.kit.conversation.transcript.TranscriptEngine;
+import cn.wildfire.chat.kit.conversation.transcript.TranscriptManager;
 import cn.wildfire.chat.app.main.SplashActivity;
 import cn.wildfirechat.chat.R;
 
 public class SettingActivity extends WfcBaseActivity {
+
+    @Bind(R.id.autoTranscribeSwitchButton)
+    SwitchButton autoTranscribeSwitchButton;
+
+    @Override
+    protected void afterViews() {
+        super.afterViews();
+        TranscriptEngine engine = TranscriptManager.get().engine();
+        autoTranscribeSwitchButton.setCheckedImmediatelyNoEvent(engine.isAutoTranscribe());
+        autoTranscribeSwitchButton.setOnCheckedChangeListener((buttonView, isChecked) -> engine.setAutoTranscribe(isChecked));
+    }
 
     @Override
     protected int contentLayout() {

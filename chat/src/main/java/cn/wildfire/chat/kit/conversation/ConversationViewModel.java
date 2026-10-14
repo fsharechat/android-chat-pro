@@ -309,10 +309,7 @@ public class ConversationViewModel extends ViewModel implements OnReceiveMessage
         }
 
         toPlayAudioMessage = message.message;
-        if (message.message.direction == MessageDirection.Receive && message.message.status != MessageStatus.Played) {
-            message.message.status = MessageStatus.Played;
-            ChatManager.Instance().setMediaMessagePlayed(message.message.messageId);
-        }
+        markAudioPlayed(message);
 
         File file = mediaMessageContentFile(message);
 
@@ -323,6 +320,15 @@ public class ConversationViewModel extends ViewModel implements OnReceiveMessage
             playAudio(message, file);
         } else {
             Log.e("ConversationViewHolder", "audio not exist");
+        }
+    }
+
+    /** 播放或点击「转文字」后置为已播放（消红点） */
+    public void markAudioPlayed(UiMessage message) {
+        if (message.message.direction == MessageDirection.Receive && message.message.status != MessageStatus.Played) {
+            message.message.status = MessageStatus.Played;
+            ChatManager.Instance().setMediaMessagePlayed(message.message.messageId);
+            postMessageUpdate(message);
         }
     }
 

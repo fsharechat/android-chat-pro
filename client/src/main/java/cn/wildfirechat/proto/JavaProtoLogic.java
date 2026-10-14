@@ -350,6 +350,10 @@ public class JavaProtoLogic {
        protoService.recallMessage(messageUid,callback);
     }
 
+    public static void speechToText(long messageUid, JavaProtoLogic.IGeneralCallback2 callback){
+        protoService.speechToText(messageUid, callback);
+    }
+
     public static long insertMessage(ProtoMessage msg){
         return 0;
     }

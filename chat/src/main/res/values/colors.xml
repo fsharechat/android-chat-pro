@@ -122,4 +122,6 @@
     <color name="ext_panel_tile_pressed_bg">@color/fog</color>
     <color name="ext_panel_icon_tint">@color/cobalt</color>
     <color name="ext_panel_title_text">@color/mist</color>
+    <color name="voice_pill_bg">#E6E7EA</color>
+    <color name="voice_pill_text">#555555</color>
 </resources>
