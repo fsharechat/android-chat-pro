@@ -35,6 +35,7 @@ import cn.wildfire.chat.kit.annotation.MessageContentType;
 import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
+import cn.wildfire.chat.kit.conversation.TextPreviewActivity;
 import cn.wildfire.chat.kit.conversation.message.TextSelectionOverlay;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
@@ -60,10 +61,11 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
     @Bind(R.id.progressBar)
     ProgressBar progressBar;
 
-    // 与 web 端一致：超过阈值的消息默认折叠为纯文本摘要，点「展开全文」才渲染完整 Markdown
+    // 超过阈值的消息默认折叠为纯文本摘要，点「查看全文」进入全文页（TextPreviewActivity）
+    // 渲染完整 Markdown，与 iOS 一致
     private static final int COLLAPSE_THRESHOLD = 600;
     private static final int PREVIEW_LENGTH = 280;
-    // 展开状态按消息记住，滚出屏幕、切换会话后回来仍保持展开
+    // AI 流式回复保持展开（结束后可「收起」），按消息记住，滚出屏幕、切换会话后回来仍保持展开
     private static final Set<Long> expandedMessageIds = new HashSet<>();
 
     // 选字高亮：接收气泡上用微信绿；发送气泡是主题色底，用正文色的半透明层才看得出来
@@ -116,7 +118,7 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
             // 发送气泡是主题色底，按钮加下划线以区别于正文，与 web 端一致
             int flags = expandToggleTextView.getPaintFlags();
             expandToggleTextView.setPaintFlags(isReceived ? flags & ~Paint.UNDERLINE_TEXT_FLAG : flags | Paint.UNDERLINE_TEXT_FLAG);
-            expandToggleTextView.setText(expanded ? "收起" : "展开全文");
+            expandToggleTextView.setText(expanded ? "收起" : "查看全文");
         } else {
             expandToggleTextView.setVisibility(View.GONE);
         }
@@ -205,16 +207,15 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
     @OnClick(R.id.expandToggleTextView)
     public void onToggleExpand(View view) {
         long messageId = message.message.messageId;
-        boolean collapsing = expandedMessageIds.contains(messageId);
-        if (collapsing) {
-            expandedMessageIds.remove(messageId);
-        } else {
-            expandedMessageIds.add(messageId);
+        if (!expandedMessageIds.contains(messageId)) {
+            // 折叠态：进入全文页查看完整 Markdown，可自由选字复制
+            TextPreviewActivity.start(context, ((TextMessageContent) message.message.content).getContent());
+            return;
         }
+        // 展开态（AI 流式回复结束后）：原地收起
+        expandedMessageIds.remove(messageId);
         onBind(message);
-        if (collapsing) {
-            keepBubbleVisibleAfterCollapse();
-        }
+        keepBubbleVisibleAfterCollapse();
     }
 
     /**

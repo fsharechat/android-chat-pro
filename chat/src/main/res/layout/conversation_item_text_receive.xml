@@ -24,7 +24,7 @@
         android:textColorLink="@color/message_text_link_receive_dark"
         android:textSize="15sp" />
 
-    <!-- 超长消息折叠开关：展开全文 / 收起 -->
+    <!-- 超长消息：查看全文（进入全文页）/ 收起（AI 回复结束后的展开态） -->
     <TextView
         android:id="@+id/expandToggleTextView"
         android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
         android:layout_marginTop="6dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
-        android:text="展开全文"
+        android:text="查看全文"
         android:textColor="@color/message_text_link_receive_dark"
         android:textSize="13sp"
         android:visibility="gone" />

@@ -208,6 +208,7 @@
             </intent-filter>
         </activity>
         <activity android:name="cn.wildfire.chat.kit.WfcWebViewActivity" />
+        <activity android:name="cn.wildfire.chat.kit.conversation.TextPreviewActivity" />
         <activity android:name="cn.wildfire.chat.kit.search.SearchMessageActivity" />
         <activity android:name="cn.wildfire.chat.kit.channel.SearchChannelActivity" />
         <activity android:name="cn.wildfire.chat.kit.group.PickGroupMemberActivity" />
