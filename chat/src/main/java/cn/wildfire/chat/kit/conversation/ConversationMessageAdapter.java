@@ -27,9 +27,11 @@ import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
+import cn.wildfire.chat.kit.conversation.message.TextSelectionOverlay;
 import cn.wildfire.chat.kit.conversation.message.viewholder.LoadingViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageContentViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.MessageViewHolderManager;
+import cn.wildfire.chat.kit.conversation.message.viewholder.SelectableTextViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.SimpleNotificationMessageContentViewHolder;
 import cn.wildfire.chat.kit.conversation.message.viewholder.TextMessageContentViewHolder;
 import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
@@ -366,10 +368,7 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
                             itemWrapper.contextMenuItem.icon(),
                             itemWrapper.contextMenuItem.destructive()));
                 }
-                // 锚点用消息气泡而不是整行，菜单才会贴在气泡旁边（长按可能发生在气泡的子 View 上）
-                View anchorView = itemView.findViewById(R.id.contentFrameLayout);
-                new FshareContextMenu(mContext, anchorView != null ? anchorView : itemView)
-                        .items(menuItems).callback(new FshareContextMenu.Callback() {
+                FshareContextMenu.Callback menuCallback = new FshareContextMenu.Callback() {
                     @Override
                     public void onSelect(int position, FshareContextMenu.Item selected) {
                         try {
@@ -399,7 +398,17 @@ public class ConversationMessageAdapter extends RecyclerView.Adapter<RecyclerVie
                         }
 
                     }
-                }).show();
+                };
+                // 文本消息走微信式选字：全选 + 拖动手柄，菜单贴着选区
+                if (viewHolder instanceof SelectableTextViewHolder
+                        && ((SelectableTextViewHolder) viewHolder).showSelectionMenu(menuItems, menuCallback)) {
+                    return true;
+                }
+                TextSelectionOverlay.dismissCurrent();
+                // 锚点用消息气泡而不是整行，菜单才会贴在气泡旁边（长按可能发生在气泡的子 View 上）
+                View anchorView = itemView.findViewById(R.id.contentFrameLayout);
+                new FshareContextMenu(mContext, anchorView != null ? anchorView : itemView)
+                        .items(menuItems).callback(menuCallback).show();
                 return true;
             }
         };

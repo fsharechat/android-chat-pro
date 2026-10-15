@@ -95,25 +95,52 @@ public class FshareContextMenu extends Dialog {
         setContentView(R.layout.fshare_context_menu);
 
         LinearLayout container = findViewById(R.id.menuContainer);
-        // 菜单行的背景是铺满整行的矩形 ripple，会画在卡片圆角之上，把首尾两行的角填成直角。
-        // 让容器按自身 outline（bg_context_menu 的 14dp 圆角）裁切子 View，四角才真正是圆的。
-        container.setClipToOutline(true);
-
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        for (int i = 0; i < items.size(); i++) {
-            if (i > 0) {
-                container.addView(createDivider());
+        populate(container, items, (position, item) -> {
+            // 先关菜单再回调，避免回调里弹二次确认时两个弹窗叠在一起
+            dismiss();
+            if (callback != null) {
+                callback.onSelect(position, item);
             }
-            container.addView(createItemView(inflater, container, i, items.get(i)));
-        }
+        });
 
         position();
     }
 
-    private View createItemView(LayoutInflater inflater, ViewGroup parent,
-                                final int position, final Item item) {
+    /**
+     * 往 {@code R.layout.fshare_context_menu} 的 menuContainer 里填菜单行。
+     * 选字浮层（{@link cn.wildfire.chat.kit.conversation.message.TextSelectionOverlay}）复用同一套卡片样式。
+     */
+    public static void populate(@NonNull LinearLayout container, @NonNull List<Item> items, @NonNull Callback onClick) {
+        // 菜单行的背景是铺满整行的矩形 ripple，会画在卡片圆角之上，把首尾两行的角填成直角。
+        // 让容器按自身 outline（bg_context_menu 的 14dp 圆角）裁切子 View，四角才真正是圆的。
+        container.setClipToOutline(true);
+
+        LayoutInflater inflater = LayoutInflater.from(container.getContext());
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) {
+                container.addView(createDivider(container.getContext()));
+            }
+            container.addView(createItemView(inflater, container, i, items.get(i), onClick));
+        }
+    }
+
+    /**
+     * 行宽在布局里是 wrap_content（否则卡片宽度不会由最长的一项决定），
+     * 卡片宽度确定后把每行改回 match_parent 撑满，背景和水波纹才不会只占半行。
+     */
+    public static void stretchRows(@NonNull LinearLayout container) {
+        for (int i = 0; i < container.getChildCount(); i++) {
+            View child = container.getChildAt(i);
+            ViewGroup.LayoutParams clp = child.getLayoutParams();
+            clp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            child.setLayoutParams(clp);
+        }
+    }
+
+    private static View createItemView(LayoutInflater inflater, ViewGroup parent,
+                                       final int position, final Item item, final Callback onClick) {
         View row = inflater.inflate(R.layout.fshare_context_menu_item, parent, false);
-        int color = getContext().getResources().getColor(item.destructive ? R.color.coral : R.color.ink);
+        int color = parent.getContext().getResources().getColor(item.destructive ? R.color.coral : R.color.ink);
 
         TextView title = row.findViewById(R.id.menuTitle);
         title.setText(item.title);
@@ -128,24 +155,18 @@ public class FshareContextMenu extends Dialog {
             icon.setColorFilter(color);
         }
 
-        row.setOnClickListener(v -> {
-            // 先关菜单再回调，避免回调里弹二次确认时两个弹窗叠在一起
-            dismiss();
-            if (callback != null) {
-                callback.onSelect(position, item);
-            }
-        });
+        row.setOnClickListener(v -> onClick.onSelect(position, item));
         return row;
     }
 
-    private View createDivider() {
-        View divider = new View(getContext());
+    private static View createDivider(Context context) {
+        View divider = new View(context);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 1);
         // 分割线从图标左侧起就缩进，跟 iOS 的分组观感一致
-        lp.setMarginStart(dp(18));
+        lp.setMarginStart((int) (18 * context.getResources().getDisplayMetrics().density + 0.5f));
         divider.setLayoutParams(lp);
-        divider.setBackgroundColor(getContext().getResources().getColor(R.color.fog));
+        divider.setBackgroundColor(context.getResources().getColor(R.color.fog));
         return divider;
     }
 
@@ -193,15 +214,7 @@ public class FshareContextMenu extends Dialog {
         // LayoutParams 里给了确定宽度后，windowMinWidth* 不再参与，绕开这个坑。
         window.setLayout(menuWidth, menuHeight);
 
-        // 行宽在布局里是 wrap_content（否则卡片宽度不会由最长的一项决定），
-        // 现在卡片宽度已经确定，把每行改回 match_parent 撑满，背景和水波纹才不会只占半行。
-        LinearLayout container = findViewById(R.id.menuContainer);
-        for (int i = 0; i < container.getChildCount(); i++) {
-            View child = container.getChildAt(i);
-            ViewGroup.LayoutParams clp = child.getLayoutParams();
-            clp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            child.setLayoutParams(clp);
-        }
+        stretchRows(findViewById(R.id.menuContainer));
 
         int[] anchorPos = new int[2];
         anchor.getLocationOnScreen(anchorPos);

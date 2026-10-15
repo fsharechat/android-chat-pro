@@ -19,11 +19,13 @@ import io.noties.markwon.ext.strikethrough.StrikethroughPlugin;
 import io.noties.markwon.ext.tables.TablePlugin;
 import io.noties.markwon.ext.tables.TableRowSpan;
 
+import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import butterknife.Bind;
@@ -33,8 +35,10 @@ import cn.wildfire.chat.kit.annotation.MessageContentType;
 import cn.wildfire.chat.kit.annotation.MessageContextMenuItem;
 import cn.wildfire.chat.kit.annotation.ReceiveLayoutRes;
 import cn.wildfire.chat.kit.annotation.SendLayoutRes;
+import cn.wildfire.chat.kit.conversation.message.TextSelectionOverlay;
 import cn.wildfire.chat.kit.conversation.message.model.UiMessage;
 import cn.wildfire.chat.kit.third.utils.UIUtils;
+import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.message.Message;
 import cn.wildfirechat.message.MessageContent;
@@ -46,7 +50,7 @@ import cn.wildfirechat.message.core.MessageStatus;
 @SendLayoutRes(resId = R.layout.conversation_item_text_send)
 @ReceiveLayoutRes(resId = R.layout.conversation_item_text_receive)
 @EnableContextMenu
-public class TextMessageContentViewHolder extends NormalMessageContentViewHolder {
+public class TextMessageContentViewHolder extends NormalMessageContentViewHolder implements SelectableTextViewHolder {
     @Bind(R.id.contentTextView)
     TextView contentTextView;
 
@@ -62,7 +66,14 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
     // 展开状态按消息记住，滚出屏幕、切换会话后回来仍保持展开
     private static final Set<Long> expandedMessageIds = new HashSet<>();
 
+    // 选字高亮：接收气泡上用微信绿；发送气泡是主题色底，用正文色的半透明层才看得出来
+    private static final int SELECTION_COLOR_RECEIVE = 0x5907C160;
+    private static final int SELECTION_ALPHA_SEND = 0x4D;
+
     private ValueAnimator blinkAnimator;
+    private TextSelectionOverlay selectionOverlay;
+    /** 点菜单项时的部分选中文字；全选或不在选字状态时为 null，复制原文。 */
+    private String selectedTextForAction;
     private final Markwon markwon;
     private final int textMaxWidth;
 
@@ -84,6 +95,10 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
 
     @Override
     public void onBind(UiMessage message) {
+        // 重新绑定意味着文字可能变了，旧选区的位置不再可信
+        if (selectionOverlay != null) {
+            selectionOverlay.dismiss();
+        }
         if (blinkAnimator != null) {
             blinkAnimator.cancel();
             blinkAnimator = null;
@@ -222,6 +237,39 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
 //        Toast.makeText(context, "onTextMessage click: " + ((TextMessageContent) message.message.content).getContent(), Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public boolean showSelectionMenu(List<FshareContextMenu.Item> items, FshareContextMenu.Callback callback) {
+        if (message == null || message.isStreaming) {
+            return false;
+        }
+        int highlight = message.message.direction == MessageDirection.Receive
+                ? SELECTION_COLOR_RECEIVE
+                : ColorUtils.setAlphaComponent(contentTextView.getCurrentTextColor(), SELECTION_ALPHA_SEND);
+        selectionOverlay = TextSelectionOverlay.show(context, contentTextView, highlight, items, new TextSelectionOverlay.Listener() {
+            @Override
+            public void onMenuItemClick(int position, FshareContextMenu.Item item) {
+                TextSelectionOverlay overlay = selectionOverlay;
+                if (overlay == null) {
+                    return;
+                }
+                // 关浮层会清掉选区，先记下选中内容；先关浮层再回调，避免与二次确认弹窗叠在一起
+                selectedTextForAction = overlay.getPartialSelectionText();
+                overlay.dismiss();
+                try {
+                    callback.onSelect(position, item);
+                } finally {
+                    selectedTextForAction = null;
+                }
+            }
+
+            @Override
+            public void onDismiss() {
+                selectionOverlay = null;
+            }
+        });
+        return selectionOverlay != null;
+    }
+
     @MessageContextMenuItem(tag = MessageContextMenuItemTags.TAG_CLIP, title = "复制", icon = R.drawable.ic_menu_copy, confirm = false, priority = 12)
     public void clip(View itemView, UiMessage message) {
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -229,7 +277,9 @@ public class TextMessageContentViewHolder extends NormalMessageContentViewHolder
             return;
         }
         TextMessageContent content = (TextMessageContent) message.message.content;
-        ClipData clipData = ClipData.newPlainText("messageContent", content.getContent());
+        // 部分选中时复制选中的显示文字；全选时复制原文（保留 Markdown 源文，折叠态下也是全文）
+        String text = selectedTextForAction != null ? selectedTextForAction : content.getContent();
+        ClipData clipData = ClipData.newPlainText("messageContent", text);
         clipboardManager.setPrimaryClip(clipData);
     }
 
