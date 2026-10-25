@@ -1,9 +1,11 @@
 package cn.wildfire.chat.kit.conversation.message.viewholder;
 
 import android.graphics.drawable.AnimationDrawable;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -158,6 +160,35 @@ public class AudioMessageContentViewHolder extends MediaMessageContentViewHolder
                 transcriptTextView.setOnClickListener(null);
                 break;
         }
+        boolean hasTranscript = transcriptTextView.getVisibility() == View.VISIBLE;
+        alignToAudioBar(progressBar, hasTranscript);
+        alignToAudioBar(errorLinearLayout, hasTranscript);
+    }
+
+    /**
+     * 进度圈、错误图标在容器布局里与整个内容区垂直居中；文字块显示后内容区变高，它们会偏到语音条下方。
+     * 此时改为顶部对齐，并下移使其与语音条垂直居中；ViewHolder 会复用，无文字时需还原
+     */
+    private void alignToAudioBar(View view, boolean hasTranscript) {
+        if (view == null) {
+            return;
+        }
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) view.getLayoutParams();
+        // 首次调整前记下布局里的原始上边距，用于还原
+        Object tag = view.getTag(R.id.audioContentLayout);
+        if (tag == null) {
+            tag = lp.topMargin;
+            view.setTag(R.id.audioContentLayout, tag);
+        }
+        if (hasTranscript) {
+            view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            lp.gravity = Gravity.TOP;
+            lp.topMargin = Math.max(0, (contentLayout.getLayoutParams().height - view.getMeasuredHeight()) / 2);
+        } else {
+            lp.gravity = Gravity.CENTER;
+            lp.topMargin = (int) tag;
+        }
+        view.setLayoutParams(lp);
     }
 
     private void showTranscript(UiMessage message, String text, int colorRes, boolean retryOnClick) {
