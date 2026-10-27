@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 
 import cn.wildfirechat.message.core.MessageStatus;
 import cn.wildfirechat.model.ProtoMessage;
+import cn.wildfirechat.proto.ConversationGapFiller;
 import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.proto.ProtoConstants;
 import cn.wildfirechat.proto.ProtoService;
@@ -38,6 +39,9 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
     //专门处理下拉消息，保证消息处理严格有序
     public Executor workMessageExecutor = Executors.newFixedThreadPool(1);
 
+    //与服务端单会话截断条数一致
+    private static final int TAIL_GAP_FILL_COUNT = 20;
+
     public ReceiveMessageHandler(ProtoService protoService) {
         super(protoService);
     }
@@ -59,6 +63,8 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
                     public void run() {
                         long head = pullMessageResult.getHead();
                         logger.i("message count "+pullMessageResult.getMessageCount()+" head "+head);
+                        //服务端截断的会话先记断层再落库消息：落库过程中会回调界面，断层必须已经生效
+                        List<WFCMessage.ConversationGap> tailGaps = ConversationGapFiller.recordGaps(protoService.getGapSink(), pullMessageResult.getGapList());
                         boolean isUserPull = false;
                         RequestInfo requestInfo = protoService.requestMap.remove(header.getMessageId());
                         if(requestInfo != null && requestInfo.getCallback() != null){
@@ -73,6 +79,9 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
                         if(head > 0){
                             protoService.getImMemoryStore().updateMessageSeq(head);
                         }
+                        for(WFCMessage.ConversationGap tailGap : tailGaps){
+                            fillTailGap(tailGap);
+                        }
                     }
                 });
             } catch (InvalidProtocolBufferException e) {
@@ -81,6 +90,27 @@ public class ReceiveMessageHandler extends AbstractMessageHandler {
         }
     }
 
+
+    /**
+     * 尾部断层：该会话一条都没下发，本地缺的是最新一段，立即补拉并刷新会话
+     * */
+    private void fillTailGap(WFCMessage.ConversationGap tailGap){
+        WFCMessage.Conversation conversation = tailGap.getConversation();
+        protoService.fillConversationGap(conversation.getType(), conversation.getTarget(), conversation.getLine(),
+                tailGap.getBeforeUid(), TAIL_GAP_FILL_COUNT, new JavaProtoLogic.ILoadRemoteMessagesCallback() {
+                    @Override
+                    public void onSuccess(ProtoMessage[] messages) {
+                        if(messages.length > 0){
+                            JavaProtoLogic.onReceiveMessage(new ProtoMessage[]{messages[messages.length - 1]},false);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int errorCode) {
+                        logger.i("fill tail gap of "+conversation.getTarget()+" failed "+errorCode);
+                    }
+                });
+    }
 
     /**
      * 处理用户主动拉取的消息

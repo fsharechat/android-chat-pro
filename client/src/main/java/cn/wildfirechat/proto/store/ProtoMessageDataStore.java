@@ -3,6 +3,7 @@ package cn.wildfirechat.proto.store;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -280,6 +281,11 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
     @Override
     public ProtoMessage[] getMessages(int conversationType, String target, int line, long fromIndex, boolean before, int count, String withUser) {
         String query = COLUMN_MESSAGE_TARGET + "=" + "'"+target+"'";
+        // 断层补完前不返回断层以下的消息，避免空洞两侧拼在一起；本地读完后界面会走远程补拉
+        long gapFloor = getConversationGapFloor(target);
+        if(gapFloor > 0){
+            query = query + " and ("+COLUMN_MESSAGE_UID+" = 0 or "+COLUMN_MESSAGE_UID+" >= "+gapFloor+")";
+        }
         String orderBy = SORT_KEY + " DESC LIMIT " + count;
         if(fromIndex != 0){
             long fromKey = getSortKey(fromIndex);
@@ -317,6 +323,68 @@ class ProtoMessageDataStore extends SqliteDatabaseStore{
             return null;
         }
 
+    }
+
+    @Override
+    public boolean hasOlderMessage(String target, long beforeUid) {
+        return getLocalFloorUid(target, beforeUid) > 0;
+    }
+
+    @Override
+    public void insertConversationGap(String target, long beforeUid) {
+        if (isDatabaseOpen()) {
+            ContentValues values = new ContentValues(2);
+            values.put("gap_target", target);
+            values.put("gap_before_uid", beforeUid);
+            database.insertWithOnConflict(ChatStoreHelper.TABLE_CONVERSATION_GAPS, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        }
+    }
+
+    @Override
+    public void deleteConversationGap(String target, long beforeUid) {
+        if (isDatabaseOpen()) {
+            database.delete(ChatStoreHelper.TABLE_CONVERSATION_GAPS, "gap_target = ? and gap_before_uid = ?",
+                    new String[]{target, String.valueOf(beforeUid)});
+        }
+    }
+
+    @Override
+    public long getConversationGapFloor(String target) {
+        return queryLong("select max(gap_before_uid) from " + ChatStoreHelper.TABLE_CONVERSATION_GAPS
+                + " where gap_target = ? and gap_before_uid < ?", new String[]{target, String.valueOf(Long.MAX_VALUE)});
+    }
+
+    @Override
+    public long getLocalFloorUid(String target, long belowUid) {
+        return queryLong("select max(" + COLUMN_MESSAGE_UID + ") from " + ChatStoreHelper.TABLE_MESSAGES
+                + " where " + COLUMN_MESSAGE_TARGET + " = ? and " + COLUMN_MESSAGE_UID + " > 0 and " + COLUMN_MESSAGE_UID + " < ?",
+                new String[]{target, String.valueOf(belowUid)});
+    }
+
+    private long queryLong(String sql, String[] args) {
+        long value = 0;
+        if (isDatabaseOpen()) {
+            Cursor cursor = database.rawQuery(sql, args);
+            if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                value = cursor.getLong(0);
+            }
+            cursor.close();
+        }
+        return value;
+    }
+
+    @Override
+    public void addHistoryMessages(String target, List<ProtoMessage> protoMessages, boolean updateConversation) {
+        if (protoMessages.isEmpty()) {
+            return;
+        }
+        for (ProtoMessage protoMessage : protoMessages) {
+            insertProtoMessage(target, protoMessage);
+        }
+        if (updateConversation) {
+            ProtoMessage lastProtoMessage = protoMessages.get(protoMessages.size() - 1);
+            createOrUpdateConversation(target, lastProtoMessage.getConversationType(), lastProtoMessage);
+        }
     }
 
     @Override

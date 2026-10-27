@@ -308,6 +308,70 @@ public class ProtoService extends AbstractProtoService {
     }
 
     public void getRemoteMessages(int conversationType, String target, int line, long beforeMessageUid, int count, JavaProtoLogic.ILoadRemoteMessagesCallback callback){
+        //本地分页停在断层处后，界面拉远程即是在补断层
+        long gapFloor = imMemoryStore.getConversationGapFloor(target);
+        if(ConversationGapFiller.isFillingGap(gapFloor, beforeMessageUid)){
+            fillConversationGap(conversationType, target, line, gapFloor, count, callback);
+            return;
+        }
+        sendLoadRemoteMessages(conversationType, target, line, beforeMessageUid, count, callback);
+    }
+
+    /**
+     * 补拉 gapUid 处的会话断层，结果落库并删除或下移断层，见 ConversationGapFiller
+     * */
+    public void fillConversationGap(int conversationType, String target, int line, long gapUid, int count, JavaProtoLogic.ILoadRemoteMessagesCallback callback){
+        log.i("fill conversation gap target "+target+" gapUid "+gapUid);
+        sendLoadRemoteMessages(conversationType, target, line, gapUid, count, new GapFillRequest(gapSink, target, gapUid, count, callback));
+    }
+
+    public ConversationGapFiller.GapSink getGapSink(){
+        return gapSink;
+    }
+
+    private final ConversationGapFiller.GapSink gapSink = new ConversationGapFiller.GapSink() {
+        @Override
+        public boolean hasOlderMessage(String target, long beforeUid) {
+            return imMemoryStore.hasOlderMessage(target, beforeUid);
+        }
+
+        @Override
+        public void insertGap(String target, long beforeUid) {
+            imMemoryStore.insertConversationGap(target, beforeUid);
+        }
+
+        @Override
+        public void deleteGap(String target, long beforeUid) {
+            imMemoryStore.deleteConversationGap(target, beforeUid);
+        }
+
+        @Override
+        public long getLocalFloorUid(String target, long belowUid) {
+            return imMemoryStore.getLocalFloorUid(target, belowUid);
+        }
+
+        @Override
+        public boolean hasMessage(long messageUid) {
+            return imMemoryStore.getMessageByUid(messageUid) != null;
+        }
+
+        @Override
+        public boolean canPersistent(int contentType) {
+            return imMemoryStore.canPersistent(contentType);
+        }
+
+        @Override
+        public ProtoMessage convert(WFCMessage.Message message) {
+            return convertProtoMessage(message);
+        }
+
+        @Override
+        public void saveHistory(String target, List<ProtoMessage> messages, boolean isTail) {
+            imMemoryStore.addHistoryMessages(target, messages, isTail);
+        }
+    };
+
+    private void sendLoadRemoteMessages(int conversationType, String target, int line, long beforeMessageUid, int count, JavaProtoLogic.ILoadRemoteMessagesCallback callback){
         WFCMessage.LoadRemoteMessages.Builder loadRemoteMessagesBuilder = WFCMessage.LoadRemoteMessages.newBuilder();
         loadRemoteMessagesBuilder.setBeforeUid(beforeMessageUid);
         loadRemoteMessagesBuilder.setCount(count);

@@ -480,6 +480,36 @@ public class DataStoreFactory implements ImMemoryStore{
     }
 
     @Override
+    public boolean hasOlderMessage(String target, long beforeUid) {
+        return protoMessageDataStore.hasOlderMessage(target, beforeUid);
+    }
+
+    @Override
+    public void insertConversationGap(String target, long beforeUid) {
+        protoMessageDataStore.insertConversationGap(target, beforeUid);
+    }
+
+    @Override
+    public void deleteConversationGap(String target, long beforeUid) {
+        protoMessageDataStore.deleteConversationGap(target, beforeUid);
+    }
+
+    @Override
+    public long getConversationGapFloor(String target) {
+        return protoMessageDataStore.getConversationGapFloor(target);
+    }
+
+    @Override
+    public long getLocalFloorUid(String target, long belowUid) {
+        return protoMessageDataStore.getLocalFloorUid(target, belowUid);
+    }
+
+    @Override
+    public void addHistoryMessages(String target, List<ProtoMessage> protoMessages, boolean updateConversation) {
+        protoMessageDataStore.addHistoryMessages(target, protoMessages, updateConversation);
+    }
+
+    @Override
     public void setGroupReportUsers(String target,String user) {
         memoryStore.setGroupReportUsers(target,user);
     }

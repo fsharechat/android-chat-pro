@@ -161,7 +161,18 @@ public class ConversationViewModel extends ViewModel implements OnReceiveMessage
                             }
                             result.postValue(msgs);
                         } else {
-                            result.postValue(new ArrayList<UiMessage>());
+                            // 远程补的是会话断层且这一页正好接上本地时，结果为空但断层已经消失，
+                            // 本地更早的消息此时才可见，再读一次本地
+                            ChatManager.Instance().getWorkHandler().post(() -> {
+                                List<Message> localAfterGap = ChatManager.Instance().getMessages(conversation, fromMessageId, true, count, channelPrivateChatUser);
+                                List<UiMessage> msgs = new ArrayList<>();
+                                if (localAfterGap != null) {
+                                    for (Message msg : localAfterGap) {
+                                        msgs.add(new UiMessage(msg));
+                                    }
+                                }
+                                result.postValue(msgs);
+                            });
                         }
                     }
 

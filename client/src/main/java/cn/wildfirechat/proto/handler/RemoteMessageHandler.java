@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.wildfirechat.model.ProtoMessage;
+import cn.wildfirechat.proto.ConversationGapFiller;
+import cn.wildfirechat.proto.GapFillRequest;
 import cn.wildfirechat.proto.JavaProtoLogic;
 import cn.wildfirechat.proto.ProtoService;
 import cn.wildfirechat.proto.WFCMessage;
@@ -33,16 +35,12 @@ public class RemoteMessageHandler extends AbstractMessageHandler{
         if(errorCode == 0){
             try {
                 WFCMessage.PullMessageResult pullMessageResult = WFCMessage.PullMessageResult.parseFrom(byteBufferList.getAllByteArray());
-                int size = pullMessageResult.getMessageCount();
-                List<ProtoMessage> protoMessageList = new ArrayList<>();
-                //服务端返回的是降序排列，需要颠倒一下
-                for(int i = size -1 ; i >= 0; i--){
-                    WFCMessage.Message wfcMessage = pullMessageResult.getMessage(i);
-                    if(protoService.getImMemoryStore().canPersistent(wfcMessage.getContent().getType())){
-                        ProtoMessage protoMessage = protoService.convertProtoMessage(wfcMessage);
-                        protoMessageList.add(protoMessage);
-                    }
+                if(iLoadRemoteMessagesCallback instanceof GapFillRequest){
+                    ((GapFillRequest) iLoadRemoteMessagesCallback).onPage(pullMessageResult);
+                    return;
                 }
+                //普通远程历史同样落库，见 ConversationGapFiller.applyHistoryPage
+                List<ProtoMessage> protoMessageList = ConversationGapFiller.applyHistoryPage(protoService.getGapSink(), pullMessageResult);
                 ProtoMessage[] protoMessages = new ProtoMessage[protoMessageList.size()];
                 protoMessageList.toArray(protoMessages);
                 iLoadRemoteMessagesCallback.onSuccess(protoMessages);

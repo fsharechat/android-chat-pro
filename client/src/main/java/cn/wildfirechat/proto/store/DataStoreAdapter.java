@@ -322,6 +322,36 @@ public class DataStoreAdapter implements ImMemoryStore{
     }
 
     @Override
+    public boolean hasOlderMessage(String target, long beforeUid) {
+        return false;
+    }
+
+    @Override
+    public void insertConversationGap(String target, long beforeUid) {
+
+    }
+
+    @Override
+    public void deleteConversationGap(String target, long beforeUid) {
+
+    }
+
+    @Override
+    public long getConversationGapFloor(String target) {
+        return 0;
+    }
+
+    @Override
+    public long getLocalFloorUid(String target, long belowUid) {
+        return 0;
+    }
+
+    @Override
+    public void addHistoryMessages(String target, List<ProtoMessage> protoMessages, boolean updateConversation) {
+
+    }
+
+    @Override
     public void setGroupReportUsers(String target,String user) {
 
     }

@@ -17,6 +17,7 @@ abstract class SqliteDatabaseStore extends DataStoreAdapter{
     protected ChatStoreHelper dbHelper;
     private static final String DELETE_TABLE_MESSAGES = "delete from "+ChatStoreHelper.TABLE_MESSAGES;
     private static final String DELETE_TABLE_CONVERSATIONS = "delete from "+ChatStoreHelper.TABLE_CONVERSATIONS;
+    private static final String DELETE_TABLE_CONVERSATION_GAPS = "delete from "+ChatStoreHelper.TABLE_CONVERSATION_GAPS;
 
 
     protected SqliteDatabaseStore(Context context){
@@ -74,6 +75,7 @@ abstract class SqliteDatabaseStore extends DataStoreAdapter{
         if(isDatabaseOpen()){
             database.execSQL(DELETE_TABLE_CONVERSATIONS);
             database.execSQL(DELETE_TABLE_MESSAGES);
+            database.execSQL(DELETE_TABLE_CONVERSATION_GAPS);
         }
     }
 }

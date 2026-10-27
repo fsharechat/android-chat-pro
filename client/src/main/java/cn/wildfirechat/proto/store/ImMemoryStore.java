@@ -77,6 +77,16 @@ public interface ImMemoryStore {
     void saveRequestProtoMessageIds(Set<String> protoMessageIds);
     Set<String> getRequestProtoMessageIds();
     void stop();
+    /** 本地该会话是否有 0 < uid < beforeUid 的消息 */
+    boolean hasOlderMessage(String target, long beforeUid);
+    void insertConversationGap(String target, long beforeUid);
+    void deleteConversationGap(String target, long beforeUid);
+    /** 该会话最高的普通断层（不含尾部断层），本地分页不返回低于它的消息；0 表示没有 */
+    long getConversationGapFloor(String target);
+    /** 断层下方本地最新一条的 uid，没有返回 0 */
+    long getLocalFloorUid(String target, long belowUid);
+    /** 补拉断层得到的消息落库，updateConversation 为 false 时不改会话的最后一条消息、不计未读 */
+    void addHistoryMessages(String target, List<ProtoMessage> protoMessages, boolean updateConversation);
     void setGroupReportUsers(String target,String user);
     List<String> getGroupReportUsers(String target);
 }
