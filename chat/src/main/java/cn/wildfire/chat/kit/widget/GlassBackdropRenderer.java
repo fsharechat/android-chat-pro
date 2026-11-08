@@ -2,10 +2,18 @@ package cn.wildfire.chat.kit.widget;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.view.View;
+import android.view.MotionEvent;
+import android.view.ViewConfiguration;
+import android.widget.ScrollView;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -35,7 +43,21 @@ public final class GlassBackdropRenderer {
     private int generation;
     private ViewTreeObserver observer;
     private final Runnable refresh;
-    private final ViewTreeObserver.OnScrollChangedListener scrollListener = this::requestRefresh;
+    private final ViewTreeObserver.OnScrollChangedListener scrollListener = this::onTreeScrolled;
+    private final ViewTreeObserver.OnGlobalLayoutListener layoutListener = this::bindScrollSources;
+    private final ArrayList<RecyclerView> observedLists = new ArrayList<>();
+    private final ArrayList<ScrollBinding> observedScrollViews = new ArrayList<>();
+    private final Rect sourceBounds = new Rect(), barBounds = new Rect();
+    private final int touchSlop;
+    private boolean touchCandidate, contentDragging;
+    private float initialX, initialY, lastY, dragShift;
+    private final Runnable settleSurface;
+    private final RecyclerView.OnScrollListener listScrollListener = new RecyclerView.OnScrollListener() {
+        @Override public void onScrolled(RecyclerView view, int dx, int dy) {
+            requestRefresh();
+            onNativeScroll(dy);
+        }
+    };
     private final ViewTreeObserver.OnPreDrawListener drawListener;
     // Accessed exclusively by the single worker thread.
     private int[] pixels, scratch;
@@ -43,6 +65,8 @@ public final class GlassBackdropRenderer {
     public GlassBackdropRenderer(View source, GlassTabBar bar) {
         this.source = source;
         this.bar = bar;
+        touchSlop = ViewConfiguration.get(source.getContext()).getScaledTouchSlop();
+        settleSurface = () -> bar.setScrollEffect(0, 0);
         refresh = () -> { if (active) source.invalidate(); };
         drawListener = () -> {
             if (active && (dirty || isDirty(source))) capture();
@@ -56,6 +80,8 @@ public final class GlassBackdropRenderer {
         observer = source.getViewTreeObserver();
         observer.addOnPreDrawListener(drawListener);
         observer.addOnScrollChangedListener(scrollListener);
+        observer.addOnGlobalLayoutListener(layoutListener);
+        bindScrollSources();
         requestRefresh();
     }
     public void stop() {
@@ -64,9 +90,15 @@ public final class GlassBackdropRenderer {
         if (observer != null && observer.isAlive()) {
             observer.removeOnPreDrawListener(drawListener);
             observer.removeOnScrollChangedListener(scrollListener);
+            observer.removeOnGlobalLayoutListener(layoutListener);
         }
+        for (RecyclerView list : observedLists) list.removeOnScrollListener(listScrollListener);
+        observedLists.clear();
+        observedScrollViews.clear();
+        touchCandidate = contentDragging = false;
         observer = null;
         main.removeCallbacks(refresh);
+        main.removeCallbacks(settleSurface);
     }
     public void close() {
         stop();
@@ -81,6 +113,94 @@ public final class GlassBackdropRenderer {
         dirty = true;
         if (active) source.postInvalidateOnAnimation();
     }
+    /** Observes content gestures without taking them away from lists, the pager or buttons. */
+    public void onContentTouchEvent(MotionEvent event) {
+        if (!active) return;
+        float x = event.getRawX(), y = event.getRawY();
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                touchCandidate = source.getGlobalVisibleRect(sourceBounds)
+                        && sourceBounds.contains((int) x, (int) y)
+                        && !(bar.getGlobalVisibleRect(barBounds) && barBounds.contains((int) x, (int) y));
+                contentDragging = false;
+                initialX = x; initialY = lastY = y; dragShift = 0;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (!touchCandidate) break;
+                if (event.getPointerCount() != 1) {
+                    releaseSurface();
+                    break;
+                }
+                float horizontal = Math.abs(x - initialX), vertical = Math.abs(y - initialY);
+                if (!contentDragging && horizontal > touchSlop && horizontal > vertical) {
+                    releaseSurface();
+                    break;
+                }
+                if (!contentDragging && vertical <= touchSlop) break;
+                contentDragging = true;
+                float dy = y - lastY;
+                lastY = y;
+                float density = source.getResources().getDisplayMetrics().density;
+                dragShift = Math.max(-1, Math.min(1, dragShift + dy / (160 * density)));
+                bar.setScrollEffect(dragShift, Math.min(1, .35f + Math.abs(dy) / (24 * density)));
+                main.removeCallbacks(settleSurface);
+                requestRefresh();
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                releaseSurface();
+                break;
+            default: break;
+        }
+    }
+    private void releaseSurface() {
+        touchCandidate = contentDragging = false;
+        main.removeCallbacks(settleSurface);
+        bar.setScrollEffect(0, 0);
+    }
+    private void onNativeScroll(int dy) {
+        if (!active || contentDragging || dy == 0) return;
+        float amount = Math.min(1, Math.abs(dy) / (24 * source.getResources().getDisplayMetrics().density));
+        bar.setScrollEffect(Math.signum(dy) * amount, .35f + .65f * amount);
+        main.removeCallbacks(settleSurface);
+        main.postDelayed(settleSurface, 100);
+    }
+    private void onTreeScrolled() {
+        requestRefresh();
+        for (ScrollBinding binding : observedScrollViews) {
+            int y = binding.view.getScrollY();
+            onNativeScroll(y - binding.lastY);
+            binding.lastY = y;
+        }
+    }
+    private void bindScrollSources() { observeScrollSource(source); }
+    private void observeScrollSource(View view) {
+        if (view instanceof RecyclerView) {
+            RecyclerView list = (RecyclerView) view;
+            if (!observedLists.contains(list)) {
+                list.addOnScrollListener(listScrollListener);
+                observedLists.add(list);
+            }
+            // Recycled rows do not own the home page's scroll position.
+            return;
+        }
+        if (view instanceof ScrollView) {
+            boolean observed = false;
+            for (ScrollBinding binding : observedScrollViews) if (binding.view == view) observed = true;
+            if (!observed) observedScrollViews.add(new ScrollBinding((ScrollView) view));
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) observeScrollSource(group.getChildAt(i));
+        }
+    }
+    private static final class ScrollBinding {
+        final ScrollView view;
+        int lastY;
+        ScrollBinding(ScrollView view) { this.view = view; lastY = view.getScrollY(); }
+    }
+
     private boolean isDirty(View view) {
         if (view.isDirty()) return true;
         if (view instanceof ViewGroup) {
@@ -115,8 +235,10 @@ public final class GlassBackdropRenderer {
         buffer.eraseColor(source.getResources().getColor(R.color.paper));
         Canvas canvas = new CaptureCanvas(buffer);
         canvas.scale(width / (bar.getWidth() + 2 * padding), height / (bar.getHeight() + 2 * padding));
-        canvas.translate(sourceLocation[0] - barLocation[0] + padding,
-                sourceLocation[1] - barLocation[1] + padding);
+        // Direct View.draw(Canvas) does not apply the scroll translation normally supplied
+        // by its parent. Without this, a ViewPager always samples its first page.
+        canvas.translate(sourceLocation[0] - barLocation[0] + padding - source.getScrollX(),
+                sourceLocation[1] - barLocation[1] + padding - source.getScrollY());
         source.draw(canvas);
         lastCapture = now;
         dirty = false;

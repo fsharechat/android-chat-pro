@@ -11,6 +11,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -141,6 +142,12 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
 
     public void hideUnreadFriendRequestBadgeView() {
         bottomNavigationView.setBadge(1, 0);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (glassBackdropRenderer != null) glassBackdropRenderer.onContentTouchEvent(event);
+        return super.dispatchTouchEvent(event);
     }
 
     @Override

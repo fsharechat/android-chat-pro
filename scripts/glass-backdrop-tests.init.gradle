@@ -1,0 +1,7 @@
+// Opt-in native regression runner; regular app builds keep their existing configuration.
+// ./gradlew -I scripts/glass-backdrop-tests.init.gradle :chat:assembleDebug :chat:assembleDebugAndroidTest
+allprojects {
+    plugins.withId('com.android.application') {
+        android.defaultConfig.testInstrumentationRunner = 'cn.wildfire.chat.kit.widget.GlassBackdropInstrumentation'
+    }
+}

@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Matrix;
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
@@ -39,6 +42,10 @@ public class GlassTabBar extends ViewGroup {
     private long lastFrame;
     private Bitmap backdrop;
     private float backdropPadding;
+    private float surfaceActivity, targetSurfaceActivity, surfaceActivityVelocity;
+    private float surfaceShift, targetSurfaceShift, surfaceShiftVelocity;
+    private RadialGradient surfaceLight;
+    private final Matrix surfaceLightMatrix = new Matrix();
     private OnSelectListener listener;
 
     public GlassTabBar(Context context, AttributeSet attrs) {
@@ -117,6 +124,21 @@ public class GlassTabBar extends ViewGroup {
         if (animated) startSpring();
         else { position = target; velocity = 0; applyColors(); invalidate(); }
     }
+    /** Material response is shared by every page, including short pages with a plain backdrop. */
+    void setScrollEffect(float shift, float activity) {
+        targetSurfaceShift = Math.max(-1, Math.min(1, shift));
+        targetSurfaceActivity = Math.max(0, Math.min(1, activity));
+        startSpring();
+    }
+
+    @Override protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        if (width > 0) {
+            surfaceLight = new RadialGradient(0, 0, width * .65f,
+                    0xffffffff, 0x00ffffff, Shader.TileMode.CLAMP);
+        }
+    }
+
     void setBackdrop(Bitmap bitmap, float padding) {
         backdrop = bitmap;
         backdropPadding = padding;
@@ -151,8 +173,25 @@ public class GlassTabBar extends ViewGroup {
             canvas.drawBitmap(backdrop, null, new RectF(-backdropPadding, -backdropPadding,
                     getWidth() + backdropPadding, getHeight() + backdropPadding), paint);
         }
-        paint.setColor(color(backdrop == null ? R.color.glass_tab_fallback : R.color.glass_tab_material));
+        int material = color(backdrop == null ? R.color.glass_tab_fallback : R.color.glass_tab_material);
+        float activity = Math.max(0, Math.min(1, surfaceActivity));
+        // Reveal a little more of the real blurred scene while scrolling. The fallback remains
+        // opaque enough to read when no sample is available.
+        if (backdrop != null) {
+            int alpha = Math.round(android.graphics.Color.alpha(material) * (1 - .18f * activity));
+            material = ColorUtils.setAlphaComponent(material, alpha);
+        }
+        paint.setColor(material);
         canvas.drawPaint(paint);
+        if (surfaceLight != null && activity > .001f) {
+            surfaceLightMatrix.setTranslate(getWidth() * (.3f + surfaceShift * .12f),
+                    getHeight() * (.5f + surfaceShift * .8f));
+            surfaceLight.setLocalMatrix(surfaceLightMatrix);
+            paint.setShader(surfaceLight);
+            paint.setAlpha(Math.round(30 * activity));
+            canvas.drawPaint(paint);
+            paint.setShader(null);
+        }
         canvas.restoreToCount(save);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dp(1));
@@ -234,10 +273,20 @@ public class GlassTabBar extends ViewGroup {
                 position += velocity * step;
                 scaleVelocity += (380 * (targetScale - scale) - 29.24f * scaleVelocity) * step;
                 scale += scaleVelocity * step;
+                surfaceActivityVelocity += (380 * (targetSurfaceActivity - surfaceActivity) - 29.24f * surfaceActivityVelocity) * step;
+                surfaceActivity += surfaceActivityVelocity * step;
+                surfaceShiftVelocity += (380 * (targetSurfaceShift - surfaceShift) - 29.24f * surfaceShiftVelocity) * step;
+                surfaceShift += surfaceShiftVelocity * step;
             }
             boolean settled = Math.abs(target - position) < .001f && Math.abs(velocity) < .01f
-                    && Math.abs(targetScale - scale) < .001f && Math.abs(scaleVelocity) < .01f;
-            if (settled) { position = target; scale = targetScale; velocity = scaleVelocity = 0; }
+                    && Math.abs(targetScale - scale) < .001f && Math.abs(scaleVelocity) < .01f
+                    && Math.abs(targetSurfaceActivity - surfaceActivity) < .001f && Math.abs(surfaceActivityVelocity) < .01f
+                    && Math.abs(targetSurfaceShift - surfaceShift) < .001f && Math.abs(surfaceShiftVelocity) < .01f;
+            if (settled) {
+                position = target; scale = targetScale; velocity = scaleVelocity = 0;
+                surfaceActivity = targetSurfaceActivity; surfaceShift = targetSurfaceShift;
+                surfaceActivityVelocity = surfaceShiftVelocity = 0;
+            }
             applyColors();
             invalidate();
             running = !settled;
@@ -250,6 +299,8 @@ public class GlassTabBar extends ViewGroup {
         position = target = selectedIndex;
         scale = targetScale = 1;
         velocity = scaleVelocity = 0;
+        surfaceActivity = targetSurfaceActivity = surfaceActivityVelocity = 0;
+        surfaceShift = targetSurfaceShift = surfaceShiftVelocity = 0;
         applyColors();
         invalidate();
     }
