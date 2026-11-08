@@ -10,7 +10,6 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -27,8 +26,6 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.king.zxing.CaptureActivity;
 import com.king.zxing.Intents;
 
@@ -56,12 +53,13 @@ import cn.wildfire.chat.kit.user.ChangeMyNameActivity;
 import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfire.chat.kit.widget.ViewPagerFixed;
+import cn.wildfire.chat.kit.widget.GlassTabBar;
+import cn.wildfire.chat.kit.widget.GlassBackdropRenderer;
 import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
 import cn.wildfirechat.model.UserInfo;
-import q.rorbin.badgeview.QBadgeView;
 import cn.wildfire.chat.kit.widget.dialog.FshareContextMenu;
 
 public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageChangeListener {
@@ -69,12 +67,11 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
     private List<Fragment> mFragmentList = new ArrayList<>(3);
 
     @Bind(R.id.bottomNavigationView)
-    BottomNavigationView bottomNavigationView;
+    GlassTabBar bottomNavigationView;
     @Bind(R.id.vpContent)
     ViewPagerFixed mVpContent;
 
-    private QBadgeView unreadMessageUnreadBadgeView;
-    private QBadgeView unreadFriendRequestBadgeView;
+    private GlassBackdropRenderer glassBackdropRenderer;
 
     private static final int REQUEST_CODE_SCAN_QR_CODE = 100;
     private static final int REQUEST_IGNORE_BATTERY_CODE = 101;
@@ -112,18 +109,7 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
                 .get(ConversationListViewModel.class);
         conversationListViewModel.unreadCountLiveData().observe(this, unreadCount -> {
 
-            if (unreadCount != null && unreadCount.unread > 0) {
-                if (unreadMessageUnreadBadgeView == null) {
-                    BottomNavigationMenuView bottomNavigationMenuView = ((BottomNavigationMenuView) bottomNavigationView.getChildAt(0));
-                    View view = bottomNavigationMenuView.getChildAt(0);
-                    unreadMessageUnreadBadgeView = new QBadgeView(MainActivity.this);
-                    unreadMessageUnreadBadgeView.bindTarget(view);
-                    styleTabBadge(unreadMessageUnreadBadgeView);
-                }
-                unreadMessageUnreadBadgeView.setBadgeNumber(unreadCount.unread);
-            } else if (unreadMessageUnreadBadgeView != null) {
-                unreadMessageUnreadBadgeView.hide(true);
-            }
+            bottomNavigationView.setBadge(0, unreadCount == null ? 0 : unreadCount.unread);
         });
 
         conversationListViewModel.connectionStatusLiveData().observe(this,status ->{
@@ -146,43 +132,34 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
 
         ContactViewModel contactViewModel = ViewModelProviders.of(this).get(ContactViewModel.class);
         contactViewModel.friendRequestUpdatedLiveData().observe(this, count -> {
-            if (count == null || count == 0) {
-                if (unreadFriendRequestBadgeView != null) {
-                    unreadFriendRequestBadgeView.hide(true);
-                }
-            } else {
-                if (unreadFriendRequestBadgeView == null) {
-                    BottomNavigationMenuView bottomNavigationMenuView = ((BottomNavigationMenuView) bottomNavigationView.getChildAt(0));
-                    View view = bottomNavigationMenuView.getChildAt(1);
-                    unreadFriendRequestBadgeView = new QBadgeView(MainActivity.this);
-                    unreadFriendRequestBadgeView.bindTarget(view);
-                    styleTabBadge(unreadFriendRequestBadgeView);
-                }
-                unreadFriendRequestBadgeView.setBadgeNumber(count);
-            }
+            bottomNavigationView.setBadge(1, count == null ? 0 : count);
         });
         if (checkDisplayName()) {
             ignoreBatteryOption();
         }
     }
 
-    /**
-     * 让底部导航角标紧贴 tab 图标右上角（iOS 风格）
-     */
-    private void styleTabBadge(QBadgeView badgeView) {
-        float density = getResources().getDisplayMetrics().density;
-        float itemWidthDp = getResources().getDisplayMetrics().widthPixels / 3f / density;
-        badgeView.setBadgeGravity(Gravity.TOP | Gravity.END);
-        badgeView.setGravityOffset(itemWidthDp / 2f - 22, 2, true);
-        badgeView.setBadgeTextSize(10, true);
-        badgeView.setBadgeBackgroundColor(getResources().getColor(R.color.coral));
+    public void hideUnreadFriendRequestBadgeView() {
+        bottomNavigationView.setBadge(1, 0);
     }
 
-    public void hideUnreadFriendRequestBadgeView() {
-        if (unreadFriendRequestBadgeView != null) {
-            unreadFriendRequestBadgeView.hide(true);
-            unreadFriendRequestBadgeView = null;
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (glassBackdropRenderer != null) glassBackdropRenderer.start();
+    }
+
+    @Override
+    protected void onStop() {
+        if (glassBackdropRenderer != null) glassBackdropRenderer.stop();
+        bottomNavigationView.finishInteraction();
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (glassBackdropRenderer != null) glassBackdropRenderer.close();
+        super.onDestroy();
     }
 
     @Override
@@ -216,22 +193,16 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
         mVpContent.setAdapter(new HomeFragmentPagerAdapter(getSupportFragmentManager(), mFragmentList));
         mVpContent.setOnPageChangeListener(this);
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.conversation_list:
-                    mVpContent.setCurrentItem(0);
-                    break;
-                case R.id.contact:
-                    mVpContent.setCurrentItem(1);
-                    break;
-                case R.id.me:
-                    mVpContent.setCurrentItem(2);
-                    break;
-                default:
-                    break;
+        bottomNavigationView.setOnSelectListener(index -> {
+            if (mVpContent.getCurrentItem() != index) {
+                mVpContent.setCurrentItem(index, true);
+            } else {
+                bottomNavigationView.setPosition(index, true);
             }
-            return true;
         });
+        bottomNavigationView.setSelectedIndex(mVpContent.getCurrentItem());
+        bottomNavigationView.setPosition(mVpContent.getCurrentItem(), false);
+        glassBackdropRenderer = new GlassBackdropRenderer(mVpContent, bottomNavigationView);
     }
 
     /**
@@ -328,23 +299,13 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        bottomNavigationView.setPosition(position + positionOffset, false);
+        if (glassBackdropRenderer != null) glassBackdropRenderer.requestRefresh();
     }
 
     @Override
     public void onPageSelected(int position) {
-        switch (position) {
-            case 0:
-                bottomNavigationView.setSelectedItemId(R.id.conversation_list);
-                break;
-            case 1:
-                bottomNavigationView.setSelectedItemId(R.id.contact);
-                break;
-            case 2:
-                bottomNavigationView.setSelectedItemId(R.id.me);
-                break;
-            default:
-                break;
-        }
+        bottomNavigationView.setSelectedIndex(position);
         contactFragment.showQuickIndexBar(position == 1);
     }
 
@@ -354,7 +315,8 @@ public class MainActivity extends WfcBaseActivity implements ViewPager.OnPageCha
             //滚动过程中隐藏快速导航条
             contactFragment.showQuickIndexBar(false);
         } else {
-            contactFragment.showQuickIndexBar(true);
+            contactFragment.showQuickIndexBar(mVpContent.getCurrentItem() == 1);
+            bottomNavigationView.setPosition(mVpContent.getCurrentItem(), true);
         }
     }
 

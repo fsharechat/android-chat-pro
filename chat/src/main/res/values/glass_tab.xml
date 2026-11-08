@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="glass_tab_height">62dp</dimen>
+    <dimen name="glass_tab_side_margin">20dp</dimen>
+    <dimen name="glass_tab_bottom_gap">8dp</dimen>
+    <dimen name="glass_tab_max_width">420dp</dimen>
+    <dimen name="glass_tab_content_inset">82dp</dimen>
+    <color name="glass_tab_material">#B8F7F8FA</color>
+    <color name="glass_tab_fallback">#EDF7F8FA</color>
+    <color name="glass_tab_border">#99FFFFFF</color>
+    <color name="glass_tab_indicator">#10000000</color>
+    <string name="glass_tab_messages">消息</string>
+    <string name="glass_tab_contacts">联系人</string>
+    <string name="glass_tab_me">我的</string>
+    <string name="glass_tab_unread">%1$s，%2$s条未读</string>
+</resources>

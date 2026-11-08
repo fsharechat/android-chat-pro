@@ -30,6 +30,7 @@ import cn.wildfire.chat.kit.group.GroupListActivity;
 import cn.wildfire.chat.kit.user.UserInfoActivity;
 import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfire.chat.kit.widget.QuickIndexBar;
+import cn.wildfire.chat.kit.widget.GlassEdgeEffectFactory;
 import cn.wildfirechat.model.UserInfo;
 
 public class ContactFragment extends BaseContactFragment implements QuickIndexBar.OnLetterUpdateListener {
@@ -76,6 +77,11 @@ public class ContactFragment extends BaseContactFragment implements QuickIndexBa
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        contactRecyclerView.setEdgeEffectFactory(new GlassEdgeEffectFactory());
+        contactRecyclerView.setClipToPadding(false);
+        contactRecyclerView.setPadding(contactRecyclerView.getPaddingLeft(), contactRecyclerView.getPaddingTop(),
+                contactRecyclerView.getPaddingRight(), getResources().getDimensionPixelSize(cn.wildfirechat.chat.R.dimen.glass_tab_content_inset));
 
         contactViewModel.contactListUpdatedLiveData().observeForever(contactListUpdateLiveDataObserver);
         contactViewModel.friendRequestUpdatedLiveData().observeForever(friendRequestUpdateLiveDataObserver);

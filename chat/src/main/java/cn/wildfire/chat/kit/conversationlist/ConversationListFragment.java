@@ -32,6 +32,7 @@ import cn.wildfire.chat.kit.conversationlist.notification.ConnectionStatusNotifi
 import cn.wildfire.chat.kit.conversationlist.notification.StatusNotificationViewModel;
 import cn.wildfire.chat.kit.user.UserViewModel;
 import cn.wildfire.chat.kit.widget.dialog.FshareDialog;
+import cn.wildfire.chat.kit.widget.GlassEdgeEffectFactory;
 import cn.wildfirechat.chat.R;
 import cn.wildfirechat.client.ConnectionStatus;
 import cn.wildfirechat.model.Conversation;
@@ -108,6 +109,7 @@ public class ConversationListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.conversationlist_frament, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setEdgeEffectFactory(new GlassEdgeEffectFactory());
         init();
         return view;
     }

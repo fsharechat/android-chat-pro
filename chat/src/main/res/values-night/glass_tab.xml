@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="glass_tab_material">#B8222429</color>
+    <color name="glass_tab_fallback">#ED222429</color>
+    <color name="glass_tab_border">#26FFFFFF</color>
+    <color name="glass_tab_indicator">#24FFFFFF</color>
+</resources>

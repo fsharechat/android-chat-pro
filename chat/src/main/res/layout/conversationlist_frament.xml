@@ -6,6 +6,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/glass_tab_content_inset"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

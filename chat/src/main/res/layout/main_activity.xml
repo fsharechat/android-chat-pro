@@ -24,20 +24,25 @@
             app:theme="@style/AppTheme.Appbar" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <cn.wildfire.chat.kit.widget.ViewPagerFixed
-        android:id="@+id/vpContent"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bottom_nav_background"
-        app:labelVisibilityMode="labeled"
-        app:elevation="0dp"
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color"
-        app:menu="@menu/main_bottom_navigation" />
+        <cn.wildfire.chat.kit.widget.ViewPagerFixed
+            android:id="@+id/vpContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <cn.wildfire.chat.kit.widget.GlassTabBar
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/glass_tab_height"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginLeft="@dimen/glass_tab_side_margin"
+            android:layout_marginRight="@dimen/glass_tab_side_margin"
+            android:layout_marginBottom="@dimen/glass_tab_bottom_gap" />
+    </FrameLayout>
 </LinearLayout>
