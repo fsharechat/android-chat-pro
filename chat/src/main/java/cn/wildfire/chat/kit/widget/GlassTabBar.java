@@ -25,7 +25,8 @@ import androidx.core.graphics.ColorUtils;
 import cn.wildfirechat.chat.R;
 
 /** Floating material bar. Position is continuous, shared by the pager and the spring. */
-public class GlassTabBar extends ViewGroup {
+public class GlassTabBar extends ViewGroup implements GlassBackdropRenderer.Target {
+    @Override public View backdropView() { return this; }
     public interface OnSelectListener { void onSelect(int index); }
 
     private final FrameLayout[] items = new FrameLayout[3];
@@ -125,7 +126,7 @@ public class GlassTabBar extends ViewGroup {
         else { position = target; velocity = 0; applyColors(); invalidate(); }
     }
     /** Material response is shared by every page, including short pages with a plain backdrop. */
-    void setScrollEffect(float shift, float activity) {
+    public void setScrollEffect(float shift, float activity) {
         targetSurfaceShift = Math.max(-1, Math.min(1, shift));
         targetSurfaceActivity = Math.max(0, Math.min(1, activity));
         startSpring();
@@ -139,7 +140,7 @@ public class GlassTabBar extends ViewGroup {
         }
     }
 
-    void setBackdrop(Bitmap bitmap, float padding) {
+    public void setBackdrop(Bitmap bitmap, float padding) {
         backdrop = bitmap;
         backdropPadding = padding;
         invalidate();

@@ -240,6 +240,7 @@ public class ConversationActivity extends WfcBaseActivity implements
     protected void onResume() {
         super.onResume();
         isResume = true;
+        if (inputPanel != null) inputPanel.onActivityResume();
         //upload read report
         if(conversationViewModel != null && conversation != null){
             conversationViewModel.uploadReport(conversation);
@@ -316,6 +317,7 @@ public class ConversationActivity extends WfcBaseActivity implements
     private void initView() {
         handler = new Handler();
         rootLinearLayout.addOnKeyboardShownListener(this);
+        rootLinearLayout.addOnKeyboardHiddenListener(this);
 
         swipeRefreshLayout.setOnRefreshListener(this::loadMoreOldMessages);
 
@@ -325,6 +327,7 @@ public class ConversationActivity extends WfcBaseActivity implements
         adapter.setOnPortraitLongClickListener(this);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setEdgeEffectFactory(new cn.wildfire.chat.kit.widget.GlassEdgeEffectFactory());
         recyclerView.setAdapter(adapter);
         ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -334,6 +337,7 @@ public class ConversationActivity extends WfcBaseActivity implements
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     // 用户主动拖动时立即停止自动跟底，避免流式输出时列表上下跳动
                     moveToBottom = false;
+                    if (inputPanel.extension.canHideOnScroll()) inputPanel.collapse();
                     return;
                 }
                 if (newState != RecyclerView.SCROLL_STATE_IDLE) {
@@ -355,6 +359,21 @@ public class ConversationActivity extends WfcBaseActivity implements
 
         inputPanel.init(this, rootLinearLayout);
         inputPanel.setOnConversationInputPanelStateChangeListener(this);
+        inputPanel.bindBackdrop(swipeRefreshLayout);
+        inputPanel.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> updateComposerInset());
+        inputPanel.post(this::updateComposerInset);
+    }
+
+    private void updateComposerInset() {
+        int bottom = inputPanel.getHeight() + Math.round(8 * getResources().getDisplayMetrics().density);
+        if (recyclerView.getPaddingBottom() == bottom) return;
+        int anchor = layoutManager.findFirstVisibleItemPosition();
+        View first = layoutManager.findViewByPosition(anchor);
+        int top = first == null ? 0 : first.getTop() - recyclerView.getPaddingTop();
+        boolean followsBottom = moveToBottom && recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE;
+        recyclerView.setPadding(recyclerView.getPaddingLeft(), recyclerView.getPaddingTop(), recyclerView.getPaddingRight(), bottom);
+        if (followsBottom && adapter.getItemCount() > 0) scrollToStreamingBottom();
+        else if (anchor >= 0) layoutManager.scrollToPositionWithOffset(anchor, top);
     }
 
     private void setupConversation(Conversation conversation) {
@@ -677,6 +696,7 @@ public class ConversationActivity extends WfcBaseActivity implements
             quitChatRoom();
         }
 
+        inputPanel.dispose();
         super.onDestroy();
         conversationViewModel.messageLiveData().removeObserver(messageLiveDataObserver);
         conversationViewModel.messageUpdateLiveData().removeObserver(messageUpdateLiveDatObserver);
@@ -691,11 +711,10 @@ public class ConversationActivity extends WfcBaseActivity implements
 
     @Override
     public void onBackPressed() {
-        isResume = false;
-        if (rootLinearLayout.getCurrentInput() != null) {
-            rootLinearLayout.hideAttachedInput(true);
+        if (rootLinearLayout.isInputOpen() || inputPanel.isRecording()) {
             inputPanel.collapse();
         } else {
+            isResume = false;
             super.onBackPressed();
         }
     }
@@ -703,7 +722,7 @@ public class ConversationActivity extends WfcBaseActivity implements
     @Override
     public void onKeyboardShown() {
         inputPanel.onKeyboardShown();
-        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        if (moveToBottom && adapter.getItemCount() > 0) scrollToStreamingBottom();
     }
 
     @Override
@@ -786,7 +805,7 @@ public class ConversationActivity extends WfcBaseActivity implements
 
     @Override
     public void onInputPanelExpanded() {
-        recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+        if (moveToBottom && adapter.getItemCount() > 0) scrollToStreamingBottom();
     }
 
     @Override

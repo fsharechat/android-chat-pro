@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="composer_material">#CC242833</color>
+    <color name="composer_fallback">#242833</color>
+    <color name="composer_border">#40FFFFFF</color>
+    <color name="composer_hint">#9CA6BB</color>
+</resources>

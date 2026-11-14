@@ -36,6 +36,7 @@ public class ConversationExtManager {
         registerExt(LocationExt.class);
         registerExt(AudioVoipExt.class);
         registerExt(VideoVoipExt.class);
+        registerExt(cn.wildfire.chat.kit.conversation.ext.VoiceMessageExt.class);
     }
 
     public void registerExt(Class<? extends ConversationExt> clazz) {

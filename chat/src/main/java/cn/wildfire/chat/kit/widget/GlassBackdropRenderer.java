@@ -29,9 +29,16 @@ public final class GlassBackdropRenderer {
         CaptureCanvas(Bitmap bitmap) { super(bitmap); }
     }
 
+    public interface Target {
+        View backdropView();
+        void setBackdrop(Bitmap bitmap, float padding);
+        default void setScrollEffect(float shift, float activity) {}
+    }
+
     private static final int DOWNSAMPLE = 8;
     private final View source;
-    private final GlassTabBar bar;
+    private final View bar;
+    private final Target target;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final int[] sourceLocation = new int[2], barLocation = new int[2];
@@ -62,11 +69,12 @@ public final class GlassBackdropRenderer {
     // Accessed exclusively by the single worker thread.
     private int[] pixels, scratch;
 
-    public GlassBackdropRenderer(View source, GlassTabBar bar) {
+    public GlassBackdropRenderer(View source, Target target) {
         this.source = source;
-        this.bar = bar;
+        this.target = target;
+        this.bar = target.backdropView();
         touchSlop = ViewConfiguration.get(source.getContext()).getScaledTouchSlop();
-        settleSurface = () -> bar.setScrollEffect(0, 0);
+        settleSurface = () -> target.setScrollEffect(0, 0);
         refresh = () -> { if (active) source.invalidate(); };
         drawListener = () -> {
             if (active && (dirty || isDirty(source))) capture();
@@ -104,7 +112,7 @@ public final class GlassBackdropRenderer {
         stop();
         closed = true;
         worker.shutdown();
-        bar.setBackdrop(null, 0);
+        target.setBackdrop(null, 0);
         recycle(displayed);
         recycle(spare);
         displayed = spare = null;
@@ -142,7 +150,7 @@ public final class GlassBackdropRenderer {
                 lastY = y;
                 float density = source.getResources().getDisplayMetrics().density;
                 dragShift = Math.max(-1, Math.min(1, dragShift + dy / (160 * density)));
-                bar.setScrollEffect(dragShift, Math.min(1, .35f + Math.abs(dy) / (24 * density)));
+                target.setScrollEffect(dragShift, Math.min(1, .35f + Math.abs(dy) / (24 * density)));
                 main.removeCallbacks(settleSurface);
                 requestRefresh();
                 break;
@@ -157,12 +165,12 @@ public final class GlassBackdropRenderer {
     private void releaseSurface() {
         touchCandidate = contentDragging = false;
         main.removeCallbacks(settleSurface);
-        bar.setScrollEffect(0, 0);
+        target.setScrollEffect(0, 0);
     }
     private void onNativeScroll(int dy) {
         if (!active || contentDragging || dy == 0) return;
         float amount = Math.min(1, Math.abs(dy) / (24 * source.getResources().getDisplayMetrics().density));
-        bar.setScrollEffect(Math.signum(dy) * amount, .35f + .65f * amount);
+        target.setScrollEffect(Math.signum(dy) * amount, .35f + .65f * amount);
         main.removeCallbacks(settleSurface);
         main.postDelayed(settleSurface, 100);
     }
@@ -258,7 +266,7 @@ public final class GlassBackdropRenderer {
                 } else {
                     spare = displayed;
                     displayed = captured;
-                    bar.setBackdrop(displayed, padding);
+                    target.setBackdrop(displayed, padding);
                 }
                 if (dirty && active) source.postInvalidateOnAnimation();
             });

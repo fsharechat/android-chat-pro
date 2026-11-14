@@ -48,13 +48,21 @@ public class ConversationExtPageView extends LinearLayout implements View.OnClic
     }
 
     public void updateExtViews(List<ConversationExt> exts) {
-        for (int index = 0; index < exts.size(); index++) {
-            ImageView iconImageView = findViewWithTag("icon_" + index);
-            iconImageView.setImageResource(exts.get(index).iconResId());
-            iconImageView.setBackgroundResource(R.drawable.selector_session_func);
-            iconImageView.setOnClickListener(this);
-            TextView titleTextView = findViewWithTag("title_" + index);
-            titleTextView.setText(exts.get(index).title(getContext()));
+        for (int index = 0; index < EXT_PER_PAGE; index++) {
+            View item = findViewById(getResources().getIdentifier("container_" + index, "id", getContext().getPackageName()));
+            item.setVisibility(index < exts.size() ? VISIBLE : INVISIBLE);
+            if (index >= exts.size()) continue;
+            ImageView icon = findViewWithTag("icon_" + index);
+            icon.setImageResource(exts.get(index).iconResId());
+            icon.setBackgroundResource(R.drawable.selector_session_func);
+            icon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            TextView title = findViewWithTag("title_" + index);
+            title.setText(exts.get(index).title(getContext()));
+            title.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            item.setTag("ext_" + index);
+            item.setContentDescription(title.getText());
+            item.setFocusable(true);
+            item.setOnClickListener(this);
         }
     }
 

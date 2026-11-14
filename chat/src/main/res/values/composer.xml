@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="composer_material">#B8DFE6F1</color>
+    <color name="composer_fallback">#EDF0F5</color>
+    <color name="composer_border">#B8C4D8</color>
+    <color name="composer_icon">@color/ink</color>
+    <color name="composer_hint">#788399</color>
+    <color name="composer_panel">@color/paper</color>
+    <color name="composer_send">@color/cobalt</color>
+    <string name="composer_hint">发消息…</string>
+    <string name="composer_more">更多功能</string>
+    <string name="composer_close_more">收起更多</string>
+    <string name="composer_emoji">表情</string>
+    <string name="composer_keyboard">键盘输入</string>
+    <string name="composer_voice">语音消息</string>
+    <string name="composer_hold">按住说话</string>
+    <string name="composer_record_permission">请允许使用麦克风后重新按住说话</string>
+    <string name="composer_record_error">无法开始录音，请检查麦克风权限后重试</string>
+</resources>

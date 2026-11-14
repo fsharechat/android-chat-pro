@@ -1,0 +1,6 @@
+// Opt-in native composer fixture; no real message sends or microphone recording.
+allprojects {
+    plugins.withId('com.android.application') {
+        android.defaultConfig.testInstrumentationRunner = 'cn.wildfire.chat.kit.conversation.ComposerInstrumentation'
+    }
+}

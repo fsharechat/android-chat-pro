@@ -1,125 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/inputPanelFrameLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <LinearLayout
+        android:orientation="vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+        <FrameLayout
+            android:id="@+id/composerDock"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:gravity="bottom"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/audioImageView"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_margin="5dp"
-                android:src="@mipmap/ic_cheat_voice" />
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:background="@color/white"
-                android:gravity="center">
-
-                <EditText
-                    android:id="@+id/editText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:background="@null"
-                    android:drawableBottom="@drawable/selector_edit_focus"
-                    android:maxLines="4"
-                    android:minHeight="30dp"
-                    android:textSize="16sp"
-                    android:visibility="visible" />
-
-                <Button
-                    android:id="@+id/audioButton"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:background="@drawable/shape_session_btn_voice_normal"
-                    android:text="@string/please_to_talk"
-                    android:textColor="@color/gray1"
-                    android:visibility="gone"
-                    tools:visibility="gone" />
-
-            </RelativeLayout>
-
-            <ImageView
-                android:id="@+id/emotionImageView"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_margin="5dp"
-                android:src="@mipmap/ic_cheat_emo" />
-
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:clipChildren="false">
+            <cn.wildfire.chat.kit.widget.ComposerGlassView
+                android:id="@+id/composerGlass"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no" />
             <ImageView
                 android:id="@+id/extImageView"
-                android:layout_width="45dp"
-                android:layout_height="35dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="5dp"
-                android:scaleType="centerInside"
-                android:src="@mipmap/ic_cheat_add" />
-
-            <Button
-                android:id="@+id/sendButton"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="45dp"
-                android:layout_height="35dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="2.5dp"
-                android:background="@drawable/shape_session_btn_send"
-                android:text="@string/send"
-                android:textColor="@color/text_color_white"
-                android:textSize="13sp"
-                android:visibility="visible" />
-        </LinearLayout>
-
-        <View style="@style/Line" />
-
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="start|bottom"
+                android:padding="13dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/composer_more"
+                android:src="@drawable/ic_composer_plus"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true" />
+            <LinearLayout
+                android:id="@+id/composerCapsule"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:layout_marginStart="56dp"
+                android:orientation="horizontal"
+                android:gravity="bottom"
+                android:paddingStart="4dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingEnd="4dp">
+                <ImageView
+                    android:id="@+id/composerKeyboard"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="14dp"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@string/composer_keyboard"
+                    android:src="@drawable/ic_composer_keyboard"
+                    android:visibility="gone"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true" />
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+                    <EditText
+                        android:id="@+id/editText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:maxLines="5"
+                        android:gravity="center_vertical|start"
+                        android:includeFontPadding="false"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="2dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:background="@null"
+                        android:inputType="textCapSentences|textMultiLine"
+                        android:imeOptions="flagNoExtractUi|flagNoEnterAction"
+                        android:textSize="16sp"
+                        android:textColor="@color/ink"
+                        android:textColorHint="@color/composer_hint"
+                        android:hint="@string/composer_hint" />
+                    <Button
+                        android:id="@+id/audioButton"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:padding="4dp"
+                        android:background="@android:color/transparent"
+                        android:text="@string/composer_hold"
+                        android:gravity="center"
+                        android:textSize="16sp"
+                        android:textAllCaps="false"
+                        android:textColor="@color/ink"
+                        android:visibility="gone" />
+                </FrameLayout>
+                <ImageView
+                    android:id="@+id/emotionImageView"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="13dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_composer_emoji"
+                    android:contentDescription="@string/composer_emoji"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true" />
+                <FrameLayout
+                    android:id="@+id/composerTail"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp">
+                    <ImageView
+                        android:id="@+id/audioImageView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="13dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_composer_voice"
+                        android:contentDescription="@string/composer_voice"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true" />
+                    <ImageView
+                        android:id="@+id/sendButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_composer_send"
+                        android:tint="@color/text_color_white"
+                        android:contentDescription="@string/send"
+                        android:background="@drawable/composer_send_background"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </FrameLayout>
+            </LinearLayout>
+        </FrameLayout>
         <cn.wildfire.chat.kit.widget.KeyboardHeightFrameLayout
             android:id="@+id/emotionContainerFrameLayout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_custom_keyboard_size"
-            android:background="@color/white"
+            android:background="@color/composer_panel"
             android:visibility="gone">
-            <!--表情-->
             <com.lqr.emoji.EmotionLayout
                 android:id="@+id/emotionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone" />
         </cn.wildfire.chat.kit.widget.KeyboardHeightFrameLayout>
-
         <cn.wildfire.chat.kit.widget.KeyboardHeightFrameLayout
             android:id="@+id/extContainerContainerLayout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_custom_keyboard_size"
-            android:background="@color/white"
-            android:minHeight="@dimen/conversation_ext_panel_min_height"
+            android:background="@color/composer_panel"
             android:visibility="gone">
-
-            <!--其他功能-->
             <cn.wildfire.chat.kit.widget.ViewPagerFixed
                 android:id="@+id/conversationExtViewPager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-
         </cn.wildfire.chat.kit.widget.KeyboardHeightFrameLayout>
     </LinearLayout>
 </merge>

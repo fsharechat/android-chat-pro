@@ -65,7 +65,7 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
     @Bind(R.id.extImageView)
     ImageView extImageView;
     @Bind(R.id.sendButton)
-    Button sendButton;
+    ImageView sendButton;
 
     @Bind(R.id.emotionContainerFrameLayout)
     KeyboardHeightFrameLayout emotionContainerFrameLayout;
@@ -85,6 +85,14 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
     private InputAwareLayout rootLinearLayout;
     private FragmentActivity activity;
     private AudioRecorderPanel audioRecorderPanel;
+
+    private final ComposerState state = new ComposerState();
+    private ImageView keyboardButton;
+    private View tail;
+    private cn.wildfire.chat.kit.widget.ComposerGlassView glass;
+    private cn.wildfire.chat.kit.widget.GlassBackdropRenderer backdrop;
+    private View plusView, capsule;
+    private boolean restoringDraft;
 
     private long lastTypingTime;
     private String draftString;
@@ -135,6 +143,16 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
 
         this.activity = activity;
         this.rootLinearLayout = rootInputAwareLayout;
+        keyboardButton = findViewById(R.id.composerKeyboard);
+        tail = findViewById(R.id.composerTail);
+        glass = findViewById(R.id.composerGlass);
+        plusView = findViewById(R.id.extImageView);
+        capsule = findViewById(R.id.composerCapsule);
+        keyboardButton.setOnClickListener(v -> showKeyboard());
+        editText.setOnTouchListener((v, event) -> {
+            if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN && state.surface() != ComposerState.Surface.KEYBOARD) showKeyboard();
+            return false;
+        });
 
         this.extension = new ConversationExtension(activity, this, extViewPager);
 
@@ -158,7 +176,7 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
                 int end = Selection.getSelectionEnd(buffer);
                 if (start == end) {
                     MentionSpan[] mentions = buffer.getSpans(start, end, MentionSpan.class);
-                    if (mentions.length > 0) {
+                    if (mentions.length > 0 && buffer.getSpanEnd(mentions[0]) == start) {
                         buffer.replace(
                                 buffer.getSpanStart(mentions[0]),
                                 buffer.getSpanEnd(mentions[0]),
@@ -192,12 +210,20 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
 
             @Override
             public void onRecordStateChanged(AudioRecorderPanel.RecordState state) {
+                boolean active = audioRecorderPanel.isRecording();
+                extImageView.setEnabled(!active);
+                emotionImageView.setEnabled(!active);
+                keyboardButton.setEnabled(!active);
                 if (state == AudioRecorderPanel.RecordState.START) {
                     TypingMessageContent content = new TypingMessageContent(TypingMessageContent.TYPING_VOICE);
                     conversationViewModel.sendMessage(content);
                 }
             }
         });
+
+        render();
+
+        audioRecorderPanel.attach(rootLinearLayout, audioButton);
 
         // emotion
         emotionLayout.setEmotionSelectedListener(this);
@@ -217,28 +243,27 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
 
     @OnClick(R.id.extImageView)
     void onExtImageViewClick() {
-        if (rootLinearLayout.getCurrentInput() == extContainerFrameLayout) {
-            rootLinearLayout.showSoftkey(editText);
-            hideConversationExtension();
-        } else {
-            emotionImageView.setImageResource(R.mipmap.ic_cheat_emo);
-            showConversationExtension();
-        }
+        if (state.surface() == ComposerState.Surface.MORE) { collapse(); return; }
+        if (isRecording()) return;
+        state.show(ComposerState.Surface.MORE);
+        rootLinearLayout.show(editText, extContainerFrameLayout);
+        render();
+        notifyPanelExpanded();
     }
 
     @OnClick(R.id.emotionImageView)
     void onEmotionImageViewClick() {
-        if (rootLinearLayout.getCurrentInput() == emotionContainerFrameLayout) {
-            hideEmotionLayout();
-        } else {
-            hideAudioButton();
-            showEmotionLayout();
-        }
+        if (isRecording()) return;
+        if (state.surface() == ComposerState.Surface.EMOJI) { showKeyboard(); return; }
+        state.show(ComposerState.Surface.EMOJI);
+        rootLinearLayout.show(editText, emotionContainerFrameLayout);
+        render();
+        notifyPanelExpanded();
     }
 
     @OnTextChanged(value = R.id.editText, callback = OnTextChanged.Callback.TEXT_CHANGED)
     void onInputTextChanged(CharSequence s, int start, int before, int count) {
-        if (activity.getCurrentFocus() == editText) {
+        if (!restoringDraft && conversation != null && activity.getCurrentFocus() == editText) {
             if (conversation.type == Conversation.ConversationType.Group) {
                 if (count == 1 && s.charAt(start) == '@') {
 //                    if (start == 0 || s.charAt(start - 1) == ' ') {
@@ -259,37 +284,33 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
 
     @OnTextChanged(value = R.id.editText, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     void afterInputTextChanged(Editable editable) {
-        if (editText.getText().toString().trim().length() > 0) {
-            if (activity.getCurrentFocus() == editText) {
-                notifyTyping(TypingMessageContent.TYPING_TEXT);
-            }
-            sendButton.setVisibility(View.VISIBLE);
-            extImageView.setVisibility(View.GONE);
-        } else {
-            sendButton.setVisibility(View.GONE);
-            extImageView.setVisibility(View.VISIBLE);
+        render();
+        if (!restoringDraft && conversation != null && editable.toString().trim().length() > 0 && editText.hasFocus()) {
+            notifyTyping(TypingMessageContent.TYPING_TEXT);
         }
     }
 
     @OnClick(R.id.audioImageView)
-    public void showRecordPanel() {
-        if (audioButton.isShown()) {
-            hideAudioButton();
-            editText.requestFocus();
-            rootLinearLayout.showSoftkey(editText);
-        } else {
-//            editText.clearFocus();
-            showAudioButton();
-            hideEmotionLayout();
-            rootLinearLayout.hideSoftkey(editText, null);
-            hideConversationExtension();
-        }
+    public void showRecordPanel() { showVoiceInput(); }
+
+    public void showVoiceInput() {
+        if (isRecording()) return;
+        state.enterVoice();
+        rootLinearLayout.hideCurrentInput(editText);
+        render();
+    }
+
+    private void showKeyboard() {
+        if (isRecording()) return;
+        state.show(ComposerState.Surface.KEYBOARD);
+        render();
+        rootLinearLayout.showSoftkey(editText);
     }
 
     @OnClick(R.id.sendButton)
     void sendMessage() {
         Editable content = editText.getText();
-        if (TextUtils.isEmpty(content)) {
+        if (TextUtils.isEmpty(content.toString().trim()) || android.view.inputmethod.BaseInputConnection.getComposingSpanStart(content) >= 0) {
             return;
         }
 
@@ -319,105 +340,84 @@ public class ConversationInputPanel extends FrameLayout implements IEmotionSelec
     }
 
     public void onKeyboardShown() {
-        hideEmotionLayout();
+        if (rootLinearLayout.isKeyboardRequested()) state.show(ComposerState.Surface.KEYBOARD);
+        syncPanelHeightWithKeyboard();
+        render();
     }
-
     public void onKeyboardHidden() {
-        // do nothing
+        if (state.surface() == ComposerState.Surface.KEYBOARD && !rootLinearLayout.isKeyboardRequested()) state.collapse();
+        render();
     }
-
     private void setDraft() {
-        ConversationInfo conversationInfo = conversationViewModel.getConversationInfo(conversation);
-        if (conversationInfo == null) {
-            return;
-        }
-        Draft draft = Draft.fromDraftJson(conversationInfo.draft);
-        draftString = draft == null ? "" : draft.getContent();
-
-        editText.setText(draftString);
+        ConversationInfo info = conversationViewModel.getConversationInfo(conversation);
+        if (info == null) return;
+        draftString = info.draft;
+        restoringDraft = true;
+        try { editText.setText(Draft.parseDraft(draftString)); }
+        finally { restoringDraft = false; }
+        editText.setSelection(editText.length());
+        render();
     }
-
+    public void onActivityResume() { if (backdrop != null) backdrop.start(); }
     public void onActivityPause() {
+        if (backdrop != null) backdrop.stop();
+        if (audioRecorderPanel != null) audioRecorderPanel.cancel();
+        if (conversationViewModel == null) return;
         Editable editable = editText.getText();
-        if (TextUtils.isEmpty(editable.toString().trim())) {
-            if (!TextUtils.isEmpty(draftString)) {
-                conversationViewModel.saveDraft(conversation, null);
-            }
-            return;
-        }
-        if (TextUtils.equals(this.draftString, editable)) {
-            return;
-        }
-        String draft = Draft.toDraftJson(editable);
-        conversationViewModel.saveDraft(conversation, draft);
-    }
-
-    private void showAudioButton() {
-        audioButton.setVisibility(View.VISIBLE);
-        audioRecorderPanel.attach(rootLinearLayout, audioButton);
-        editText.setVisibility(View.GONE);
-        sendButton.setVisibility(View.GONE);
-        audioImageView.setImageResource(R.mipmap.ic_cheat_keyboard);
-        rootLinearLayout.hideCurrentInput(editText);
-        rootLinearLayout.hideAttachedInput(true);
-    }
-
-
-    private void hideAudioButton() {
-        audioButton.setVisibility(View.GONE);
-        audioRecorderPanel.deattch();
-        editText.setVisibility(View.VISIBLE);
-        if (TextUtils.isEmpty(editText.getText())) {
-            sendButton.setVisibility(View.GONE);
-        } else {
-            sendButton.setVisibility(View.VISIBLE);
-        }
-        rootLinearLayout.show(editText, emotionContainerFrameLayout);
-        audioImageView.setImageResource(R.mipmap.ic_cheat_voice);
-    }
-
-    private void showEmotionLayout() {
-        audioButton.setVisibility(View.GONE);
-        emotionImageView.setImageResource(R.mipmap.ic_cheat_keyboard);
-        if (onConversationInputPanelStateChangeListener != null) {
-            onConversationInputPanelStateChangeListener.onInputPanelExpanded();
+        String draft = editable.toString().trim().isEmpty() ? null : Draft.toDraftJson(editable);
+        if (!TextUtils.equals(draftString, draft)) {
+            conversationViewModel.saveDraft(conversation, draft);
+            draftString = draft;
         }
     }
-
-    private void hideEmotionLayout() {
-        emotionImageView.setImageResource(R.mipmap.ic_cheat_emo);
-        if (onConversationInputPanelStateChangeListener != null) {
-            onConversationInputPanelStateChangeListener.onInputPanelCollapsed();
-        }
+    public void dispose() {
+        if (audioRecorderPanel != null) audioRecorderPanel.deattch();
+        if (backdrop != null) { backdrop.close(); backdrop = null; }
     }
-
+    public void bindBackdrop(View source) {
+        backdrop = new cn.wildfire.chat.kit.widget.GlassBackdropRenderer(source, glass);
+        backdrop.start();
+    }
+    public boolean isRecording() { return audioRecorderPanel != null && audioRecorderPanel.isRecording(); }
     private void syncPanelHeightWithKeyboard() {
-        int keyboardHeight = rootLinearLayout.getKeyboardHeight();
-        emotionContainerFrameLayout.applyPanelHeight(keyboardHeight);
-        extContainerFrameLayout.applyPanelHeight(keyboardHeight);
+        int height = rootLinearLayout.getKeyboardHeight();
+        emotionContainerFrameLayout.applyPanelHeight(height);
+        extContainerFrameLayout.applyPanelHeight(height);
     }
-
-    private void showConversationExtension() {
-        rootLinearLayout.show(editText, extContainerFrameLayout);
-        if (audioButton.isShown()) {
-            hideAudioButton();
-        }
-        if (onConversationInputPanelStateChangeListener != null) {
-            onConversationInputPanelStateChangeListener.onInputPanelExpanded();
-        }
+    private void render() {
+        if (tail == null) return;
+        boolean voice = state.isVoice();
+        boolean hasText = !editText.getText().toString().trim().isEmpty();
+        editText.setVisibility(voice ? GONE : VISIBLE);
+        audioButton.setVisibility(voice ? VISIBLE : GONE);
+        keyboardButton.setVisibility(voice ? VISIBLE : GONE);
+        tail.setVisibility(voice ? GONE : VISIBLE);
+        sendButton.setVisibility(hasText ? VISIBLE : GONE);
+        audioImageView.setVisibility(hasText ? GONE : VISIBLE);
+        boolean more = state.surface() == ComposerState.Surface.MORE;
+        extImageView.setImageResource(more ? R.drawable.ic_composer_close : R.drawable.ic_composer_plus);
+        extImageView.setContentDescription(getContext().getString(more ? R.string.composer_close_more : R.string.composer_more));
+        boolean emoji = state.surface() == ComposerState.Surface.EMOJI;
+        emotionImageView.setImageResource(emoji ? R.drawable.ic_composer_keyboard : R.drawable.ic_composer_emoji);
+        emotionImageView.setPadding(dp(emoji ? 14 : 13), dp(emoji ? 14 : 13), dp(emoji ? 14 : 13), dp(emoji ? 14 : 13));
+        emotionImageView.setContentDescription(getContext().getString(emoji ? R.string.composer_keyboard : R.string.composer_emoji));
     }
-
-    private void hideConversationExtension() {
-        if (onConversationInputPanelStateChangeListener != null) {
-            onConversationInputPanelStateChangeListener.onInputPanelCollapsed();
-        }
+    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+    private void notifyPanelExpanded() {
+        if (onConversationInputPanelStateChangeListener != null) onConversationInputPanelStateChangeListener.onInputPanelExpanded();
     }
-
     void collapse() {
+        if (audioRecorderPanel != null) audioRecorderPanel.cancel();
+        state.collapse();
         extension.reset();
-        emotionImageView.setImageResource(R.mipmap.ic_cheat_emo);
-        rootLinearLayout.hideAttachedInput(true);
         rootLinearLayout.hideCurrentInput(editText);
+        render();
+        if (onConversationInputPanelStateChangeListener != null) onConversationInputPanelStateChangeListener.onInputPanelCollapsed();
+    }
+    @Override protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (glass != null) glass.setShapes(plusView, capsule);
+        if (changed && backdrop != null) backdrop.requestRefresh();
     }
 
     private void notifyTyping(int type) {

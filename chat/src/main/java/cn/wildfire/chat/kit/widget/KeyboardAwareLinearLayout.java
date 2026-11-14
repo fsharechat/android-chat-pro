@@ -92,11 +92,6 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
     }
 
     private void updateKeyboardState() {
-        if (isLandscape()) {
-            if (keyboardOpen) onKeyboardClose();
-            return;
-        }
-
         if (viewInset == 0 && Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP)
             viewInset = getViewInset();
         final int availableHeight = this.getRootView().getHeight() - statusBarHeight - viewInset;
@@ -114,6 +109,9 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
 
     @TargetApi(VERSION_CODES.LOLLIPOP)
     private int getViewInset() {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.M && getRootWindowInsets() != null) {
+            return getRootWindowInsets().getStableInsetBottom();
+        }
         try {
             Field attachInfoField = View.class.getDeclaredField("mAttachInfo");
             attachInfoField.setAccessible(true);
@@ -163,7 +161,8 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
     }
 
     private int getKeyboardLandscapeHeight() {
-        return Math.max(getHeight(), getRootView().getHeight()) / 2;
+        int fallback = Math.max(getHeight(), getRootView().getHeight()) / 2;
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("keyboard_height_landscape", fallback);
     }
 
     private int getKeyboardPortraitHeight() {
@@ -175,7 +174,7 @@ public class KeyboardAwareLinearLayout extends LinearLayoutCompat {
 
     private void setKeyboardPortraitHeight(int height) {
         PreferenceManager.getDefaultSharedPreferences(getContext())
-                .edit().putInt("keyboard_height_portrait", height).apply();
+                .edit().putInt(isLandscape() ? "keyboard_height_landscape" : "keyboard_height_portrait", height).apply();
     }
 
     public void postOnKeyboardClose(final Runnable runnable) {

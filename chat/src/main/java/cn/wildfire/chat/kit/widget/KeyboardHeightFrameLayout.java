@@ -41,7 +41,9 @@ public class KeyboardHeightFrameLayout extends FrameLayout implements InputAware
      * 这样再次显示时不会因为高度变化引起整个会话界面重新布局。
      */
     public void applyPanelHeight(int height) {
-        int target = Math.max(height, getMinimumHeight());
+        int available = getRootView().getHeight();
+        int maximum = Math.max((int) (120 * getResources().getDisplayMetrics().density), available / 2);
+        int target = Math.min(Math.max(height, getMinimumHeight()), maximum);
         if (target <= 0) {
             // 根布局还没测量出来时拿不到有效的键盘高度，保留布局里的默认高度
             return;

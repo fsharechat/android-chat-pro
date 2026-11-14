@@ -53,7 +53,8 @@ public class Draft {
         if (TextUtils.isEmpty(json)) {
             return null;
         }
-        return new Gson().fromJson(json, Draft.class);
+        try { return new Gson().fromJson(json, Draft.class); }
+        catch (com.google.gson.JsonParseException invalidDraft) { return null; }
     }
 
     public static String toDraftJson(Editable content) {
@@ -66,9 +67,12 @@ public class Draft {
         if (draft == null) {
             return "";
         }
-        SpannableStringBuilder builder = new SpannableStringBuilder(draft.content);
+        SpannableStringBuilder builder = new SpannableStringBuilder(draft.content == null ? "" : draft.content);
         if (draft.mentions != null && !draft.mentions.isEmpty()) {
             for (Mention mention : draft.mentions) {
+                if (mention == null || mention.getStart() < 0 || mention.getEnd() <= mention.getStart()
+                        || mention.getEnd() > builder.length()
+                        || (!mention.isMentionAll() && TextUtils.isEmpty(mention.getUid()))) continue;
                 MentionSpan span;
                 if (mention.isMentionAll()) {
                     span = new MentionSpan(true);
