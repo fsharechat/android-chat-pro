@@ -1,0 +1,6 @@
+// Opt-in native regression for manual theme -> follow system across activity restarts.
+allprojects {
+    plugins.withId('com.android.application') {
+        android.defaultConfig.testInstrumentationRunner = 'cn.wildfire.chat.app.ThemeInstrumentation'
+    }
+}

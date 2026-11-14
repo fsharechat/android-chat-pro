@@ -3,7 +3,7 @@ package cn.wildfire.chat.app;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.Build;
+import android.content.res.Resources;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -47,7 +47,10 @@ public class ThemeManager {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 break;
             case THEME_MODE_SYSTEM:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                // AppCompat 1.0 beta skips updating resources for FOLLOW_SYSTEM. Its previous
+                // explicit mode can therefore survive an activity/task restart. Resolve from
+                // framework system resources, never an activity's overridden configuration.
+                applySystemNightMode(Resources.getSystem().getConfiguration());
                 break;
         }
     }
@@ -55,17 +58,25 @@ public class ThemeManager {
     public void applyCurrentTheme() {
         applyThemeMode(getThemeMode());
     }
+
+    public void onSystemConfigurationChanged(Configuration configuration) {
+        if (getThemeMode() == THEME_MODE_SYSTEM) {
+            applySystemNightMode(configuration);
+        }
+    }
+
+    private void applySystemNightMode(Configuration configuration) {
+        boolean dark = (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        AppCompatDelegate.setDefaultNightMode(dark
+                ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+    }
     
     public boolean isDarkMode(Context context) {
         int themeMode = getThemeMode();
         if (themeMode == THEME_MODE_SYSTEM) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                return (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) 
-                        == Configuration.UI_MODE_NIGHT_YES;
-            } else {
-                return (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) 
-                        == Configuration.UI_MODE_NIGHT_YES;
-            }
+            return (Resources.getSystem().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                    == Configuration.UI_MODE_NIGHT_YES;
         }
         return themeMode == THEME_MODE_DARK;
     }
@@ -82,4 +93,4 @@ public class ThemeManager {
                 return "跟随系统";
         }
     }
-} 
+}

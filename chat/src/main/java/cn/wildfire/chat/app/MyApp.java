@@ -2,6 +2,7 @@ package cn.wildfire.chat.app;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 
 import com.comsince.github.logger.LoggerFactory;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -17,6 +18,12 @@ import cn.wildfirechat.proto.AndroidLogger;
 public class MyApp extends BaseApp {
 
     private WfcUIKit wfcUIKit;
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ThemeManager.getInstance(this).onSystemConfigurationChanged(newConfig);
+    }
 
     @Override
     public void onCreate() {
